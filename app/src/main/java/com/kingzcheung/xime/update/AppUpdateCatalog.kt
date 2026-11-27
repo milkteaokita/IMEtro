@@ -36,14 +36,14 @@ data class AppReleaseAsset(
  * 再写 app/releases.json（格式和 GitHub 发布列表相同，只有最新一版）。两边的安装包逐字节相同。
  */
 object AppUpdateCatalog {
-    const val RELEASES_API = "https://api.github.com/repos/Cyletix/CyIME/releases?per_page=30"
-    const val RELEASES_PAGE = "https://github.com/Cyletix/CyIME/releases"
+    const val RELEASES_API = "https://api.github.com/repos/milkteaokita/IMEtro/releases?per_page=30"
+    const val RELEASES_PAGE = "https://github.com/milkteaokita/IMEtro/releases"
     const val MODELSCOPE_RELEASES = DownloadMirrors.CYIME_MODELSCOPE + "app/releases.json"
     const val MODELSCOPE_PAGE = "https://www.modelscope.cn/models/Cyletix/cyime-model/files"
 
-    fun releasesPage(domestic: Boolean): String = if (domestic) MODELSCOPE_PAGE else RELEASES_PAGE
+    fun releasesPage(@Suppress("UNUSED_PARAMETER") domestic: Boolean): String = RELEASES_PAGE
 
-    fun githubAssetUrl(tag: String, name: String) = "https://github.com/Cyletix/CyIME/releases/download/$tag/$name"
+    fun githubAssetUrl(tag: String, name: String) = "https://github.com/milkteaokita/IMEtro/releases/download/$tag/$name"
 
     fun modelscopeAssetUrl(tag: String, name: String) = DownloadMirrors.CYIME_MODELSCOPE + "app/$tag/$name"
 
@@ -70,7 +70,7 @@ object AppUpdateCatalog {
 
     private val androidTag = Regex("""^v?(\d+\.\d+\.\d+)$""")
     // CyIME-1.14.156-arm64-v8a.apk / CyIME-1.14.156-full-arm64-v8a.apk（1.14.72 里的完整版文件名是 1.14.73）。
-    private val apkName = Regex("""^CyIME-\d+(?:\.\d+)*(-full)?-(.+)\.apk$""")
+    private val apkName = Regex("""^(?:IMEtro|CyIME)-\d+(?:\.\d+)*(-full)?-(.+)\.apk$""")
     private val json = Json { ignoreUnknownKeys = true }
 
     fun parseVersion(text: String): List<Int> =
@@ -130,5 +130,5 @@ object AppUpdateCatalog {
 
     /** 下载目录里留下的安装包名对应的版本；用来清掉已经装上的旧包。 */
     fun versionOfApk(fileName: String): String? =
-        Regex("""^CyIME-(\d+(?:\.\d+)*)""").find(fileName)?.groupValues?.get(1)
+        Regex("""^(?:IMEtro|CyIME)-(\d+(?:\.\d+)*)""").find(fileName)?.groupValues?.get(1)
 }

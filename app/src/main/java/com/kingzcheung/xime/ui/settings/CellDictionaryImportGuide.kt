@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
+import com.kingzcheung.xime.ui.metro.LocalMetroUiState
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,10 +34,13 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun CellDictionaryImportGuide(onDismiss: () -> Unit, onImport: () -> Unit) {
+    val metro = LocalMetroUiState.current
     ModalBottomSheet(onDismissRequest = onDismiss,
         modifier = Modifier.windowInsetsPadding(SheetOuterInsets),
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+        shape = RectangleShape,
+        containerColor = metro.chrome,
+        dragHandle = null,
         contentWindowInsets = sheetContentInsets) {
         Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).navigationBarsPadding()
             .padding(horizontal = 24.dp).padding(bottom = 16.dp).testTag("cell-dictionary-import-guide"),
@@ -68,8 +73,8 @@ internal fun CellDictionaryImportGuide(onDismiss: () -> Unit, onImport: () -> Un
             GuideHeading("限制")
             GuideText("文本和 Rime 词典最多 200 万个词，搜狗词库和 JSON 最多 25 万个词。单字会跳过；形码只认笔画，五笔等形码词库不能从这里导入。")
 
-            Button(onClick = { onDismiss(); onImport() }, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-                .heightIn(min = 48.dp)) { Text("选择文件导入") }
+            MetroSolidButton(text = "选择文件导入", onClick = { onDismiss(); onImport() }, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                .heightIn(min = 48.dp))
         }
     }
 }
@@ -96,7 +101,7 @@ private fun GuideFormat(name: String, detail: String) {
 /** 示例原样显示，等宽、不折行，长行横着滑。 */
 @Composable
 private fun GuideExample(text: String) {
-    Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp),
+    Surface(Modifier.fillMaxWidth(), shape = RectangleShape,
         color = MaterialTheme.colorScheme.surfaceContainerHighest) {
         Text(text.replace("\t", "    "), style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace,
             softWrap = false, modifier = Modifier.horizontalScroll(rememberScrollState()).padding(12.dp))

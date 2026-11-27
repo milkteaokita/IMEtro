@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
+import com.kingzcheung.xime.ui.metro.MetroRadioIndicator
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -239,15 +240,12 @@ fun PerformanceSettingsContent(onBack: () -> Unit, onOpenSetupGuide: (() -> Unit
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.background,
         topBar = {
-            TopAppBar(
-                title = { Text("性能与省电") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface),
+            com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+                parentTitle = "其他设置",
+                pageTitle = "性能与省电",
+                onBack = onBack,
             )
         },
     ) { padding ->
@@ -372,7 +370,7 @@ internal fun TierRow(title: String, subtitle: String, selected: Boolean, enabled
         .selectable(selected = selected, enabled = enabled, role = Role.RadioButton, onClick = onSelect)
         .padding(horizontal = 4.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.width(52.dp), contentAlignment = Alignment.Center) {
-            RadioButton(selected = selected, onClick = null, enabled = enabled || selected)
+            MetroRadioIndicator(selected = selected)
         }
         Column(Modifier.weight(1f).padding(end = 12.dp)) {
             Text(title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium,
@@ -404,9 +402,7 @@ private fun IdleLevelSlider(
         }
         Text(description, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.height(8.dp))
-        Slider(value = position, onValueChange = { position = it }, modifier = Modifier.testTag(tag),
-            // 松手时按滑块当时的位置取值：点一下滑条时 onValueChange 和这里在同一帧里先后调用，
-            // 组合里算的 shown 还是旧值，原来点选的档位不会保存（GitHub #128）。
+        com.kingzcheung.xime.ui.metro.MetroSlider(value = position, onValueChange = { position = it }, modifier = Modifier.testTag(tag),
             onValueChangeFinished = {
                 val chosen = idleLevels[position.roundToInt().coerceIn(idleLevels.indices)]
                 if (chosen != minutes) onChoose(chosen)

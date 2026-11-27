@@ -10,7 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -410,7 +410,7 @@ fun SpaceKeyButton(
             }
             .padding(scaledKeyVisualPadding())
             .keyGlow(Modifier.then(shadow)
-            .clip(RoundedCornerShape(LocalKeyCornerRadius.current))
+            .clip(RectangleShape)
             .background(cancelColors?.background ?: keyFill)
             .drawBehind {
                 // 开始说话：强调色从按住的地方铺满整个空格，之后随音量轻轻变深；上滑时一点点让给删除色。

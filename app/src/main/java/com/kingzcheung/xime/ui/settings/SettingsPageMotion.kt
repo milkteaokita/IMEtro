@@ -8,37 +8,41 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.SeekableTransitionState
 import androidx.compose.animation.core.rememberTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import com.kingzcheung.xime.ui.metro.LocalMetroUiState
+import com.kingzcheung.xime.ui.metro.MetroTurnstileDirection
+import com.kingzcheung.xime.ui.metro.MetroTurnstileMotion
+import com.kingzcheung.xime.ui.metro.MetroTurnstileStage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 /**
- * 所有设置页共用的层级切换：进入下一级时新页从右推入、上一级往左让开；
- * 返回时当前页向右退出、上一级从左回来。系统关闭动画时直接切换。
+ * 所有设置页共用的层级切换：Zune HD / Windows Phone 3D Turnstile 轉場，並連動動畫倍率。
  */
 internal object SettingsPageMotion {
-    private const val DURATION_MS = 300
-    private fun <T> spec() = tween<T>(DURATION_MS, easing = FastOutSlowInEasing)
+    val enter: EnterTransition
+        @Composable get() = MetroTurnstileMotion.enter(LocalMetroUiState.current.animationScale)
+    val exit: ExitTransition
+        @Composable get() = MetroTurnstileMotion.exit(LocalMetroUiState.current.animationScale)
+    val popEnter: EnterTransition
+        @Composable get() = MetroTurnstileMotion.popEnter(LocalMetroUiState.current.animationScale)
+    val popExit: ExitTransition
+        @Composable get() = MetroTurnstileMotion.popExit(LocalMetroUiState.current.animationScale)
 
-    // 上一级只让开四分之一宽度，和系统设置一样留出层次感，又不拖泥带水。
-    val enter: EnterTransition = slideInHorizontally(spec()) { it }
-    val exit: ExitTransition = slideOutHorizontally(spec()) { -it / 4 }
-    val popEnter: EnterTransition = slideInHorizontally(spec()) { -it / 4 }
-    val popExit: ExitTransition = slideOutHorizontally(spec()) { it }
-
-    val push: ContentTransform get() = (enter togetherWith exit).apply { targetContentZIndex = 1f }
-    val pop: ContentTransform get() = (popEnter togetherWith popExit).apply { targetContentZIndex = -1f }
+    val push: ContentTransform
+        @Composable get() = (enter togetherWith exit).apply { targetContentZIndex = 1f }
+    val pop: ContentTransform
+        @Composable get() = (popEnter togetherWith popExit).apply { targetContentZIndex = -1f }
     val none: ContentTransform get() = EnterTransition.None togetherWith ExitTransition.None
 }
 
@@ -46,8 +50,9 @@ internal object SettingsPageMotion {
 @Composable
 internal fun rememberSettingsMotionEnabled(): Boolean {
     val resolver = LocalContext.current.contentResolver
-    return remember(resolver) {
-        Settings.Global.getFloat(resolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) != 0f
+    val metroScale = LocalMetroUiState.current.animationScale
+    return remember(resolver, metroScale) {
+        Settings.Global.getFloat(resolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) != 0f && metroScale > 0.05f
     }
 }
 
@@ -85,14 +90,28 @@ internal fun <T> SettingsSubPages(
     } else {
         BackHandler(enabled = handleBack && page != null, onBack = onBack)
     }
+    val animScale = LocalMetroUiState.current.animationScale
+    val direction = remember { MetroTurnstileDirection() }
     rememberTransition(state).AnimatedContent(
-        transitionSpec = { subPageTransform(motion) },
+        modifier = Modifier.fillMaxSize().background(LocalMetroUiState.current.background),
+        transitionSpec = {
+            direction.isPop = targetState == null
+            subPageTransform(motion, animScale)
+        },
         contentKey = { it },
-    ) { content(it) }
+    ) { target ->
+        MetroTurnstileStage(
+            transition = transition,
+            isPopProvider = { direction.isPop },
+            motionEnabled = motion,
+        ) {
+            content(target)
+        }
+    }
 }
 
-private fun <T> AnimatedContentTransitionScope<T?>.subPageTransform(motion: Boolean): ContentTransform = when {
+private fun <T> AnimatedContentTransitionScope<T?>.subPageTransform(motion: Boolean, animScale: Float): ContentTransform = when {
     !motion -> SettingsPageMotion.none
-    targetState == null -> SettingsPageMotion.pop
-    else -> SettingsPageMotion.push
+    targetState == null -> (MetroTurnstileMotion.popEnter(animScale) togetherWith MetroTurnstileMotion.popExit(animScale)).apply { targetContentZIndex = -1f }
+    else -> (MetroTurnstileMotion.enter(animScale) togetherWith MetroTurnstileMotion.exit(animScale)).apply { targetContentZIndex = 1f }
 }

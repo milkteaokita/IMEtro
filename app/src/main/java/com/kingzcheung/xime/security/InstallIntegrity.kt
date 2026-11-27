@@ -25,6 +25,7 @@ object InstallIntegrity {
      */
     internal val OFFICIAL_CERTS: Set<String> = setOf(
         "e0d419cbfc7715e0be5bd98e7e5a26ab7d147a67b15d0961797197e6c76c05e2",
+        "e9972db6ff339c8e8277b819c8a1e1204dbeefdd963b8b5357740329c4561568",
     )
 
     const val DOWNLOAD_URL = "https://github.com/Cyletix/CyIME/releases"

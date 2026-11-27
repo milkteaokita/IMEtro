@@ -32,6 +32,10 @@ import com.kingzcheung.xime.clipboard.ClipboardImages
 import com.kingzcheung.xime.clipboard.clipboardImageCacheMbLabel
 import com.kingzcheung.xime.clipboard.ClipboardManager
 import com.kingzcheung.xime.clipboard.ClipboardRetention
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroRadioIndicator
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
 import kotlinx.coroutines.launch
 
 /**
@@ -76,12 +80,12 @@ internal fun ClipboardHistoryLimitsSetting() {
         }
     })
     pending?.let { (next, removed) ->
-        AlertDialog(
+        MetroAlertDialog(
             onDismissRequest = { pending = null },
             title = { Text("删掉 $removed 条记录？") },
             text = { Text("按新设置，较早的 $removed 条历史记录会被删掉，固定和分组的保留。") },
-            confirmButton = { Button(onClick = { pending = null; save(next) }) { Text("删除") } },
-            dismissButton = { OutlinedButton(onClick = { pending = null }) { Text("取消") } },
+            confirmButton = { MetroSolidButton(text = "删除", containerColor = MaterialTheme.colorScheme.error, onClick = { pending = null; save(next) }) },
+            dismissButton = { MetroOutlinedButton(text = "取消", onClick = { pending = null }) },
         )
     }
 }
@@ -106,7 +110,7 @@ private fun HistoryLimitChoices(
                 .selectable(selected == option, enabled = enabled, role = Role.RadioButton) {
                     if (option != selected) onSelect(option)
                 }.padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                RadioButton(selected = selected == option, onClick = null, enabled = enabled)
+                MetroRadioIndicator(selected = selected == option)
                 Spacer(Modifier.width(12.dp))
                 Text(label(option), style = MaterialTheme.typography.titleSmall)
             }

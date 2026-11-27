@@ -12,6 +12,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.kingzcheung.xime.settings.SettingsPreferences
 import com.kingzcheung.xime.ui.keyboard.rememberSwipeHintsEnabled
+import com.kingzcheung.xime.ui.metro.MetroToggleSwitch
 
 /**
  * 两处入口共用原有显示开关；与输入方式、角标方向独立，保留用户已保存的选择。
@@ -36,7 +37,7 @@ internal fun CornerHintVisibilitySettings(modifier: Modifier = Modifier) {
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha))
                 }
-                Switch(checked = checked, onCheckedChange = null, enabled = symbolsOn, colors = settingsSwitchColors())
+                MetroToggleSwitch(checked = checked, onCheckedChange = null, enabled = symbolsOn, showStatusLabel = false)
             }
         }
         toggle("上方角标提示", "显示按键右上角的小符号", hints.up) {

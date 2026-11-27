@@ -30,8 +30,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffile-prefix-map=${CMAKE_BINARY_DIR}=")
 # NDK 头文件路径会嵌入 RTTI 类型名（anonymous struct 等），各环境 SDK 路径不同。
 # AGP 通过缓存变量 ANDROID_NDK 提供 NDK 路径（勿用环境变量 ANDROID_NDK_HOME，构建时未必设置）。
 if(ANDROID_NDK)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffile-prefix-map=${ANDROID_NDK}=")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffile-prefix-map=${ANDROID_NDK}=")
+  add_compile_options("-ffile-prefix-map=${ANDROID_NDK}=")
 endif()
 
 # Debug 构建也启用优化，解决大词典查询性能问题

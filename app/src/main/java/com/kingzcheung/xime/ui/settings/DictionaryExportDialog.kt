@@ -28,6 +28,10 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.kingzcheung.xime.settings.DictionaryExport
 import com.kingzcheung.xime.settings.InstalledCellDictionary
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroRadioIndicator
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
 
 /**
  * 「导出」：先选导出哪些词（当前方案学到的词，或一个导入的词库），再选写成哪家输入法的格式；点「导出」后选存到哪。
@@ -41,7 +45,7 @@ internal fun DictionaryExportDialog(
 ) {
     var source by rememberSaveable { mutableStateOf<String?>(null) }
     var format by rememberSaveable { mutableStateOf(DictionaryExport.Format.CYIME) }
-    AlertDialog(onDismissRequest = onDismiss, title = { Text("导出词库") }, text = {
+    MetroAlertDialog(onDismissRequest = onDismiss, title = { Text("导出词库") }, text = {
         Column(Modifier.heightIn(max = 480.dp).verticalScroll(rememberScrollState()).testTag("dictionary-export-dialog"),
             verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text("导出哪些词", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
@@ -64,18 +68,21 @@ internal fun DictionaryExportDialog(
                 modifier = Modifier.padding(top = 8.dp))
         }
     }, confirmButton = {
-        TextButton(onClick = {
-            val name = if (source == null) "我学到的词" else installed.firstOrNull { it.id == source }?.name ?: "词库"
-            onExport(source, name, format)
-        }) { Text("导出") }
-    }, dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } })
+        MetroSolidButton(
+            text = "导出",
+            onClick = {
+                val name = if (source == null) "我学到的词" else installed.firstOrNull { it.id == source }?.name ?: "词库"
+                onExport(source, name, format)
+            },
+        )
+    }, dismissButton = { MetroOutlinedButton(text = "取消", onClick = onDismiss) })
 }
 
 @Composable
 private fun ExportChoice(title: String, note: String, selected: Boolean, tag: String, onClick: () -> Unit) {
     Row(Modifier.fillMaxWidth().testTag(tag).selectable(selected, role = Role.RadioButton, onClick = onClick)
         .padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-        RadioButton(selected = selected, onClick = null)
+        MetroRadioIndicator(selected = selected)
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.bodyLarge)

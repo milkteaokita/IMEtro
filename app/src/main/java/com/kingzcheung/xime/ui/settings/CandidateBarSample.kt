@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Close
@@ -33,6 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import com.kingzcheung.xime.ui.metro.MetroRadioIndicator
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -100,7 +100,7 @@ private val SAMPLE_WORDS = listOf("测试", "测是", "侧视", "侧室", "策�
 
 @Composable
 private fun SampleStrip(look: SampleLook, content: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit) {
-    Row(Modifier.fillMaxWidth().height(40.dp).clip(RoundedCornerShape(10.dp))
+    Row(Modifier.fillMaxWidth().height(40.dp).clip(RectangleShape)
         .keyboardBackground(look.background, look.isDark, look.fallback)
         .padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically, content = content)
 }
@@ -112,7 +112,7 @@ private fun SampleEdge(icon: ImageVector, look: SampleLook, filled: Boolean = tr
     val fill = if (!filled) Color.Transparent
         else if (look.isDark) Color.White.copy(alpha = 0.25f * strength) else Color(0xFFE0E0E0).copy(alpha = strength)
     Box(Modifier.width(40.dp).fillMaxHeight(), contentAlignment = Alignment.Center) {
-        Box(Modifier.size(32.dp).clip(CircleShape).background(fill), contentAlignment = Alignment.Center) {
+        Box(Modifier.size(32.dp).clip(RectangleShape).background(fill), contentAlignment = Alignment.Center) {
             Icon(icon, contentDescription = null, tint = look.text, modifier = Modifier.size(22.dp))
         }
     }
@@ -134,7 +134,7 @@ internal fun CandidateBarSample(left: ImageVector?, right: ImageVector, modifier
                             .background(candidateDividerColor(look.text)))
                         val selected = index == 0
                         androidx.compose.material3.Text(word,
-                            Modifier.clip(RoundedCornerShape(6.dp))
+                            Modifier.clip(RectangleShape)
                                 .background(if (selected) look.accent.copy(alpha = 0.2f) else Color.Transparent)
                                 .padding(horizontal = 8.dp, vertical = 3.dp),
                             color = if (selected) look.selectedText else look.text, fontSize = 17.sp,
@@ -234,10 +234,10 @@ internal fun CandidateModeCard(
         modifier = modifier.fillMaxWidth()
             .testTag("candidate-right-key:${mode.name.lowercase()}")
             .semantics { this.selected = selected }
-            .then(if (selected) Modifier.border(2.dp, primary, RoundedCornerShape(16.dp))
-                else if (standalone) Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
+            .then(if (selected) Modifier.border(2.dp, primary, RectangleShape)
+                else if (standalone) Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, RectangleShape)
                 else Modifier),
-        shape = RoundedCornerShape(16.dp),
+        shape = RectangleShape,
         color = if (standalone) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface,
     ) {
         androidx.compose.foundation.layout.Column(Modifier.padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 12.dp),
@@ -255,7 +255,7 @@ internal fun CandidateModeCard(
                     if (tag.isNotEmpty()) com.kingzcheung.xime.ui.i18n.Text(tag, style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                 }
-                androidx.compose.material3.RadioButton(selected = selected, onClick = null)
+                MetroRadioIndicator(selected = selected)
             }
             when (mode) {
                 com.kingzcheung.xime.settings.CandidateRightKey.EXPAND -> {

@@ -43,6 +43,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.kingzcheung.xime.clipboard.ClipboardGroupStore
 import com.kingzcheung.xime.clipboard.ClipboardImages
+import com.kingzcheung.xime.ui.metro.MetroRadioIndicator
 import com.kingzcheung.xime.clipboard.ImageAccessActivity
 import com.kingzcheung.xime.settings.PerformanceCosts
 import com.kingzcheung.xime.clipboard.CLIPBOARD_IMAGE_HEIGHT_KEY
@@ -71,19 +72,12 @@ import com.kingzcheung.xime.ui.menubar.clipboardClosesAfterPaste
 @Composable
 fun ClipboardPanelSettingsContent(onBack: () -> Unit, onNavigateToGroups: () -> Unit, onNavigateToSync: () -> Unit = {}) {
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.background,
         topBar = {
-            TopAppBar(
-                title = { Text("剪贴板") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                ),
+            com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+                parentTitle = "系统",
+                pageTitle = "剪贴板",
+                onBack = onBack,
             )
         }
     ) { padding ->
@@ -146,7 +140,7 @@ private fun ClipboardPanelDisplaySettings(onNavigateToGroups: () -> Unit) {
                         lines = option
                         prefs.edit().putInt(CLIPBOARD_CARD_MAX_LINES_KEY, option).apply()
                     }.padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(selected = lines == option, onClick = null)
+                    MetroRadioIndicator(selected = lines == option)
                     Spacer(Modifier.width(12.dp))
                     Text("$option 行", style = MaterialTheme.typography.titleSmall)
                 }
@@ -163,7 +157,7 @@ private fun ClipboardPanelDisplaySettings(onNavigateToGroups: () -> Unit) {
                         textPercent = option
                         prefs.edit().putInt(com.kingzcheung.xime.ui.menubar.CLIPBOARD_CARD_TEXT_SIZE_KEY, option).apply()
                     }.padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(selected = textPercent == option, onClick = null)
+                    MetroRadioIndicator(selected = textPercent == option)
                     Spacer(Modifier.width(12.dp))
                     Text(if (option == 100) "标准" else "$option%", style = MaterialTheme.typography.titleSmall)
                 }
@@ -180,7 +174,7 @@ private fun ClipboardPanelDisplaySettings(onNavigateToGroups: () -> Unit) {
                         imageHeight = option
                         prefs.edit().putString(CLIPBOARD_IMAGE_HEIGHT_KEY, option.key).apply()
                     }.padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(selected = imageHeight == option, onClick = null)
+                    MetroRadioIndicator(selected = imageHeight == option)
                     Spacer(Modifier.width(12.dp))
                     Column {
                         Text(option.label, style = MaterialTheme.typography.titleSmall)
@@ -201,7 +195,7 @@ private fun ClipboardPanelDisplaySettings(onNavigateToGroups: () -> Unit) {
                         imageCount = option
                         prefs.edit().putInt(CLIPBOARD_RECENT_IMAGE_COUNT_KEY, option).apply()
                     }.padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(selected = imageCount == option, onClick = null)
+                    MetroRadioIndicator(selected = imageCount == option)
                     Spacer(Modifier.width(12.dp))
                     Text(if (option == 0) "不限" else "$option 张", style = MaterialTheme.typography.titleSmall)
                 }

@@ -3,7 +3,9 @@ package com.kingzcheung.xime.ui.common
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.border
+import androidx.compose.ui.graphics.RectangleShape
+import com.kingzcheung.xime.ui.metro.LocalMetroUiState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
@@ -20,8 +22,8 @@ import androidx.compose.ui.unit.sp
 
 /** Shared appearance; each host retains its own focus, anchoring and gesture rules. */
 internal object CompactMenuStyle {
-    val CornerRadius = 12.dp
-    val Shape = RoundedCornerShape(CornerRadius)
+    val CornerRadius = 0.dp
+    val Shape = RectangleShape
     val MinRowHeight = 36.dp
     val FontSize = 14.sp
     val LineHeight = 20.sp
@@ -31,7 +33,7 @@ internal object CompactMenuStyle {
     val ItemGap = 8.dp
     // Material DropdownMenu supplies this same vertical content inset.
     val SurfacePadding = 8.dp
-    val Elevation = 6.dp
+    val Elevation = 0.dp
 }
 
 @Composable
@@ -76,10 +78,11 @@ internal fun CompactDropdownMenu(
     offset: DpOffset = DpOffset(0.dp, 4.dp),
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest, modifier = modifier,
+    val metro = LocalMetroUiState.current
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest, modifier = modifier.border(1.dp, metro.divider, RectangleShape),
         offset = offset, shape = CompactMenuStyle.Shape,
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        tonalElevation = 0.dp, shadowElevation = CompactMenuStyle.Elevation, content = content)
+        containerColor = metro.chrome,
+        tonalElevation = 0.dp, shadowElevation = 0.dp, content = content)
 }
 
 @Composable

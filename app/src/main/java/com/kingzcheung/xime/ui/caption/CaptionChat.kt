@@ -27,7 +27,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Icon
@@ -197,7 +197,7 @@ private fun Message(turn: Turn, mine: Boolean, fontSp: Int, modifier: Modifier, 
     val time = remember(turn.key) { clockFormat.format(Date(turn.segments.first().wallMs)) }
     Column(modifier, horizontalAlignment = if (mine) Alignment.End else Alignment.Start) {
         // Name line: tap it for "这是谁？".
-        Row(Modifier.clip(RoundedCornerShape(8.dp)).combinedClickable(onClick = { speaker?.let(onSpeakerTap) })
+        Row(Modifier.clip(RectangleShape).combinedClickable(onClick = { speaker?.let(onSpeakerTap) })
             .padding(horizontal = 4.dp, vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(14.dp).clip(CircleShape).background(accent))
             Spacer(Modifier.width(6.dp))
@@ -208,7 +208,7 @@ private fun Message(turn: Turn, mine: Boolean, fontSp: Int, modifier: Modifier, 
         }
         Spacer(Modifier.size(4.dp))
         // 气泡：半透明的主题容器色 + 键盘同款玻璃质感；自己的回话用强调色容器。
-        Row(Modifier.height(IntrinsicSize.Min).clip(RoundedCornerShape(CaptionStyle.Corner))
+        Row(Modifier.height(IntrinsicSize.Min).clip(RectangleShape)
             .background(if (mine) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh.translucent(.86f))
             .visualMaterial(VisualStyles.current, CaptionStyle.Corner, level = MaterialLevel.RAISED)
             // Long-press now selects text; a tap on the bubble asks who really said it.

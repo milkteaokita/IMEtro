@@ -136,28 +136,14 @@ object AppUpdater {
         }
     }
 
-    /** 国内先查魔搭，海外先查 GitHub；一边连不上、被限流或没有内容就换另一边。两边都失败才算失败。 */
-    private fun fetchLatest(domestic: Boolean): AppRelease? {
-        var firstError: Exception? = null
-        for (fromModelScope in if (domestic) listOf(true, false) else listOf(false, true)) {
-            try {
-                val latest = fetchFrom(fromModelScope) ?: continue
-                // 自用版（打包器「装到我的设备」）带个人九键模型、CyLM 和私有释义，公开包覆盖上去会把它们换掉：
-                // 只提示有新版，不给一键下载安装，点了去发布页。
-                return if (privateBuild) latest.copy(asset = null) else AppUpdateCatalog.withMirror(latest, fromModelScope)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                FileLogger.w(TAG, "${if (fromModelScope) "魔搭" else "GitHub"} 查不到更新：${e.message}")
-                if (firstError == null) firstError = e
-            }
-        }
-        firstError?.let { throw it }
-        return null
+    /** IMEtro 正式版與更新均發布於 GitHub Releases。 */
+    private fun fetchLatest(@Suppress("UNUSED_PARAMETER") domestic: Boolean): AppRelease? {
+        val latest = fetchFrom(fromModelScope = false) ?: return null
+        return if (privateBuild) latest.copy(asset = null) else latest
     }
 
     private fun fetchFrom(fromModelScope: Boolean): AppRelease? {
-        val builder = Request.Builder().header("User-Agent", "CyIME/${BuildConfig.VERSION_NAME}")
+        val builder = Request.Builder().header("User-Agent", "IMEtro/${BuildConfig.VERSION_NAME}")
         if (fromModelScope) builder.url(AppUpdateCatalog.MODELSCOPE_RELEASES)
         else builder.url(AppUpdateCatalog.RELEASES_API)
             .header("Accept", "application/vnd.github+json")

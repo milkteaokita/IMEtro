@@ -32,6 +32,9 @@ import androidx.compose.ui.unit.dp
 import com.kingzcheung.xime.R
 import com.kingzcheung.xime.settings.AppLanguage
 import com.kingzcheung.xime.settings.AppLanguages
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroRadioIndicator
 
 /**
  * 设置首页「界面语言」一行：点开是单选框（不另开一页，首页不放只有一个设置的子页）。
@@ -56,7 +59,7 @@ internal fun AppLanguageItem() {
             else runCatching { context.startActivity(Intent(Settings.ACTION_LOCALE_SETTINGS)) }
         },
     )
-    if (picking) AlertDialog(
+    if (picking) MetroAlertDialog(
         onDismissRequest = { picking = false },
         title = { Text(stringResource(R.string.settings_app_language)) },
         text = {
@@ -73,8 +76,8 @@ internal fun AppLanguageItem() {
                     Row(Modifier.fillMaxWidth().heightIn(min = 52.dp).clickable(onClick = choose)
                         .testTag("app-language:${language.name}"),
                         verticalAlignment = Alignment.CenterVertically) {
-                        RadioButton(selected = language == current, onClick = choose)
-                        Spacer(Modifier.width(8.dp))
+                        MetroRadioIndicator(selected = language == current)
+                        Spacer(Modifier.width(12.dp))
                         Text(language.label(), style = MaterialTheme.typography.bodyLarge,
                             fontWeight = if (language == current) FontWeight.Medium else FontWeight.Normal)
                     }
@@ -83,7 +86,7 @@ internal fun AppLanguageItem() {
                     color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp))
             }
         },
-        confirmButton = { TextButton(onClick = { picking = false }) { Text(stringResource(R.string.action_close)) } },
+        confirmButton = { MetroOutlinedButton(text = stringResource(R.string.action_close), onClick = { picking = false }) },
     )
 }
 

@@ -14,7 +14,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
@@ -193,7 +193,7 @@ internal fun PreeditEditorBar(
             val surfaceColor = floatingColor?.let { target ->
                 origin?.let { androidx.compose.ui.graphics.lerp(it.color, target, t) } ?: target }
             val rowSurface = if (surfaceColor == null) Modifier
-                else Modifier.clip(RoundedCornerShape(4.dp)).background(surfaceColor).glassTextHalo(halo)
+                else Modifier.clip(RectangleShape).background(surfaceColor).glassTextHalo(halo)
             val placed = editorBounds.value.takeIf { !inline }
             Row(Modifier.width(lerp(startWidth, width, t)).height(lerp(startHeight, 44.dp, t)).testTag("preedit-editor")
                 .then(if (placed != null) Modifier.semantics { this[PreeditPopupBoundsKey] = placed } else Modifier)
@@ -235,7 +235,7 @@ internal fun PreeditEditorBar(
                                 }
                             })
                 }
-                Box(Modifier.alpha(t).padding(start = 4.dp).size(32.dp).clip(RoundedCornerShape(4.dp))
+                Box(Modifier.alpha(t).padding(start = 4.dp).size(32.dp).clip(RectangleShape)
                     .then(if (floatingColor == null) Modifier.background(keyColor.copy(alpha = 0.62f)) else Modifier)
                     .clickable(onClick = onClose).testTag("preedit-editor-close"), contentAlignment = Alignment.Center) {
                     Icon(Icons.Default.Close, "关闭拼音编辑", tint = iconColor, modifier = Modifier.size(24.dp))
@@ -257,7 +257,7 @@ internal fun PreeditEditorBar(
                 val vertical = with(density) { (6.dp * t).roundToPx() }
                 PreeditBubbleBlur(editorBounds.value?.let {
                     IntRect(it.left + start, it.top + vertical, it.right - end, it.bottom - vertical)
-                }, glass.blurRadiusDp, with(density) { 4.dp.toPx() })
+                }, glass.blurRadiusDp, 0f)
             }
             Popup(popupPositionProvider = position,
                 properties = PopupProperties(focusable = false, dismissOnBackPress = false, dismissOnClickOutside = false)) {
@@ -275,4 +275,4 @@ internal object PreeditStyle {
 }
 
 internal fun Modifier.preeditSurface(color: Color): Modifier = heightIn(min = PreeditStyle.SurfaceHeight)
-    .clip(RoundedCornerShape(4.dp)).background(color.copy(alpha = color.alpha * 0.62f)).padding(horizontal = 8.dp)
+    .clip(RectangleShape).background(color.copy(alpha = color.alpha * 0.62f)).padding(horizontal = 8.dp)

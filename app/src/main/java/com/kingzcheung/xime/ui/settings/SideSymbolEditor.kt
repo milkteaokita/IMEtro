@@ -17,7 +17,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
@@ -186,7 +189,7 @@ internal fun SideSymbolEditor(target: SideSymbolTarget, onResetReady: ((() -> Un
         // 框里改了字还没点「完成」就点了框外或返回：先问，不直接丢（用户 11-19）。
         var leaving by remember(editingKey, index) { mutableStateOf(false) }
         val changed = SideSymbolTarget.cellText(draft) != (if (adding) "" else list[index])
-        AlertDialog(onDismissRequest = { if (changed) leaving = true else editingKey = null },
+        MetroAlertDialog(onDismissRequest = { if (changed) leaving = true else editingKey = null },
             modifier = Modifier.testTag("side-symbol-dialog"),
             title = { Text(if (adding) "加一格" else if (targets.size > 1) "${of.label}第 ${index + 1} 格" else "第 ${index + 1} 格") },
             text = {
@@ -210,8 +213,8 @@ internal fun SideSymbolEditor(target: SideSymbolTarget, onResetReady: ((() -> Un
                     }
                 }
             },
-            confirmButton = { TextButton(onClick = { finish() }) { Text("完成") } },
-            dismissButton = { TextButton(onClick = { editingKey = null }) { Text("取消") } })
+            confirmButton = { MetroSolidButton(text = "完成", onClick = { finish() }) },
+            dismissButton = { MetroOutlinedButton(text = "取消", onClick = { editingKey = null }) })
         if (leaving) UnsavedChangesDialog(onSave = { leaving = false; finish() },
             onDiscard = { leaving = false; editingKey = null }, onKeepEditing = { leaving = false })
     }
@@ -225,7 +228,7 @@ private fun SketchCaption(text: String) {
 /** 可改的格：深色底；正在改的描强调色边；[text] 为 null 是末尾的「+」。 */
 @Composable
 private fun SlotCell(text: String?, active: Boolean, tag: String, modifier: Modifier, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(7.dp)
+    val shape = RectangleShape
     Box(modifier.padding(2.dp).clip(shape)
         .background(if (active) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
             else MaterialTheme.colorScheme.secondaryContainer)
@@ -242,7 +245,7 @@ private fun SlotCell(text: String?, active: Boolean, tag: String, modifier: Modi
 /** 键盘上不能在这里改的键：浅色，只标出位置。 */
 @Composable
 private fun FixedKey(label: String, modifier: Modifier, dim: Boolean = false) {
-    Box(modifier.padding(2.dp).clip(RoundedCornerShape(7.dp))
+    Box(modifier.padding(2.dp).clip(RectangleShape)
         .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (dim) 0.3f else 0.55f)),
         contentAlignment = Alignment.Center) {
         Text(label, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Clip,
@@ -265,7 +268,7 @@ private fun sketchLabel(action: String): String = when (action) {
 @Composable
 private fun SlotRail(count: Int, canGrow: Boolean, fillWhenFew: Boolean, modifier: Modifier,
     cell: @Composable (Int, Modifier) -> Unit) {
-    BoxWithConstraints(modifier.padding(2.dp).clip(RoundedCornerShape(7.dp))
+    BoxWithConstraints(modifier.padding(2.dp).clip(RectangleShape)
         .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))) {
         val slots = count + if (canGrow) 1 else 0
         if (fillWhenFew && count <= NineGridFrame.SIDE_VISIBLE_SLOTS) Column(Modifier.fillMaxSize()) {
@@ -342,8 +345,8 @@ private fun NumberSketch(count: Int, cell: @Composable (Int, Modifier) -> Unit) 
 
 @Composable
 private fun HandwritingPad(label: String, modifier: Modifier) {
-    Box(modifier.padding(2.dp).clip(RoundedCornerShape(7.dp))
-        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(7.dp)),
+    Box(modifier.padding(2.dp).clip(RectangleShape)
+        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RectangleShape),
         contentAlignment = Alignment.Center) {
         Text(label, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
     }

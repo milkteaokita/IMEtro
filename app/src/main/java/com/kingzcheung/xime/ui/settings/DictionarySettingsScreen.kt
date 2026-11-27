@@ -1,5 +1,6 @@
 package com.kingzcheung.xime.ui.settings
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -39,6 +40,7 @@ import com.kingzcheung.xime.ui.i18n.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -79,44 +81,57 @@ fun DictionarySettingsContent(
     val customPhraseVM: CustomPhraseViewModel = viewModel(key = "dict_custom_phrase")
     val customPhraseState by customPhraseVM.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) { customPhraseVM.loadShared() }
-    // 页面整体让到键盘上方：键盘开着时右下角「+」也点得到（11-03 平板复现：键盘盖住了添加按钮）。
+    val metro = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current
     Scaffold(
         modifier = Modifier.imePadding(),
+        containerColor = metro.background,
         topBar = {
-            TopAppBar(
-                title = { Text("词库") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-                    }
+            com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+                parentTitle = "智能",
+                pageTitle = "词库",
+                onBack = onBack,
+                actions = {
+                    com.kingzcheung.xime.ui.metro.MetroOutlinedButton("贡献", onClick = onContribute)
                 },
-                actions = { TextButton(onClick = onContribute) { Text("贡献") } },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                )
             )
         },
         floatingActionButton = {
             if (selectedDictTab == 0) {
-                FloatingActionButton(
+                com.kingzcheung.xime.ui.metro.MetroSolidButton(
+                    text = "+ 添加",
                     onClick = { customPhraseVM.showAddDialog() },
-                    containerColor = MaterialTheme.colorScheme.primary
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "添加短语", tint = MaterialTheme.colorScheme.onPrimary)
-                }
+                )
             }
         }
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-            PrimaryTabRow(selectedTabIndex = selectedDictTab, containerColor = MaterialTheme.colorScheme.surface) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
                 listOf("我的短语", "导入词库", "删掉的候选", "查词").forEachIndexed { index, title ->
-                    // 四个标签平分一行，窄屏一格不到 90dp：文字标签自带左右各 16dp 留白，「删掉的候选」放不下
-                    // 被截成「删掉的候」（#352）。自己排内容，左右只留 4dp。
-                    Tab(selected = selectedDictTab == index, onClick = { selectedDictTab = index }) {
-                        Box(Modifier.height(48.dp).padding(horizontal = 4.dp), contentAlignment = Alignment.Center) {
-                            Text(title, maxLines = 1, softWrap = false, style = MaterialTheme.typography.titleSmall)
-                        }
+                    val active = selectedDictTab == index
+                    Column(
+                        modifier = Modifier
+                            .clickable { selectedDictTab = index }
+                            .padding(bottom = 4.dp),
+                    ) {
+                        Text(
+                            text = title,
+                            maxLines = 1,
+                            softWrap = false,
+                            style = MaterialTheme.typography.titleSmall,
+                            color = if (active) metro.onBackground else metro.onBackgroundSubtle,
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Box(
+                            modifier = Modifier
+                                .width(28.dp)
+                                .height(3.dp)
+                                .background(if (active) metro.accent else Color.Transparent)
+                        )
                     }
                 }
             }
@@ -267,7 +282,9 @@ private fun PhraseEditDialog(
         onDismissRequest = onDismiss,
         modifier = Modifier.windowInsetsPadding(SheetOuterInsets),
         sheetState = rememberModalBottomSheetState(),
-        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+        shape = androidx.compose.ui.graphics.RectangleShape,
+        dragHandle = null,
+        containerColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.chrome,
         contentWindowInsets = sheetContentInsets,
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp),

@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -151,7 +151,7 @@ internal fun DraggableFloatingBar(
                 val previewH = if (targetVertical) with(density) { sideDockSize!!.height.roundToPx() } else horizontalHeightPx
                 val at = hardwareToolbarGeometry(constraints.maxWidth, constraints.maxHeight, previewW, previewH, marginPx)
                     .offset(target)
-                val shape = RoundedCornerShape(HardwareCandidateCornerRadius)
+                val shape = RectangleShape
                 Box(Modifier.absoluteOffset { IntOffset(at.x.roundToInt(), at.y.roundToInt()) }
                     .size(with(density) { previewW.toDp() }, with(density) { previewH.toDp() })
                     .clip(shape).background(dockPreviewColor.copy(alpha = 0.12f))

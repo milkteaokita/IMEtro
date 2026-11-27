@@ -17,6 +17,8 @@ import com.kingzcheung.xime.settings.KeysConfigHelper
 import com.kingzcheung.xime.ui.keyboard.AppFonts
 import com.kingzcheung.xime.settings.SettingsPreferences
 import com.kingzcheung.xime.ui.theme.KeyboardThemes
+import com.kingzcheung.xime.ui.theme.MetroKeyboardThemes
+import com.kingzcheung.xime.ui.theme.MetroThemeSync
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -151,14 +153,12 @@ class XimeApplication : Application(), ImageLoaderFactory {
         
         ExtensionManager.initialize(this)
 
-        // 从 xime.yaml 加载配色方案
+        // 初始化 Metro OS 強調色與深淺色同步，再載入鍵盤主題
+        MetroThemeSync.init(this)
         KeyboardThemes.initFromConfig(this)
 
-        // 从 xime.yaml 的 style 读取默认主题和显示模式
-        // color_scheme 可指定 dynamic（Material You 动态配色，仅 Android 12+，
-        // 低版本 getThemeById 自动回退到内置配色）
-        SettingsPreferences.defaultKeyboardTheme = KeysConfigHelper.loadDefaultThemeId(this)
-        SettingsPreferences.defaultDarkMode = KeysConfigHelper.loadDefaultDarkMode(this)
+        SettingsPreferences.defaultKeyboardTheme = MetroKeyboardThemes.SYNC_ID
+        SettingsPreferences.defaultDarkMode = 1
         SettingsPreferences.applyForkThemeDefaults(this)
         SettingsPreferences.migrateSttUseLocalOnce(this)
 

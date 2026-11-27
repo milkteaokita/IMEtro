@@ -18,7 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import com.kingzcheung.xime.ui.i18n.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -53,7 +53,7 @@ internal fun CallCaptionBar(controller: CaptionController, route: CallRoute, onD
     var choosing by remember { mutableStateOf<SpeakerUi?>(null) }
     // Answered "不是" once: tapping that voice again does not ask again.
     val notSelf = remember { mutableStateListOf<Int>() }
-    Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.Black.copy(alpha = .66f))
+    Box(Modifier.fillMaxWidth().clip(RectangleShape).background(Color.Black.copy(alpha = .66f))
         .pointerInput(Unit) { detectVerticalDragGestures { change, dy -> change.consume(); onDrag(dy) } }
         // Floating: a tap on the words goes back to the full caption page.
         .then(if (onOpen != null) Modifier.clickable(onClick = onOpen) else Modifier)
@@ -133,6 +133,6 @@ internal fun CallLine(line: SegmentUi, mark: Color?, lineHeight: Float, modifier
 
 @Composable
 private fun BarButton(text: String, onClick: () -> Unit) {
-    Text(text, color = Color.White, fontSize = 18.sp, modifier = Modifier.clip(RoundedCornerShape(10.dp))
+    Text(text, color = Color.White, fontSize = 18.sp, modifier = Modifier.clip(RectangleShape)
         .background(Color.White.copy(alpha = .22f)).clickable(onClick = onClick).padding(horizontal = 14.dp, vertical = 8.dp))
 }

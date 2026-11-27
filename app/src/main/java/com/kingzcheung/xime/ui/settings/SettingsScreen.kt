@@ -2,9 +2,11 @@ package com.kingzcheung.xime.ui.settings
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
@@ -15,6 +17,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.kingzcheung.xime.ui.common.menuSwipeBack
+import com.kingzcheung.xime.ui.metro.LocalMetroUiState
+import com.kingzcheung.xime.ui.metro.MetroTurnstileDirection
+import com.kingzcheung.xime.ui.metro.MetroTurnstileStage
 
 data class SettingsNavigationRequest(val route: String, val id: Int)
 
@@ -79,6 +84,11 @@ fun SettingsScreen(
     }
     
     val motion = rememberSettingsMotionEnabled()
+    val turnstileDirection = remember { MetroTurnstileDirection() }
+    val enterTransition = SettingsPageMotion.enter
+    val exitTransition = SettingsPageMotion.exit
+    val popEnterTransition = SettingsPageMotion.popEnter
+    val popExitTransition = SettingsPageMotion.popExit
     val entry by navController.currentBackStackEntryAsState()
     val back = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -96,15 +106,29 @@ fun SettingsScreen(
     NavHost(
         navController = navController,
         startDestination = startDestination,
-        modifier = Modifier.menuSwipeBack(entry, if (back != null && entry != null && entry?.destination?.route != SettingsRoutes.Main) {
-            { if (back.hasEnabledCallbacks()) back.onBackPressed() }
-        } else null),
-        enterTransition = { if (motion) SettingsPageMotion.enter else EnterTransition.None },
-        exitTransition = { if (motion) SettingsPageMotion.exit else ExitTransition.None },
-        popEnterTransition = { if (motion) SettingsPageMotion.popEnter else EnterTransition.None },
-        popExitTransition = { if (motion) SettingsPageMotion.popExit else ExitTransition.None },
+        modifier = Modifier
+            .background(LocalMetroUiState.current.background)
+            .menuSwipeBack(entry, if (back != null && entry != null && entry?.destination?.route != SettingsRoutes.Main) {
+                { if (back.hasEnabledCallbacks()) back.onBackPressed() }
+            } else null),
+        enterTransition = {
+            turnstileDirection.isPop = false
+            if (motion) enterTransition else EnterTransition.None
+        },
+        exitTransition = {
+            turnstileDirection.isPop = false
+            if (motion) exitTransition else ExitTransition.None
+        },
+        popEnterTransition = {
+            turnstileDirection.isPop = true
+            if (motion) popEnterTransition else EnterTransition.None
+        },
+        popExitTransition = {
+            turnstileDirection.isPop = true
+            if (motion) popExitTransition else ExitTransition.None
+        },
     ) {
-        composable(SettingsRoutes.Main) {
+        metroComposable(SettingsRoutes.Main, direction = turnstileDirection) {
             androidx.compose.runtime.CompositionLocalProvider(LocalSettingsSearchAnchors provides false) {
                 SettingsMainContent(
                     onNavigateToHardwareKeyboard = { navController.navigate(SettingsRoutes.HardwareKeyboard) },
@@ -127,9 +151,9 @@ fun SettingsScreen(
                 )
             }
         }
-        composable(SettingsRoutes.TypingStats) { TypingStatsScreen { navController.popBackStack() } }
-        composable(SettingsRoutes.HardwareKeyboard) { HardwareKeyboardSettingsContent { navController.popBackStack() } }
-        composable("languages") {
+        metroComposable(SettingsRoutes.TypingStats, direction = turnstileDirection) { TypingStatsScreen { navController.popBackStack() } }
+        metroComposable(SettingsRoutes.HardwareKeyboard, direction = turnstileDirection) { HardwareKeyboardSettingsContent { navController.popBackStack() } }
+        metroComposable("languages", direction = turnstileDirection) {
             LanguageSettingsContent(onBack = { navController.popBackStack() },
                 onOpenSchemaResources = { navController.navigate(SettingsRoutes.Schema) },
                 onImportSchema = { navController.navigate(SettingsRoutes.SchemaImport) },
@@ -137,10 +161,10 @@ fun SettingsScreen(
                 onOpenChineseInput = { navController.navigate(SettingsRoutes.ChineseInput) },
                 onOpenEnglishInput = { navController.navigate(SettingsRoutes.EnglishInput) })
         }
-        composable(SettingsRoutes.ChineseInput) { ChineseInputSettingsContent { navController.popBackStack() } }
-        composable(SettingsRoutes.EnglishInput) { EnglishInputSettingsContent { navController.popBackStack() } }
-        composable(SettingsRoutes.DoublePinyin) { DoublePinyinSettingsContent { navController.popBackStack() } }
-        composable(SettingsRoutes.Schema) {
+        metroComposable(SettingsRoutes.ChineseInput, direction = turnstileDirection) { ChineseInputSettingsContent { navController.popBackStack() } }
+        metroComposable(SettingsRoutes.EnglishInput, direction = turnstileDirection) { EnglishInputSettingsContent { navController.popBackStack() } }
+        metroComposable(SettingsRoutes.DoublePinyin, direction = turnstileDirection) { DoublePinyinSettingsContent { navController.popBackStack() } }
+        metroComposable(SettingsRoutes.Schema, direction = turnstileDirection) {
             val leaveSchema = {
                 if (initialRoute == "schema") {
                     // 从键盘「方案管理」直接进来时起始页就是方案页，首页不在栈里：换成首页，不压在方案页上面。
@@ -157,16 +181,17 @@ fun SettingsScreen(
                 onNavigateToRimeFileBrowser = { navController.navigate(SettingsRoutes.RimeFileBrowser) },
             )
         }
-        composable(SettingsRoutes.SchemaImport) {
+        metroComposable(SettingsRoutes.SchemaImport, direction = turnstileDirection) {
             SchemaSettingsContent(
                 onBack = { navController.popBackStack() },
                 onNavigateToRimeFileBrowser = { navController.navigate(SettingsRoutes.RimeFileBrowser) },
                 startImport = true,
             )
         }
-        composable(
+        metroComposable(
             "${SettingsRoutes.Market}?tab={tab}",
             arguments = listOf(navArgument("tab") { type = NavType.IntType; defaultValue = 0 }),
+            direction = turnstileDirection,
         ) { entry ->
             MarketHubContent(
                 initialTab = entry.arguments?.getInt("tab")?.coerceIn(0, 2) ?: 0,
@@ -189,49 +214,52 @@ fun SettingsScreen(
                 },
             )
         }
-        composable(SettingsRoutes.ModelLocal) {
+        metroComposable(SettingsRoutes.ModelLocal, direction = turnstileDirection) {
             ModelLocalContent(
                 onBack = { navController.popBackStack() },
             )
         }
-        composable(
+        metroComposable(
             route = SettingsRoutes.SchemaMarketDetail,
             arguments = listOf(navArgument("schemeId") { type = NavType.StringType }),
+            direction = turnstileDirection,
         ) { backStackEntry ->
-            val schemeId = backStackEntry.arguments?.getString("schemeId") ?: return@composable
+            val schemeId = backStackEntry.arguments?.getString("schemeId") ?: return@metroComposable
             MarketSchemeDetailContent(
                 schemeId = schemeId,
                 onBack = { navController.popBackStack() },
             )
         }
-        composable(
+        metroComposable(
             route = SettingsRoutes.ModelMarketDetail,
             arguments = listOf(navArgument("modelId") { type = NavType.StringType }),
+            direction = turnstileDirection,
         ) { backStackEntry ->
-            val modelId = backStackEntry.arguments?.getString("modelId") ?: return@composable
+            val modelId = backStackEntry.arguments?.getString("modelId") ?: return@metroComposable
             MarketModelDetailContent(
                 modelId = modelId,
                 onBack = { navController.popBackStack() },
             )
         }
-        composable(
+        metroComposable(
             route = SettingsRoutes.PluginDetail,
             arguments = listOf(navArgument("pluginId") { type = NavType.StringType }),
+            direction = turnstileDirection,
         ) { backStackEntry ->
-            val pluginId = backStackEntry.arguments?.getString("pluginId") ?: return@composable
+            val pluginId = backStackEntry.arguments?.getString("pluginId") ?: return@metroComposable
             PluginDetailContent(
                 pluginId = pluginId,
                 onBack = { navController.popBackStack() },
                 onOpenSettings = { id -> navController.navigate("${SettingsRoutes.PluginSettings}/$id") },
             )
         }
-        composable(SettingsRoutes.Theme) {
+        metroComposable(SettingsRoutes.Theme, direction = turnstileDirection) {
             ThemeSettingsContent(
                 onBack = { navController.popBackStack() },
                 onThemeChanged = onThemeChanged
             )
         }
-        composable(SettingsRoutes.Plugins) {
+        metroComposable(SettingsRoutes.Plugins, direction = turnstileDirection) {
             PluginsSettingsContent(
                 onBack = { navController.popBackStack() },
                 onNavigateToPluginMarket = {
@@ -247,9 +275,10 @@ fun SettingsScreen(
                 onNavigateToClipboardSync = { navController.navigate(SettingsRoutes.ClipboardSync) }
             )
         }
-        composable(
+        metroComposable(
             route = "${SettingsRoutes.PluginSettings}/{pluginId}",
-            arguments = listOf(navArgument("pluginId") { type = NavType.StringType })
+            arguments = listOf(navArgument("pluginId") { type = NavType.StringType }),
+            direction = turnstileDirection,
         ) { backStackEntry ->
             val pluginId = backStackEntry.arguments?.getString("pluginId")
             PluginSettingsContent(
@@ -257,17 +286,18 @@ fun SettingsScreen(
                 onBack = { navController.popBackStack() }
             )
         }
-        composable(SettingsRoutes.Performance) {
+        metroComposable(SettingsRoutes.Performance, direction = turnstileDirection) {
             PerformanceSettingsContent(onBack = { navController.popBackStack() },
                 onOpenSetupGuide = { navController.navigate(SettingsRoutes.SetupGuide) })
         }
-        composable(SettingsRoutes.KeyEffect) {
+        metroComposable(SettingsRoutes.KeyEffect, direction = turnstileDirection) {
             KeyEffectSettingsContent(
                 onBack = { navController.popBackStack() }
             )
         }
-        composable("${SettingsRoutes.LayoutDisplay}?page={page}",
-            arguments = listOf(navArgument("page") { type = NavType.StringType; nullable = true; defaultValue = null })) { entry ->
+        metroComposable("${SettingsRoutes.LayoutDisplay}?page={page}",
+            arguments = listOf(navArgument("page") { type = NavType.StringType; nullable = true; defaultValue = null }),
+            direction = turnstileDirection) { entry ->
             LayoutDisplaySettingsContent(
                 onBack = { navController.popBackStack() },
                 onOpenLayout = { navController.navigate(it) },
@@ -275,18 +305,18 @@ fun SettingsScreen(
             )
         }
         LayoutInputCategory.entries.forEach { category ->
-            composable(category.route) {
+            metroComposable(category.route, direction = turnstileDirection) {
                 LayoutInputSettingsContent(category, onBack = { navController.popBackStack() },
                     onNavigate = { navController.navigate(it) })
             }
         }
-        composable(SettingsRoutes.GlideContribute) {
+        metroComposable(SettingsRoutes.GlideContribute, direction = turnstileDirection) {
             GlideContributeScreen(onBack = { navController.popBackStack() })
         }
-        composable(SettingsRoutes.SmartPrediction) {
+        metroComposable(SettingsRoutes.SmartPrediction, direction = turnstileDirection) {
             SmartPredictionSettingsContent(onBack = { navController.popBackStack() })
         }
-        composable(SettingsRoutes.SpeechToText) {
+        metroComposable(SettingsRoutes.SpeechToText, direction = turnstileDirection) {
             SpeechToTextSettingsContent(
                 onBack = { navController.popBackStack() },
                 onNavigateToSetupGuide = { navController.navigate(SettingsRoutes.SetupGuide) },
@@ -295,53 +325,53 @@ fun SettingsScreen(
                 },
             )
         }
-        composable(SettingsRoutes.Dictionary) {
+        metroComposable(SettingsRoutes.Dictionary, direction = turnstileDirection) {
             DictionarySettingsContent(
                 onBack = { navController.popBackStack() },
                 onCellDictionaries = { navController.navigate(SettingsRoutes.CellDictionaries) },
                 onContribute = { navController.navigate(SettingsRoutes.DictContribute) }
             )
         }
-        composable(SettingsRoutes.DictContribute) {
+        metroComposable(SettingsRoutes.DictContribute, direction = turnstileDirection) {
             DictContributeScreen(onBack = { navController.popBackStack() })
         }
-        composable(SettingsRoutes.CellDictionaries) {
+        metroComposable(SettingsRoutes.CellDictionaries, direction = turnstileDirection) {
             CellDictionarySettingsContent(onBack = { navController.popBackStack() })
         }
-        composable(SettingsRoutes.RimeFileBrowser) {
+        metroComposable(SettingsRoutes.RimeFileBrowser, direction = turnstileDirection) {
             RimeFileBrowserContent(
                 onBack = { navController.popBackStack() }
             )
         }
-        composable(SettingsRoutes.ClipboardSync) {
+        metroComposable(SettingsRoutes.ClipboardSync, direction = turnstileDirection) {
             ClipboardSyncSettingsContent(
                 onBack = { navController.popBackStack() },
                 onNavigateToPlugins = { navController.navigate(SettingsRoutes.Plugins) },
             )
         }
-        composable(SettingsRoutes.ClipboardPanel) {
+        metroComposable(SettingsRoutes.ClipboardPanel, direction = turnstileDirection) {
             ClipboardPanelSettingsContent(
                 onBack = { navController.popBackStack() },
                 onNavigateToGroups = { navController.navigate(SettingsRoutes.ClipboardGroups) },
                 onNavigateToSync = { navController.navigate(SettingsRoutes.ClipboardSync) },
             )
         }
-        composable(SettingsRoutes.ClipboardGroups) {
+        metroComposable(SettingsRoutes.ClipboardGroups, direction = turnstileDirection) {
             ClipboardGroupSettingsContent(onBack = { navController.popBackStack() })
         }
-        composable(SettingsRoutes.KeyboardResize) {
+        metroComposable(SettingsRoutes.KeyboardResize, direction = turnstileDirection) {
             KeyboardPanelSettingsContent(com.kingzcheung.xime.keyboard.KeyboardPanelLaunch.Panel.RESIZE) { navController.popBackStack() }
         }
-        composable(SettingsRoutes.ToolbarArrange) {
+        metroComposable(SettingsRoutes.ToolbarArrange, direction = turnstileDirection) {
             KeyboardPanelSettingsContent(com.kingzcheung.xime.keyboard.KeyboardPanelLaunch.Panel.ARRANGE) { navController.popBackStack() }
         }
-        composable(SettingsRoutes.Other) {
+        metroComposable(SettingsRoutes.Other, direction = turnstileDirection) {
             OtherSettingsContent(onBack = { navController.popBackStack() }, onNavigateToRoute = { navController.navigate(it) })
         }
-        composable(SettingsRoutes.Backup) {
+        metroComposable(SettingsRoutes.Backup, direction = turnstileDirection) {
             BackupSettingsContent(onBack = { navController.popBackStack() })
         }
-        composable(SettingsRoutes.About) {
+        metroComposable(SettingsRoutes.About, direction = turnstileDirection) {
             AboutContent(
                 onBack = { navController.popBackStack() },
                 onNavigateToPrivacy = { navController.navigate(SettingsRoutes.Privacy) },
@@ -352,12 +382,12 @@ fun SettingsScreen(
                 onNavigateToStorageSpace = { navController.navigate(SettingsRoutes.StorageSpace) }
             )
         }
-        composable(SettingsRoutes.SetupGuide) {
+        metroComposable(SettingsRoutes.SetupGuide, direction = turnstileDirection) {
             SetupGuideScreen(firstRun = false, onDone = { navController.popBackStack() },
                 onOpenPerformance = { navController.navigate(SettingsRoutes.Performance) },
                 onOpenRoute = { navController.navigate(it) })
         }
-        composable(SettingsRoutes.StorageSpace) {
+        metroComposable(SettingsRoutes.StorageSpace, direction = turnstileDirection) {
             StorageSpaceScreen(
                 onBack = { navController.popBackStack() },
                 onNavigateToPlugins = { navController.navigate(SettingsRoutes.Plugins) },
@@ -365,24 +395,24 @@ fun SettingsScreen(
                 onNavigateToPerformance = { navController.navigate(SettingsRoutes.Performance) }
             )
         }
-        composable(SettingsRoutes.LogViewer) {
+        metroComposable(SettingsRoutes.LogViewer, direction = turnstileDirection) {
             LogViewerScreen(
                 onBack = { navController.popBackStack() }
             )
         }
-        composable(SettingsRoutes.Handwriting) {
+        metroComposable(SettingsRoutes.Handwriting, direction = turnstileDirection) {
             HandwritingSettingsContent(onBack = { navController.popBackStack() },
                 onOpenModels = { navController.navigate(SettingsRoutes.ModelLocal) },
                 onOpenTraining = { navController.navigate(SettingsRoutes.HandwritingTraining) },
                 onOpenContribute = { navController.navigate(SettingsRoutes.HandwritingContribute) })
         }
-        composable(SettingsRoutes.HandwritingContribute) {
+        metroComposable(SettingsRoutes.HandwritingContribute, direction = turnstileDirection) {
             HandwritingTrainingScreen(
                 onBack = { navController.popBackStack() },
                 contribute = true,
             )
         }
-        composable(SettingsRoutes.HandwritingTraining) {
+        metroComposable(SettingsRoutes.HandwritingTraining, direction = turnstileDirection) {
             val context = androidx.compose.ui.platform.LocalContext.current
             HandwritingTrainingScreen(
                 onBack = { navController.popBackStack() },
@@ -392,23 +422,41 @@ fun SettingsScreen(
                 },
             )
         }
-        composable(SettingsRoutes.Privacy) {
+        metroComposable(SettingsRoutes.Privacy, direction = turnstileDirection) {
             PrivacyPolicyContent(
                 onBack = { navController.popBackStack() }
             )
         }
-        composable(SettingsRoutes.Licenses) {
+        metroComposable(SettingsRoutes.Licenses, direction = turnstileDirection) {
             LicensesContent(
                 onBack = { navController.popBackStack() }
             )
         }
-        composable(SettingsRoutes.Credits) {
+        metroComposable(SettingsRoutes.Credits, direction = turnstileDirection) {
             CreditsContent(onBack = { navController.popBackStack() })
         }
-        composable(SettingsRoutes.ReleaseNotes) {
+        metroComposable(SettingsRoutes.ReleaseNotes, direction = turnstileDirection) {
             ReleaseNotesContent(onBack = { navController.popBackStack() })
         }
     }
+    }
+}
+
+private fun androidx.navigation.NavGraphBuilder.metroComposable(
+    route: String,
+    arguments: List<androidx.navigation.NamedNavArgument> = emptyList(),
+    direction: MetroTurnstileDirection,
+    content: @Composable androidx.compose.animation.AnimatedContentScope.(androidx.navigation.NavBackStackEntry) -> Unit,
+) {
+    composable(route = route, arguments = arguments) { entry ->
+        val motionEnabled = rememberSettingsMotionEnabled()
+        MetroTurnstileStage(
+            transition = transition,
+            isPopProvider = { direction.isPop },
+            motionEnabled = motionEnabled,
+        ) {
+            content(entry)
+        }
     }
 }
 

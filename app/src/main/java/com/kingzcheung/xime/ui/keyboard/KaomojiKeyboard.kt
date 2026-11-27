@@ -10,7 +10,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -100,7 +100,7 @@ internal fun KaomojiKeyboard(onSelect: (String) -> Unit, modifier: Modifier = Mo
                 val needed = (widths[face] ?: 0) + padding
                 GridItemSpan(ceil((needed + gap) / (cell + gap)).toInt().coerceIn(1, maxLineSpan))
             }) { face ->
-                Box(Modifier.fillMaxWidth().heightIn(min = 40.dp).clip(RoundedCornerShape(KeyShapes.current.radius(8.dp)))
+                Box(Modifier.fillMaxWidth().heightIn(min = 40.dp).clip(RectangleShape)
                     .background(textColor.copy(alpha = .08f)).testTag("kaomoji:$face").clickable {
                         val updated = RecentUsageStore.record(context, RecentUsageStore.KEY_RECENT_KAOMOJI, face)
                         if (pager.settledPage != 0) recent = updated

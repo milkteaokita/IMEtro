@@ -36,7 +36,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteOutline
@@ -2464,7 +2464,7 @@ fun KeyboardView(
         state.voiceNotice?.let { notice ->
             Box(Modifier.matchParentSize().then(Modifier.zIndex(21f)), contentAlignment = Alignment.TopCenter) {
                 Text(notice, color = keyTextColor, fontSize = 13.sp, maxLines = 2,
-                    modifier = Modifier.padding(8.dp).background(keyboardBgColor.copy(alpha = 0.95f), RoundedCornerShape(8.dp))
+                    modifier = Modifier.padding(8.dp).background(keyboardBgColor.copy(alpha = 0.95f), RectangleShape)
                         .padding(horizontal = 12.dp, vertical = 6.dp).testTag("voice-notice"))
             }
         }
@@ -2473,7 +2473,7 @@ fun KeyboardView(
         state.schemePreparing?.let { name ->
             Box(Modifier.matchParentSize().then(Modifier.zIndex(21f)), contentAlignment = Alignment.TopCenter) {
                 Row(verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(8.dp).background(keyboardBgColor.copy(alpha = 0.95f), RoundedCornerShape(8.dp))
+                    modifier = Modifier.padding(8.dp).background(keyboardBgColor.copy(alpha = 0.95f), RectangleShape)
                         .padding(horizontal = 12.dp, vertical = 6.dp).testTag("scheme-preparing")) {
                     androidx.compose.material3.CircularProgressIndicator(Modifier.size(14.dp), color = keyTextColor, strokeWidth = 2.dp)
                     Spacer(Modifier.width(8.dp))
@@ -2997,7 +2997,7 @@ private fun CandidatePinCard(word: String, note: String?, actions: List<PinCardA
         contentAlignment = Alignment.Center
     ) {
         Card(
-            shape = RoundedCornerShape(16.dp),
+            shape = RectangleShape,
             modifier = Modifier.widthIn(max = 360.dp),
             colors = CardDefaults.cardColors(containerColor = cardColors.card)
         ) {
@@ -3028,7 +3028,7 @@ private fun CandidatePinCard(word: String, note: String?, actions: List<PinCardA
                         val tint = if (action.destructive) MaterialTheme.colorScheme.error else cardColors.text
                         Column(
                             Modifier.weight(1f)
-                                .clip(RoundedCornerShape(10.dp))
+                                .clip(RectangleShape)
                                 .background(cardColors.text.copy(alpha = .08f))
                                 .clickable(onClick = action.onClick)
                                 .padding(horizontal = 4.dp, vertical = 8.dp)
@@ -3094,7 +3094,7 @@ internal fun KeyboardConfirmCard(title: String, message: String, confirmLabel: S
         contentAlignment = Alignment.Center
     ) {
         Card(
-            shape = RoundedCornerShape(16.dp),
+            shape = RectangleShape,
             modifier = Modifier.widthIn(max = 300.dp),
             colors = CardDefaults.cardColors(containerColor = cardColors.card)
         ) {
@@ -3193,7 +3193,7 @@ private fun SentencePartChips(parts: List<String>, textColor: Color, tag: String
         parts.forEachIndexed { index, part ->
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(RectangleShape)
                     .background(textColor.copy(alpha = .1f))
                     .clickable { onPart(index) }
                     .padding(horizontal = 12.dp, vertical = 8.dp)

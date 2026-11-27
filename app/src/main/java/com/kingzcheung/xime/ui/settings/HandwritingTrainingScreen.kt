@@ -27,7 +27,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Undo
@@ -1240,10 +1243,10 @@ private fun HandwritingTrainingBody(
             Canvas(
                 modifier = Modifier
                     .matchParentSize()
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RectangleShape)
                     // 画板跟页面分得开：浅色是白纸加一圈描边，深色是更深的底加描边（原来半透明 surfaceVariant 在浅色下灰底灰页看不清边）。
                     .background(MaterialTheme.colorScheme.surfaceContainerLowest)
-                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RectangleShape)
                     .testTag("training-board")
                     .onSizeChanged { canvasSize = it.width to it.height }
                     .pointerInput(stylusPresence) {
@@ -1466,16 +1469,18 @@ private fun HandwritingTrainingBody(
     }
 
     if (confirmClear) {
-        AlertDialog(
+        MetroAlertDialog(
             onDismissRequest = { confirmClear = false },
             title = { Text("清空全部样本？") },
             text = { Text("已保存的 ${state.totalSamples} 条样本会被删除，没导出的就找不回来了。") },
             confirmButton = {
-                TextButton(onClick = { confirmClear = false; viewModel.clearSamples() }) {
-                    Text("清空", color = MaterialTheme.colorScheme.error)
-                }
+                MetroSolidButton(
+                    text = "清空",
+                    containerColor = MaterialTheme.colorScheme.error,
+                    onClick = { confirmClear = false; viewModel.clearSamples() },
+                )
             },
-            dismissButton = { TextButton(onClick = { confirmClear = false }) { Text("取消") } },
+            dismissButton = { MetroOutlinedButton(text = "取消", onClick = { confirmClear = false }) },
         )
     }
 }

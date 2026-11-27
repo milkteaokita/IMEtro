@@ -27,6 +27,10 @@ import com.kingzcheung.xime.speech.SpeechModelSelection
 import com.kingzcheung.xime.speech.SpeechLanguages
 import com.kingzcheung.xime.settings.InputLanguage
 import com.kingzcheung.xime.settings.SettingsPreferences
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroRadioIndicator
+import com.kingzcheung.xime.ui.metro.MetroToggleSwitch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -159,7 +163,7 @@ private fun SpeechPipeline(language: InputLanguage, mode: String, ready: Set<Str
             Row(Modifier.fillMaxWidth().then(anchor).testTag(tag)
                 .selectable(checked, enabled = enabled, role = Role.RadioButton, onClick = { onFinish(finish, finalizer) })
                 .padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                RadioButton(checked, onClick = null, enabled = enabled)
+                MetroRadioIndicator(selected = checked)
                 Column(Modifier.weight(1f).padding(start = 12.dp)) {
                     Text(title, style = MaterialTheme.typography.bodyLarge)
                     Text(caption, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -191,10 +195,10 @@ internal fun speechModelTiming(id: String): String = when (id) {
 internal fun SpeechModelPicker(language: InputLanguage, selected: String, ready: Set<String>,
     downloads: Map<String, ModelDownloadState>, onSelect: (String) -> Unit, onDownload: (String) -> Unit,
     onClose: () -> Unit) {
-    AlertDialog(onDismissRequest = onClose, title = { Text("${language.displayName}说话时用的模型") },
+    MetroAlertDialog(onDismissRequest = onClose, title = { Text("${language.displayName}说话时用的模型") },
         text = {
             SpeechModelChoices(language, selected, ready, downloads, onSelect, onDownload)
-        }, confirmButton = { TextButton(onClick = onClose) { Text("关闭") } })
+        }, confirmButton = { MetroOutlinedButton(text = "关闭", onClick = onClose) })
 }
 
 @Composable
@@ -220,7 +224,7 @@ private fun SpeechModelChoice(language: InputLanguage, id: String, checked: Bool
         Row(Modifier.weight(1f).testTag("speech-choice:${language.id}:$id")
             .selectable(checked, enabled = ready, role = Role.RadioButton, onClick = onSelect)
             .padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-            RadioButton(checked, onClick = null, enabled = ready)
+            MetroRadioIndicator(selected = checked)
             Column(Modifier.weight(1f).padding(start = 8.dp)) {
                 Text(name, style = MaterialTheme.typography.bodyLarge)
                 Text(speechModelFacts(id).replace(" MB", "\u00A0MB"), style = MaterialTheme.typography.bodySmall)
@@ -294,8 +298,7 @@ internal fun SpeechPunctuationSettings() {
             Text("按意思自动加标点。本地中文要在「说完后」选整句定稿",
                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Switch(checked = autoPunctuation, onCheckedChange = null,
-            colors = settingsSwitchColors())
+        MetroToggleSwitch(checked = autoPunctuation, onCheckedChange = null, showStatusLabel = false)
     }
     // 只带一部分标点：自动加标点开着时逐项一行开关，默认全开；关掉的那类按「停顿处加空格」留空格或不留。
     if (autoPunctuation) listOf(
@@ -320,7 +323,7 @@ internal fun SpeechPunctuationSettings() {
                 },
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Switch(checked = kept, onCheckedChange = null, colors = settingsSwitchColors())
+            MetroToggleSwitch(checked = kept, onCheckedChange = null, showStatusLabel = false)
         }
     }
     var pauseSpace by remember { mutableStateOf(SettingsPreferences.isSttPauseSpace(context)) }
@@ -336,7 +339,7 @@ internal fun SpeechPunctuationSettings() {
             Text(if (pauseSpace) "说话停顿、没加标点的地方空一格。" else "中文里不加空格；英文单词之间照常空一格。",
                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Switch(checked = pauseSpace, onCheckedChange = null, colors = settingsSwitchColors())
+        MetroToggleSwitch(checked = pauseSpace, onCheckedChange = null, showStatusLabel = false)
     }
 }
 
@@ -355,6 +358,6 @@ internal fun SpeechNumberSettings() {
             Text("说的数字写成 325、3.5、50% 这样",
                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Switch(checked = arabic, onCheckedChange = null, colors = settingsSwitchColors())
+        MetroToggleSwitch(checked = arabic, onCheckedChange = null, showStatusLabel = false)
     }
 }

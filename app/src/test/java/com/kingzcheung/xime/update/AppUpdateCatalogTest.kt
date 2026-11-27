@@ -9,10 +9,10 @@ import org.junit.Test
 class AppUpdateCatalogTest {
 
     private fun asset(name: String, size: Long = 100, digest: String? = "sha256:ABCDEF") =
-        """{"name":"$name","size":$size,"browser_download_url":"https://github.com/Cyletix/CyIME/releases/download/x/$name"${digest?.let { ",\"digest\":\"$it\"" } ?: ""}}"""
+        """{"name":"$name","size":$size,"browser_download_url":"https://github.com/milkteaokita/IMEtro/releases/download/x/$name"${digest?.let { ",\"digest\":\"$it\"" } ?: ""}}"""
 
     private fun release(tag: String, vararg assets: String, draft: Boolean = false, prerelease: Boolean = false) =
-        """{"tag_name":"$tag","draft":$draft,"prerelease":$prerelease,"html_url":"https://github.com/Cyletix/CyIME/releases/tag/$tag","assets":[${assets.joinToString(",")}]}"""
+        """{"tag_name":"$tag","draft":$draft,"prerelease":$prerelease,"html_url":"https://github.com/milkteaokita/IMEtro/releases/tag/$tag","assets":[${assets.joinToString(",")}]}"""
 
     // Same mix as the real list: a draft, a Windows release, the models release and older Android releases.
     private val releases = "[" + listOf(
@@ -31,7 +31,7 @@ class AppUpdateCatalogTest {
         assertEquals("CyIME-1.14.156-arm64-v8a.apk", latest.asset!!.name)
         assertEquals(121031364L, latest.asset!!.sizeBytes)
         assertEquals("abcdef", latest.asset!!.sha256)
-        assertEquals("https://github.com/Cyletix/CyIME/releases/tag/1.14.156", latest.pageUrl)
+        assertEquals("https://github.com/milkteaokita/IMEtro/releases/tag/1.14.156", latest.pageUrl)
     }
 
     @Test
@@ -83,6 +83,7 @@ class AppUpdateCatalogTest {
 
     @Test
     fun apkFileVersion() {
+        assertEquals("2.0.0", AppUpdateCatalog.versionOfApk("IMEtro-2.0.0-arm64-v8a.apk"))
         assertEquals("1.14.156", AppUpdateCatalog.versionOfApk("CyIME-1.14.156-full-arm64-v8a.apk"))
         assertEquals("1.14.156", AppUpdateCatalog.versionOfApk("CyIME-1.14.156-arm64-v8a.apk.part"))
         assertNull(AppUpdateCatalog.versionOfApk("other.apk"))
@@ -112,7 +113,7 @@ class AppUpdateCatalogTest {
     @Test
     fun eachSourceFallsBackToTheOther() {
         val fromModelScope = AppUpdateCatalog.withMirror(AppUpdateCatalog.latest(modelscope, false, listOf("arm64-v8a"))!!, true)
-        assertEquals(listOf("https://github.com/Cyletix/CyIME/releases/download/1.15.47/CyIME-1.15.47-arm64-v8a.apk"),
+        assertEquals(listOf("https://github.com/milkteaokita/IMEtro/releases/download/1.15.47/CyIME-1.15.47-arm64-v8a.apk"),
             fromModelScope.asset!!.mirrors)
         val fromGitHub = AppUpdateCatalog.withMirror(AppUpdateCatalog.latest(releases, false, listOf("arm64-v8a"))!!, false)
         assertEquals(listOf(AppUpdateCatalog.modelscopeAssetUrl("1.14.156", "CyIME-1.14.156-arm64-v8a.apk")),
@@ -123,7 +124,7 @@ class AppUpdateCatalogTest {
 
     @Test
     fun domesticUsersOpenModelScope() {
-        assertEquals(AppUpdateCatalog.MODELSCOPE_PAGE, AppUpdateCatalog.releasesPage(domestic = true))
+        assertEquals(AppUpdateCatalog.RELEASES_PAGE, AppUpdateCatalog.releasesPage(domestic = true))
         assertEquals(AppUpdateCatalog.RELEASES_PAGE, AppUpdateCatalog.releasesPage(domestic = false))
     }
 

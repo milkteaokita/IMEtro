@@ -5,7 +5,7 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
@@ -95,7 +95,7 @@ fun QuickSendFormArea(
         Popup(popupPositionProvider = position,
             properties = PopupProperties(focusable = false, dismissOnBackPress = false,
                 dismissOnClickOutside = false, clippingEnabled = false)) {
-            Column(Modifier.width(width).clip(RoundedCornerShape(16.dp))
+            Column(Modifier.width(width).clip(RectangleShape)
                 // Gradient/image themes paint the theme backdrop like the keyboard panels; a solid
                 // theme keeps its colour. Never glass: the editor floats over the app without a
                 // blur window, so it stays opaque and readable.

@@ -3,6 +3,7 @@ package com.kingzcheung.xime.ui.settings
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import com.kingzcheung.xime.ui.i18n.Text
+import com.kingzcheung.xime.ui.metro.MetroSlider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -73,8 +74,13 @@ private fun GlassSlider(label: String, valueLabel: String, value: Float,
             Text(label, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
             Text(valueLabel, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
         }
-        Slider(value, onChange, valueRange = range, enabled = enabled,
-            modifier = Modifier.semantics { contentDescription = label })
+        MetroSlider(
+            value = value,
+            onValueChange = onChange,
+            valueRange = range,
+            enabled = enabled,
+            modifier = Modifier.semantics { contentDescription = label },
+        )
     }
 }
 

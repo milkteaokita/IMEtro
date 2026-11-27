@@ -24,7 +24,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
+import com.kingzcheung.xime.ui.metro.MetroRadioIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
@@ -94,23 +95,17 @@ fun ModelLocalContent(
     }
 
     Scaffold(
+        containerColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.background,
         topBar = {
-            TopAppBar(
-                title = { Text("模型管理") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-                    }
-                },
+            com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+                parentTitle = "扩展",
+                pageTitle = "模型管理",
+                onBack = onBack,
                 actions = {
                     IconButton(onClick = { viewModel.refresh() }) {
                         Icon(Icons.Default.Refresh, contentDescription = "刷新")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                ),
             )
         },
     ) { padding ->
@@ -187,7 +182,7 @@ internal fun ModelDeleteDialog(
 ) {
     val context = LocalContext.current
     val note = remember(item.model.id) { modelDeleteNote(context, item.model.id) }
-    AlertDialog(
+    com.kingzcheung.xime.ui.metro.MetroAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("删除模型") },
         text = {
@@ -195,14 +190,10 @@ internal fun ModelDeleteDialog(
                 (note?.let { "\n$it" } ?: ""))
         },
         confirmButton = {
-            TextButton(modifier = Modifier.testTag("model-delete-confirm"), onClick = onConfirm) {
-                Text("删除", color = MaterialTheme.colorScheme.error)
-            }
+            com.kingzcheung.xime.ui.metro.MetroSolidButton("删除", modifier = Modifier.testTag("model-delete-confirm"), onClick = onConfirm)
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("取消")
-            }
+            com.kingzcheung.xime.ui.metro.MetroOutlinedButton("取消", onClick = onDismiss)
         },
     )
 }
@@ -243,7 +234,7 @@ private fun DownloadRegionSection(
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Spacer(Modifier.width(8.dp))
-                    RadioButton(selected = region == option, onClick = null)
+                    MetroRadioIndicator(selected = region == option)
                 }
             }
             ModelRowDivider()
@@ -378,7 +369,7 @@ private fun ModelRowDivider() {
 @Composable
 private fun TagText(text: String, color: Color) {
     Surface(
-        shape = RoundedCornerShape(6.dp),
+        shape = RectangleShape,
         color = color.copy(alpha = 0.12f),
     ) {
         Text(

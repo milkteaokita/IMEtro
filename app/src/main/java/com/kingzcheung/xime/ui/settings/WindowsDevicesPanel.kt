@@ -16,6 +16,7 @@ import com.kingzcheung.xime.clipboard.sync.WindowsDevices
 import com.kingzcheung.xime.clipboard.sync.WindowsPeer
 import com.kingzcheung.xime.clipboard.sync.WindowsPairingConfirmation
 import com.kingzcheung.xime.settings.SettingsPreferences
+import com.kingzcheung.xime.ui.metro.MetroToggleSwitch
 
 @Composable
 fun WindowsDevicesPanel() {
@@ -123,7 +124,7 @@ internal fun WindowsDevicesPanelContent(
                     Text("同步剪贴板")
                     Text("自动同步复制的文字，暂不同步图片。", style = MaterialTheme.typography.bodySmall)
                 }
-                Switch(checked = enabled, onCheckedChange = onEnabled)
+                MetroToggleSwitch(checked = enabled, onCheckedChange = onEnabled, showStatusLabel = false)
             }
             TextButton(onClick = onRetry) { Text("重新连接") }
         }

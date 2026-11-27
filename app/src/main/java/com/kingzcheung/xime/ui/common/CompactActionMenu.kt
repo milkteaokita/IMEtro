@@ -2,6 +2,7 @@ package com.kingzcheung.xime.ui.common
 
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -15,7 +16,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.TransformOrigin
+import com.kingzcheung.xime.ui.metro.LocalMetroUiState
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalDensity
@@ -130,12 +133,14 @@ internal fun CompactActionMenu(
             val origin = TransformOrigin(
                 ((anchor.center.x - placement.left) / placement.width.coerceAtLeast(1f)).coerceIn(0f, 1f),
                 ((anchor.center.y - placement.top) / placement.height.coerceAtLeast(1f)).coerceIn(0f, 1f))
-            Surface(Modifier.cyPopupEnter(origin).testTag(tag), shape = CompactMenuStyle.Shape,
+            val metro = LocalMetroUiState.current
+            Surface(Modifier.cyPopupEnter(origin).testTag(tag).border(1.dp, metro.divider, RectangleShape),
+                shape = CompactMenuStyle.Shape,
                 // This overlay covers existing records, so it is opaque; it uses the keyboard palette so
                 // it matches the keys of every theme instead of a (possibly white) Material surface.
                 color = palette?.key?.copy(alpha = 1f)
-                    ?: if (glass.enabled) colors.surface.copy(alpha = 1f) else colors.surfaceContainerHigh,
-                shadowElevation = CompactMenuStyle.Elevation, tonalElevation = 0.dp) {
+                    ?: if (glass.enabled) colors.surface.copy(alpha = 1f) else metro.chrome,
+                shadowElevation = 0.dp, tonalElevation = 0.dp) {
                 Column(Modifier.testTag(surfaceTag)
                     .verticalScroll(rememberScrollState()).padding(vertical = CompactMenuStyle.SurfacePadding)) {
                     listOfNotNull(title, message).forEachIndexed { index, text ->

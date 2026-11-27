@@ -25,7 +25,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
+import com.kingzcheung.xime.ui.metro.MetroToggleSwitch
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -106,28 +110,18 @@ fun PluginsSettingsContent(
     onNavigateToClipboardSync: () -> Unit = {}
 ) {
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.background,
         topBar = {
-            TopAppBar(
-                title = { Text("插件管理") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "返回"
-                        )
-                    }
-                },
+            com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+                parentTitle = "扩展",
+                pageTitle = "插件管理",
+                onBack = onBack,
                 actions = {
                     IconButton(onClick = onNavigateToPluginMarket) {
                         Icon(Icons.TwoTone.Storefront, contentDescription = "插件市场")
                     }
                     InstalledPluginActions()
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                ),
             )
         }
     ) { padding ->
@@ -334,7 +328,7 @@ private fun ExtensionItem(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        shape = RoundedCornerShape(12.dp)
+        shape = RectangleShape
     ) {
         Column(
             modifier = Modifier
@@ -528,12 +522,17 @@ private fun ExtensionItem(
                         )
 
                         Spacer(modifier = Modifier.weight(1f))
-                        Switch(checked = isEnabled && !contactsUnauthorized, enabled = hostCompatible, colors = settingsSwitchColors(), onCheckedChange = { on ->
-                            contactsGate(on) {
-                                isEnabled = on
-                                viewModel.setPluginEnabled(extension.id, on)
-                            }
-                        })
+                        MetroToggleSwitch(
+                            checked = isEnabled && !contactsUnauthorized,
+                            enabled = hostCompatible,
+                            onCheckedChange = { on ->
+                                contactsGate(on) {
+                                    isEnabled = on
+                                    viewModel.setPluginEnabled(extension.id, on)
+                                }
+                            },
+                            showStatusLabel = false,
+                        )
                     }
 
                 }
@@ -543,7 +542,7 @@ private fun ExtensionItem(
 
     if (showTrustConfirm) {
         val badge = trustBadge(extension.trustLevel)
-        AlertDialog(
+        MetroAlertDialog(
             onDismissRequest = {
                 showTrustConfirm = false
                 trustConfirmAction = null
@@ -563,24 +562,24 @@ private fun ExtensionItem(
                 }
             },
             confirmButton = {
-                TextButton(
+                MetroSolidButton(
+                    text = "继续启用",
                     onClick = {
                         val action = trustConfirmAction
                         showTrustConfirm = false
                         trustConfirmAction = null
                         action?.invoke()
                     }
-                ) {
-                    Text("继续启用")
-                }
+                )
             },
             dismissButton = {
-                TextButton(onClick = {
-                    showTrustConfirm = false
-                    trustConfirmAction = null
-                }) {
-                    Text("取消")
-                }
+                MetroOutlinedButton(
+                    text = "取消",
+                    onClick = {
+                        showTrustConfirm = false
+                        trustConfirmAction = null
+                    }
+                )
             }
         )
     }
@@ -620,7 +619,7 @@ fun NetworkAccessSection(
             if (unauthorized.isNotEmpty()) {
                 Surface(
                     color = MaterialTheme.colorScheme.errorContainer,
-                    shape = RoundedCornerShape(6.dp),
+                    shape = RectangleShape,
                     modifier = Modifier.padding(start = if (showTitle) 8.dp else 0.dp)
                 ) {
                     Text(
@@ -684,24 +683,23 @@ fun NetworkAccessSection(
     }
 
     pendingHost?.let { host ->
-        AlertDialog(
+        MetroAlertDialog(
             onDismissRequest = { pendingHost = null },
             title = { Text("授权网络访问") },
             text = { Text("允许插件「$pluginName」连接 $host 并发送数据？\n\n数据将发送到该域名，请确认信任此插件。") },
             confirmButton = {
-                TextButton(onClick = {
-                    SettingsPreferences.authorizePluginHost(context, pluginId, host)
-                    authorized = authorized + host
-                    pending = pending - host
-                    pendingHost = null
-                }) {
-                    Text("允许", color = MaterialTheme.colorScheme.primary)
-                }
+                MetroSolidButton(
+                    text = "允许",
+                    onClick = {
+                        SettingsPreferences.authorizePluginHost(context, pluginId, host)
+                        authorized = authorized + host
+                        pending = pending - host
+                        pendingHost = null
+                    }
+                )
             },
             dismissButton = {
-                TextButton(onClick = { pendingHost = null }) {
-                    Text("取消")
-                }
+                MetroOutlinedButton(text = "取消", onClick = { pendingHost = null })
             }
         )
     }
@@ -729,7 +727,7 @@ fun PluginIconView(
             .size(36.dp)
             .background(
                 MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(10.dp)
+                shape = RectangleShape
             ).padding(4.dp)
     } else {
         modifier
@@ -802,7 +800,7 @@ private fun PluginErrorDialog(
     onDismiss: () -> Unit,
     onClear: () -> Unit
 ) {
-    AlertDialog(
+    MetroAlertDialog(
         onDismissRequest = onDismiss,
         title = { 
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -826,6 +824,7 @@ private fun PluginErrorDialog(
                 errors.forEachIndexed { index, error ->
                     Card(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        shape = RectangleShape,
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
                         )
@@ -855,14 +854,14 @@ private fun PluginErrorDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onClear) {
-                Text("清除日志", color = MaterialTheme.colorScheme.error)
-            }
+            MetroSolidButton(
+                text = "清除日志",
+                onClick = onClear,
+                containerColor = MaterialTheme.colorScheme.error,
+            )
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("关闭")
-            }
+            MetroOutlinedButton(text = "关闭", onClick = onDismiss)
         }
     )
 }

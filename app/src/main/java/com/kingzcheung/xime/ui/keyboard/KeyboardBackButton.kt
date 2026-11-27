@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material3.Icon
@@ -22,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import com.kingzcheung.xime.ui.theme.VisualStyles
 import com.kingzcheung.xime.ui.theme.visualMaterial
@@ -50,23 +50,23 @@ internal fun KeyboardToolbarButton(
         animationSpec = tween(if (pressed) 0 else 300), label = "toolbar-button-press")
     val disc = (if (restingFill.alpha > 0f) Modifier.background(restingFill) else Modifier)
         .background(background.copy(alpha = background.alpha * pressAlpha))
-        .border(1.dp, outline.copy(alpha = outline.alpha * pressAlpha), CircleShape)
+        .border(1.dp, outline.copy(alpha = outline.alpha * pressAlpha), RectangleShape)
     if (slotWidth != null) {
         val pill = if (continuousPill) edgePillSize(slotWidth) else toolbarPillSize(slotWidth)
-        val shape = cornerRadius?.let { androidx.compose.foundation.shape.RoundedCornerShape(it) } ?: CircleShape
+        val shape = RectangleShape
         Box(modifier.width(slotWidth).height(40.dp).clickable(source, indication = null, onClick = onClick),
             contentAlignment = Alignment.Center) {
             Box(Modifier.size(pill).clip(shape).then(disc)
-                .then(if (pressed) Modifier.visualMaterial(VisualStyles.current, cornerRadius ?: (pill.height / 2),
+                .then(if (pressed) Modifier.visualMaterial(VisualStyles.current, 0.dp,
                     com.kingzcheung.xime.ui.theme.MaterialLevel.RAISED) else Modifier),
                 contentAlignment = Alignment.Center) { content() }
         }
         return
     }
-    Box(modifier.size(40.dp).clip(CircleShape).clickable(source, indication = null, onClick = onClick),
+    Box(modifier.size(40.dp).clip(RectangleShape).clickable(source, indication = null, onClick = onClick),
         contentAlignment = Alignment.Center) {
-        Box(Modifier.size(32.dp).clip(CircleShape).then(disc)
-            .then(if (pressed) Modifier.visualMaterial(VisualStyles.current, 16.dp,
+        Box(Modifier.size(32.dp).clip(RectangleShape).then(disc)
+            .then(if (pressed) Modifier.visualMaterial(VisualStyles.current, 0.dp,
                 com.kingzcheung.xime.ui.theme.MaterialLevel.RAISED) else Modifier), contentAlignment = Alignment.Center) { content() }
     }
 }

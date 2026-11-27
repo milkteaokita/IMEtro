@@ -19,7 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CircularProgressIndicator
@@ -266,7 +266,7 @@ fun ToolPanelBar(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .clip(RoundedCornerShape(18.dp))
+                .clip(RectangleShape)
                 .background(cardBgColor.copy(alpha = 0.5f))
                 .padding(horizontal = 14.dp),
             contentAlignment = Alignment.CenterStart,
@@ -383,7 +383,7 @@ private fun LiveBarLanguages(
             val shown = node.optionLabels[value] ?: value
             Box(
                 Modifier.height(36.dp).widthIn(min = 36.dp, max = 84.dp)
-                    .clip(RoundedCornerShape(18.dp))
+                    .clip(RectangleShape)
                     .background(pillColor)
                     .testTag("live-bar-lang:$key")
                     .pointerInput(key) {

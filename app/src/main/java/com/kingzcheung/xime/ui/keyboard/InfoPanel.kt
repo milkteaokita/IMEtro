@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -196,7 +196,7 @@ fun InfoPanel(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(10.dp))
+                            .clip(RectangleShape)
                             .background(itemBgColor)
                             .clickable(enabled = !isLoading) { onItemClick(item) }
                             .padding(horizontal = 12.dp, vertical = 10.dp),
@@ -223,8 +223,8 @@ private fun EditableSource(node: UiNode, textColor: Color, accentColor: Color, o
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .border(1.dp, accentColor.copy(alpha = 0.6f), RoundedCornerShape(10.dp))
+            .clip(RectangleShape)
+            .border(1.dp, accentColor.copy(alpha = 0.6f), RectangleShape)
             .clickable { onAction(TOOL_PANEL_EDIT_ACTION) }
             .semantics { contentDescription = "改原文" }
             .padding(horizontal = 12.dp, vertical = 10.dp),

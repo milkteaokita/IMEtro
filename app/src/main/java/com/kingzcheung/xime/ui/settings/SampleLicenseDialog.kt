@@ -13,11 +13,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.kingzcheung.xime.handwriting.training.HandwritingContribution
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
 
 @Composable
 internal fun SampleLicenseDialog(scope: String, onDismiss: () -> Unit, onAgree: () -> Unit) {
     val uriHandler = LocalUriHandler.current
-    AlertDialog(onDismissRequest = onDismiss, title = { Text("贡献样本协议") }, text = {
+    MetroAlertDialog(onDismissRequest = onDismiss, title = { Text("贡献样本协议") }, text = {
         Column(Modifier.verticalScroll(rememberScrollState())) {
             Text(scope)
             Spacer(Modifier.height(12.dp))
@@ -26,6 +29,6 @@ internal fun SampleLicenseDialog(scope: String, onDismiss: () -> Unit, onAgree: 
                 Text("阅读 CC0 1.0 条款")
             }
         }
-    }, confirmButton = { TextButton(onClick = onAgree) { Text("同意协议") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("暂不贡献") } })
+    }, confirmButton = { MetroSolidButton(text = "同意协议", onClick = onAgree) },
+        dismissButton = { MetroOutlinedButton(text = "暂不贡献", onClick = onDismiss) })
 }

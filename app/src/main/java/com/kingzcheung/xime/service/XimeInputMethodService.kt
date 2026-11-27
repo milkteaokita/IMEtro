@@ -1219,6 +1219,10 @@ class XimeInputMethodService : InputMethodService(), LifecycleOwner, SavedStateR
     
     fun isDarkTheme(): Boolean {
         com.kingzcheung.xime.ui.theme.VisualStyles.current.dark?.let { return it }
+        if (uiState.value.themeId == com.kingzcheung.xime.ui.theme.MetroKeyboardThemes.SYNC_ID &&
+            com.kingzcheung.xime.ui.theme.MetroThemeSync.syncedState.fromLauncher) {
+            return com.kingzcheung.xime.ui.theme.MetroThemeSync.syncedState.darkMode
+        }
         return when (uiState.value.darkMode) {
             DARK_MODE_DARK -> true
             DARK_MODE_SYSTEM -> {
@@ -2311,7 +2315,7 @@ class XimeInputMethodService : InputMethodService(), LifecycleOwner, SavedStateR
             isFocusableInTouchMode = true
             composeViewRef = this
             // 键盘里所有能滑的列表都不要边缘拉伸回弹，见 NoKeyboardOverscroll。
-            setContent { com.kingzcheung.xime.ui.keyboard.NoKeyboardOverscroll {
+            setContent { com.kingzcheung.xime.ui.i18n.ProvideUiTranslations { com.kingzcheung.xime.ui.keyboard.NoKeyboardOverscroll {
               androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize()) {
                 val inputWindowWidthDp = maxWidth.value.roundToInt().coerceAtLeast(1)
                 val state = uiState.value
@@ -3211,7 +3215,7 @@ class XimeInputMethodService : InputMethodService(), LifecycleOwner, SavedStateR
                       }
                  }
              }
-         } }
+         } } }
         
         }
         keyboardContainer.addView(composeView)
@@ -4254,6 +4258,7 @@ class XimeInputMethodService : InputMethodService(), LifecycleOwner, SavedStateR
     
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
+        com.kingzcheung.xime.ui.theme.MetroThemeSync.refresh(this)
         // 收起后很快又弹出（游戏里一句一句发）：手写模型不卸载；已经卸载了而手写板开着，就趁弹出先在后台加载，
         // 不等第一个字写完才加载。没开手写不加载。
         mainHandler.removeCallbacks(releaseHandwritingWhileHidden)

@@ -43,6 +43,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import com.kingzcheung.xime.BuildConfig
+import com.kingzcheung.xime.ui.metro.MetroCheckbox
 import com.kingzcheung.xime.settings.DictContribution
 import com.kingzcheung.xime.settings.DictContributionRules
 import com.kingzcheung.xime.util.FileLogger
@@ -92,18 +93,12 @@ fun DictContributeScreen(onBack: () -> Unit) {
     fun writePicked() = DictContribution.writeFile(app, picked, loaded?.schema.orEmpty(), BuildConfig.VERSION_NAME)
 
     Scaffold(
+        containerColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.background,
         topBar = {
-            TopAppBar(
-                title = { Text("贡献词库") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                )
+            com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+                parentTitle = "词库",
+                pageTitle = "贡献词库",
+                onBack = onBack,
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -182,7 +177,7 @@ fun DictContributeScreen(onBack: () -> Unit) {
                 SettingsGroupRow(row, words.size) { com.kingzcheung.xime.ui.i18n.UntranslatedContent {
                     SettingsListRow(word.text, listOf(word.pinyin, countText).filter { it.isNotEmpty() }.joinToString(" · "),
                         Modifier.clickable(enabled = !busy) { toggle() }) {
-                        Checkbox(checked = checked, enabled = !busy, onCheckedChange = { toggle() })
+                        MetroCheckbox(checked = checked, enabled = !busy, onCheckedChange = { toggle() })
                         IconButton(enabled = !busy, onClick = {
                             excluded = DictContribution.exclude(app, word)
                             unchecked = unchecked - word
@@ -203,18 +198,18 @@ fun DictContributeScreen(onBack: () -> Unit) {
     }
 
     consentFor?.let { pending ->
-        AlertDialog(
+        com.kingzcheung.xime.ui.metro.MetroAlertDialog(
             onDismissRequest = { consentFor = null },
             title = { Text("词的用途") },
             text = { Text(DictContribution.CONSENT_TEXT) },
             confirmButton = {
-                TextButton(onClick = {
+                com.kingzcheung.xime.ui.metro.MetroSolidButton("同意", onClick = {
                     DictContribution.setConsented(app)
                     consentFor = null
                     pending()
-                }) { Text("同意") }
+                })
             },
-            dismissButton = { TextButton(onClick = { consentFor = null }) { Text("取消") } },
+            dismissButton = { com.kingzcheung.xime.ui.metro.MetroOutlinedButton("取消", onClick = { consentFor = null }) },
         )
     }
 }

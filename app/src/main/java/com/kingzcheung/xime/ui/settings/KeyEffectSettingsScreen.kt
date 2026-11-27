@@ -29,6 +29,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.CompositionLocalProvider
 import com.kingzcheung.xime.ui.keyboard.*
+import com.kingzcheung.xime.ui.metro.MetroSlider
+import com.kingzcheung.xime.ui.metro.MetroToggleSwitch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -79,9 +81,10 @@ fun KeyEffectSettingsContent(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        Switch(
+                        MetroToggleSwitch(
                             checked = uiState.soundEnabled,
-                            onCheckedChange = { viewModel.setSoundEnabled(it) }
+                            onCheckedChange = { viewModel.setSoundEnabled(it) },
+                            showStatusLabel = false,
                         )
                     }
 
@@ -118,11 +121,11 @@ fun KeyEffectSettingsContent(
                                 )
                             }
                             Spacer(modifier = Modifier.height(8.dp))
-                            Slider(
+                            MetroSlider(
                                 value = uiState.soundVolume.toFloat(),
                                 onValueChange = { viewModel.setSoundVolume(it.toInt()) },
                                 valueRange = 0f..100f,
-                                steps = 19
+                                steps = 19,
                             )
                         }
                         HorizontalDivider(
@@ -196,9 +199,10 @@ fun KeyEffectSettingsContent(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                            Switch(
+                            MetroToggleSwitch(
                                 checked = uiState.hapticOnKeyUp,
-                                onCheckedChange = { viewModel.setHapticOnKeyUp(it) }
+                                onCheckedChange = { viewModel.setHapticOnKeyUp(it) },
+                                showStatusLabel = false,
                             )
                         }
                     }
@@ -229,11 +233,11 @@ fun KeyEffectSettingsContent(
                                 )
                             }
                             Spacer(modifier = Modifier.height(8.dp))
-                            Slider(
+                            MetroSlider(
                                 value = uiState.pressDuration.toFloat(),
                                 onValueChange = { viewModel.setPressDuration(it.toInt()) },
                                 valueRange = 0f..100f,
-                                steps = 19
+                                steps = 19,
                             )
                         }
 
@@ -260,11 +264,11 @@ fun KeyEffectSettingsContent(
                                 )
                             }
                             Spacer(modifier = Modifier.height(8.dp))
-                            Slider(
+                            MetroSlider(
                                 value = uiState.longPressDuration.toFloat(),
                                 onValueChange = { viewModel.setLongPressDuration(it.toInt()) },
                                 valueRange = 0f..100f,
-                                steps = 19
+                                steps = 19,
                             )
                         }
                         }
@@ -293,11 +297,11 @@ fun KeyEffectSettingsContent(
                                     )
                                 }
                                 Spacer(modifier = Modifier.height(8.dp))
-                                Slider(
+                                MetroSlider(
                                     value = uiState.pressAmplitude.toFloat(),
                                     onValueChange = { viewModel.setPressAmplitude(it.toInt()) },
                                     valueRange = 0f..255f,
-                                    steps = 50
+                                    steps = 50,
                                 )
                             }
 
@@ -324,11 +328,11 @@ fun KeyEffectSettingsContent(
                                     )
                                 }
                                 Spacer(modifier = Modifier.height(8.dp))
-                                Slider(
+                                MetroSlider(
                                     value = uiState.longPressAmplitude.toFloat(),
                                     onValueChange = { viewModel.setLongPressAmplitude(it.toInt()) },
                                     valueRange = 0f..255f,
-                                    steps = 50
+                                    steps = 50,
                                 )
                             }
                         }
@@ -411,7 +415,7 @@ private fun KeyVisualEffectToggle(title: String, description: String, enabled: B
             Text(description, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             PerformanceCostNote(costItem)
         }
-        Switch(checked = enabled, onCheckedChange = null)
+        MetroToggleSwitch(checked = enabled, onCheckedChange = null, showStatusLabel = false)
     }
 }
 
@@ -487,7 +491,7 @@ private fun KeyGapLightSlider(title: String, valueText: String, value: Float, ra
             Spacer(Modifier.width(8.dp))
             Text(valueText, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
         }
-        Slider(value = value, onValueChange = onChange, valueRange = range, steps = steps)
+        MetroSlider(value = value, onValueChange = onChange, valueRange = range, steps = steps)
     }
 }
 
@@ -503,7 +507,7 @@ private fun KeyGapLightEventToggle(title: String, description: String, checked: 
             Text(description, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             PerformanceCostNote(costItem)
         }
-        Switch(checked = checked, onCheckedChange = null)
+        MetroToggleSwitch(checked = checked, onCheckedChange = null, showStatusLabel = false)
     }
 }
 
@@ -529,7 +533,7 @@ private fun KeySoundCapturableSetting() {
             Text("录屏时能录到按键音",
                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Switch(checked = capturable, onCheckedChange = null)
+        MetroToggleSwitch(checked = capturable, onCheckedChange = null, showStatusLabel = false)
     }
 }
 

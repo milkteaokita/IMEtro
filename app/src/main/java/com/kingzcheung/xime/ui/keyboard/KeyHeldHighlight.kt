@@ -14,9 +14,9 @@ import com.kingzcheung.xime.ui.theme.LocalKeyboardPalette
 /** A stationary tint survives the short press animation without an animation clock. */
 @Composable
 internal fun Modifier.keyHeldHighlight(held: Boolean): Modifier {
+    if (!held || com.kingzcheung.xime.ui.theme.LocalMetroThemeActive.current) return this
     val accent = LocalKeyboardPalette.current?.accent ?: MaterialTheme.colorScheme.primary
     val radius = LocalKeyCornerRadius.current
-    if (!held) return this
     return drawBehind {
         drawRoundRect(accent.copy(alpha = 0.18f), cornerRadius = CornerRadius(radius.toPx()))
         val stroke = 1.dp.toPx()

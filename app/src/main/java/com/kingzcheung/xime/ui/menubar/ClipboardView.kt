@@ -22,14 +22,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import com.kingzcheung.xime.ui.i18n.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -133,7 +133,7 @@ internal fun ClearClipboardConfirmOverlay(
         val scrollWholeCard = constraints.maxHeight < compactTitleHeight + buttonHeight + with(density) { 4.dp.roundToPx() }
         Surface(
             modifier = Modifier.widthIn(max = 360.dp).fillMaxWidth().testTag("clipboard-clear-card"),
-            shape = RoundedCornerShape(16.dp), color = cardBgColor,
+            shape = RectangleShape, color = cardBgColor,
             onClick = {},
         ) {
             Column(Modifier.then(if (scrollWholeCard) Modifier.verticalScroll(rememberScrollState()) else Modifier)
@@ -157,14 +157,14 @@ internal fun ClearClipboardConfirmOverlay(
                 Row(Modifier.fillMaxWidth().testTag("clipboard-clear-actions"),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Box(Modifier.weight(1f).heightIn(min = 48.dp).testTag("clipboard-clear-cancel")
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(RectangleShape)
                         .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                         .clickable(onClick = onCancel).padding(horizontal = 8.dp, vertical = 8.dp),
                         contentAlignment = Alignment.Center) {
                         Text("取消", color = textColor, fontSize = 13.sp, lineHeight = 16.sp)
                     }
                     Box(Modifier.weight(1f).heightIn(min = 48.dp).testTag("clipboard-clear-confirm")
-                        .clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.error)
+                        .clip(RectangleShape).background(MaterialTheme.colorScheme.error)
                         .clickable(onClick = onConfirm).padding(horizontal = 8.dp, vertical = 8.dp),
                         contentAlignment = Alignment.Center) {
                         Text("清空", color = MaterialTheme.colorScheme.onError, fontSize = 13.sp, lineHeight = 16.sp)
@@ -226,7 +226,7 @@ internal fun LongPressMenuOverlay(
         val minWidth = with(density) { (if (title != null) 220.dp else 150.dp).toPx() }
         val widthCap = with(density) { 260.dp.toPx() }
         androidx.compose.ui.layout.Layout(content = {
-            Surface(Modifier.testTag(tag), shape = RoundedCornerShape(12.dp), color = cardColor, shadowElevation = 4.dp) {
+            Surface(Modifier.testTag(tag), shape = RectangleShape, color = cardColor, shadowElevation = 0.dp) {
                 Column(Modifier.testTag(surfaceTag).verticalScroll(rememberScrollState()).padding(vertical = 6.dp)) {
                     title?.let {
                         Text(it, color = cardText, fontSize = 15.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium,

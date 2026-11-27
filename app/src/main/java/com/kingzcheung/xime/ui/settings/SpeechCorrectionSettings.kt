@@ -22,6 +22,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.kingzcheung.xime.service.VoiceCorrections
 import com.kingzcheung.xime.settings.SettingsPreferences
+import com.kingzcheung.xime.ui.metro.MetroToggleSwitch
 
 /** 语音纠错：别人提的需求，默认关(VoiceCorrections)。打开后下面出词表，每行一条。 */
 @Composable
@@ -40,7 +41,7 @@ internal fun SpeechCorrectionSettings() {
                 Text("每行一条：错词 空格 正词。",
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Switch(checked = enabled, onCheckedChange = null, colors = settingsSwitchColors())
+            MetroToggleSwitch(checked = enabled, onCheckedChange = null, showStatusLabel = false)
         }
         if (enabled) {
             val count = remember(rules) { VoiceCorrections.of(rules).size }

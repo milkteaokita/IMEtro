@@ -155,18 +155,18 @@ class FillSidesRenderTest {
             } else {
                 assertTrue("$label: 卡片和两侧差 ${seam(middle)}", seam(middle) <= 3)
                 assertTrue("$label: 卡片顶角处差 ${seam(card.top + 1f)}", seam(card.top + 1f) <= 3)
-                // 整条的外角跟整宽键盘一样圆：最角上那个像素透出宿主。
+                // Metro 風格為 0.dp 直角：最角上的像素與填入側邊同色，不再透出宿主圆角缺口。
                 val host = case.host.value!!
-                assertTrue("$label: 整条左上角应是圆角", diff(bitmap.px(host.left + 1f, card.top + 1f), HOST_ARGB) <= 3)
+                assertTrue("$label: 整条左上角应与侧边同色", diff(bitmap.px(host.left + 1f, card.top + 1f), bitmap.px(host.left + 1f, middle)) <= 3)
             }
         }
         println("FillSidesRenderTest 旧画法对照：卡片和两侧最大差 $oldSeamWorst，顶角最大差 $oldCornerWorst")
         for (case in layouts) {
             val card = case.card.value!!
             val host = case.host.value!!
-            // 不管卡片在哪，整条只在贴屏幕边的两个外角圆；卡片和两侧相接处没有台阶、同色。
-            assertTrue("${case.label}: 左上外角应透出宿主", diff(bitmap.px(host.left + 1f, card.top + 1f), HOST_ARGB) <= 3)
-            assertTrue("${case.label}: 右上外角应透出宿主", diff(bitmap.px(host.right - 2f, card.top + 1f), HOST_ARGB) <= 3)
+            // Metro 0.dp 直角：外角與卡片相接處皆無圓角缺口且同色。
+            assertTrue("${case.label}: 左上外角应与下方同色", diff(bitmap.px(host.left + 1f, card.top + 1f), bitmap.px(host.left + 1f, card.top + 8f * density)) <= 3)
+            assertTrue("${case.label}: 右上外角应与下方同色", diff(bitmap.px(host.right - 2f, card.top + 1f), bitmap.px(host.right - 2f, card.top + 8f * density)) <= 3)
             for (y in listOf(card.top + 1f, card.top + 8f * density)) {
                 if (card.left > host.left + 2f) {
                     val d = diff(bitmap.px(card.left - 2f, y), bitmap.px(card.left + 1f, y))

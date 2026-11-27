@@ -66,8 +66,8 @@ fun CellDictionarySettingsContent(onBack: () -> Unit, embedded: Boolean = false)
             exporter.launch(exportFileName(name, format))
         })
     linkError?.let { message ->
-        AlertDialog(onDismissRequest = { linkError = null }, text = { Text(message) },
-            confirmButton = { TextButton(onClick = { linkError = null }) { Text("知道了") } })
+        com.kingzcheung.xime.ui.metro.MetroAlertDialog(onDismissRequest = { linkError = null }, text = { Text(message) },
+            confirmButton = { com.kingzcheung.xime.ui.metro.MetroSolidButton("知道了", onClick = { linkError = null }) })
     }
 }
 
@@ -122,12 +122,14 @@ fun CellDictionarySettingsPanel(
     val total = CellDictionaryCost.slowdown(selectedEntries, curve)
     val totalLevel = CellDictionaryCost.level(total)
     val large = totalLevel == CellDictionaryCost.Level.HEAVY
-    Scaffold(topBar = {
-        if (!embedded) TopAppBar(title = { Text("导入的词库") }, navigationIcon = {
-            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回") }
-        })
+    Scaffold(containerColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.background, topBar = {
+        if (!embedded) com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+            parentTitle = "词库",
+            pageTitle = "导入的词库",
+            onBack = onBack,
+        )
     }, bottomBar = {
-        if (dictionaries.pending || dictionaries.selected.isNotEmpty()) Surface(tonalElevation = 3.dp) {
+        if (dictionaries.pending || dictionaries.selected.isNotEmpty()) Surface(color = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.chrome, tonalElevation = 0.dp) {
             Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 if (dictionaries.selected.isNotEmpty()) Text("开着 ${dictionaries.selected.size} 个词库，${words(selectedEntries)}，" +
@@ -138,10 +140,12 @@ fun CellDictionarySettingsPanel(
                     },
                     style = MaterialTheme.typography.bodySmall, modifier = Modifier.testTag("cell-dictionary-total-cost"),
                     color = costColor(totalLevel))
-                if (dictionaries.pending) Button(onClick = { if (large) confirmLarge = true else onApply() },
-                    enabled = !state.busy, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-                    Text("应用更改")
-                }
+                if (dictionaries.pending) com.kingzcheung.xime.ui.metro.MetroSolidButton(
+                    text = "应用更改",
+                    onClick = { if (large) confirmLarge = true else onApply() },
+                    enabled = !state.busy,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                )
             }
         }
     }) { padding ->
@@ -223,12 +227,12 @@ fun CellDictionarySettingsPanel(
         onExport(source, name, format)
     }
     if (confirmLarge) {
-        AlertDialog(onDismissRequest = { confirmLarge = false },
+        com.kingzcheung.xime.ui.metro.MetroAlertDialog(onDismissRequest = { confirmLarge = false },
             title = { Text("词库较多") },
             text = { Text("开启的词库共${words(selectedEntries)}，打字最多慢 " +
                 "${CellDictionaryCost.format(total)}，候选里也会多一些不常用的词。仍要应用吗？") },
-            confirmButton = { TextButton(onClick = { confirmLarge = false; onApply() }) { Text("仍然应用") } },
-            dismissButton = { TextButton(onClick = { confirmLarge = false }) { Text("取消") } })
+            confirmButton = { com.kingzcheung.xime.ui.metro.MetroSolidButton("仍然应用", onClick = { confirmLarge = false; onApply() }) },
+            dismissButton = { com.kingzcheung.xime.ui.metro.MetroOutlinedButton("取消", onClick = { confirmLarge = false }) })
     }
 }
 
@@ -271,9 +275,13 @@ private fun DictionaryRow(
     val removable = installed != null && onRemove != null && !selected && !applied && !busy
     SettingsListRow(item.name, detail,
         detailColor = if (level == CellDictionaryCost.Level.NORMAL) Color.Unspecified else costColor(level)) {
-        if (installed != null) Switch(checked = selected, onCheckedChange = onSelect, enabled = !busy,
-            colors = settingsSwitchColors(),
-            modifier = Modifier.semantics { contentDescription = "启用${item.name}" })
+        if (installed != null) com.kingzcheung.xime.ui.metro.MetroToggleSwitch(
+            checked = selected,
+            onCheckedChange = onSelect,
+            enabled = !busy,
+            showStatusLabel = false,
+            modifier = Modifier.semantics { contentDescription = "启用${item.name}" },
+        )
         else TextButton(onClick = onDownload, enabled = !busy) { Text("下载") }
         if (onSource != null || installed != null) Box {
             IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, "${item.name}的更多操作") }

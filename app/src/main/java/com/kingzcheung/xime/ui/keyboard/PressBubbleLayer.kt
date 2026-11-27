@@ -42,18 +42,20 @@ internal fun PressBubbleLayer(controller: SwipeBubbleController, background: Col
     val density = LocalDensity.current
     val referenceHeight = bubbleReferenceHeightDp()
     val typeface = AppFonts.keyLabelTypeface
+    val metroActive = com.kingzcheung.xime.ui.theme.LocalMetroThemeActive.current
     DisposableEffect(root, layer) {
         root.overlay.add(layer)
         onDispose { root.overlay.remove(layer) }
     }
     // 带着系统动画时长缩放的协程环境：松手淡出跟着系统「移除动画」走。
     val scope = rememberCoroutineScope()
-    DisposableEffect(controller, layer, rotation, density, referenceHeight, keyboardWidth, background, text, accent, typeface) {
+    DisposableEffect(controller, layer, rotation, density, referenceHeight, keyboardWidth, background, text, accent, typeface, metroActive) {
         var fadeJob: Job? = null
         var generation = 0
         val draw: (SwipeState, Rect) -> Unit = { state, bounds ->
             val data = if (state.isPlainPress()) measureSwipeBubble(state, bounds, background, text,
-                accent, bounds.width, keyboardWidth, density, referenceHeight, keyLabelTypeface = typeface) else null
+                accent, bounds.width, keyboardWidth, density, referenceHeight, keyLabelTypeface = typeface,
+                sharpSquare = metroActive) else null
             fadeJob?.cancel()
             fadeJob = null
             val current = ++generation
@@ -143,7 +145,7 @@ private class PressBubbleDrawable(private val host: View, private val composeVie
             setBounds(0, 0, 0, 0)
             return
         }
-        val shadow = ceil(data.shadowRadiusPx)
+        val shadow = maxOf(ceil(data.shadowRadiusPx), if (data.sharpSquare) 3f else 0f)
         area.set(data.boxLeft - shadow, data.boxTop - shadow,
             data.boxLeft + maxOf(data.pathBodyLeft + data.pathBodyWidth, data.pointerLeftInBox + data.keyWidthPx) + shadow,
             data.boxTop + data.bodyHeightPx + data.pointerHeightPx + shadow)

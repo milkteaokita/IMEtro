@@ -35,8 +35,7 @@ import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.DragIndicator
@@ -226,8 +225,7 @@ internal fun HardwareKeyboardToolbar(
         }
         val currentGeometry by rememberUpdatedState(geometry)
         var dragging by remember { mutableStateOf<HardwareToolbarOffset?>(null) }
-        val shape = if (samsungBottomBar && bottomDocked) androidx.compose.ui.graphics.RectangleShape
-            else RoundedCornerShape(HardwareCandidateCornerRadius)
+        val shape = RectangleShape
         val languageMenuActive = LocalSuppressCursorMove.current
         val touchSlop = LocalViewConfiguration.current.touchSlop
         val gap = with(density) { 12.dp.roundToPx() }
@@ -474,7 +472,7 @@ private fun androidx.compose.foundation.layout.RowScope.HardwareStripTools(
         Box(Modifier.width(16.dp).height(40.dp).clickable(role = Role.Button, onClick = onPeek)
             .semantics { contentDescription = "显示工具按钮" }.testTag("hardware-toolbar-tools-edge"),
             contentAlignment = Alignment.Center) {
-            Box(Modifier.width(3.dp).height(20.dp).clip(CircleShape).background(color.copy(alpha = .35f)))
+            Box(Modifier.width(3.dp).height(20.dp).clip(RectangleShape).background(color.copy(alpha = .35f)))
         }
     }
     AnimatedVisibility(!collapsed, enter = fadeIn(CyMotion.enter()) + expandHorizontally(CyMotion.enter(), expandFrom = Alignment.Start),
@@ -516,7 +514,7 @@ internal fun HardwareToolbarAction(
             .semantics { contentDescription = description; selected = active }.testTag(tag),
         contentAlignment = Alignment.Center,
     ) {
-        Box(Modifier.size(minOf(36.dp, size)).clip(CircleShape)
+        Box(Modifier.size(minOf(36.dp, size)).clip(RectangleShape)
             .background(contentColor.copy(alpha = if (active) .22f else if (pressed) .14f else 0f)),
             contentAlignment = Alignment.Center) {
             Icon(icon, null, tint = contentColor, modifier = Modifier.size(minOf(20.dp, size)))

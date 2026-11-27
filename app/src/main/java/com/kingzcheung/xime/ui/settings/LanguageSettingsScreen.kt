@@ -3,7 +3,8 @@ package com.kingzcheung.xime.ui.settings
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
+import com.kingzcheung.xime.ui.metro.MetroToggleSwitch
 import androidx.compose.material.icons.twotone.ViewModule
 import androidx.compose.material.icons.twotone.Inventory
 import androidx.compose.material.icons.twotone.Translate
@@ -110,7 +111,7 @@ fun LanguageSettingsContent(onOpenSchemaResources: () -> Unit = {}, onOpenDouble
                 val expanded = checked && expandedLanguage == language
                 Surface(modifier = Modifier.fillMaxWidth().testTag("language-drag:${language.id}")
                     .then(dragOrderItem(dragOrder, id, checked && orderedLanguages.size > 1 && !saving)),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RectangleShape,
                     border = if (dragOrder.dragging == id) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
                     color = if (dragOrder.dragging == id) MaterialTheme.colorScheme.primaryContainer
                         else MaterialTheme.colorScheme.surfaceContainerLow) {
@@ -129,7 +130,11 @@ fun LanguageSettingsContent(onOpenSchemaResources: () -> Unit = {}, onOpenDouble
                                 Icon(if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                                     if (expanded) "收起${language.displayName}设置" else "展开${language.displayName}设置")
                             }
-                            Switch(checked, enabled = canChange, colors = settingsSwitchColors(), modifier = Modifier.testTag("language-toggle:${language.id}"),
+                            MetroToggleSwitch(
+                                checked = checked,
+                                enabled = canChange,
+                                modifier = Modifier.testTag("language-toggle:${language.id}"),
+                                showStatusLabel = false,
                                 onCheckedChange = { enabled ->
                                 scope.launch {
                                     saving = true
@@ -268,7 +273,7 @@ internal fun languageListRows(rows: List<String>, enabled: Set<InputLanguage>, m
 @Composable
 private fun MoreLanguagesRow(folded: List<String>, open: Boolean, onToggle: () -> Unit) {
     val names = folded.mapNotNull { InputLanguage.fromId(it)?.displayName }.joinToString("、")
-    Surface(modifier = Modifier.fillMaxWidth().testTag("language-more"), shape = RoundedCornerShape(12.dp),
+    Surface(modifier = Modifier.fillMaxWidth().testTag("language-more"), shape = RectangleShape,
         color = MaterialTheme.colorScheme.surfaceContainerLow) {
         Row(Modifier.fillMaxWidth().visualMaterial(VisualStyles.current, 12.dp, level = MaterialLevel.RAISED)
             .heightIn(min = 72.dp).clickable(onClick = onToggle).padding(16.dp),

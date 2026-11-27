@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -186,8 +186,13 @@ fun KeyButton(
     val currentActions by rememberUpdatedState(keyActions)
 
     val frostedGlass = LocalKeyboardInputPreferences.current.frostedGlass
-    val shadowModifier = remember(shadowEnabled, shadowElevation, shadowShapeRadius, KeyShapes.current, density, backgroundColor, frostedGlass.enabled) {
-        if (shadowEnabled && !frostedGlass.enabled) {
+    val metroActive = com.kingzcheung.xime.ui.theme.LocalMetroThemeActive.current
+    val metroPressed = com.kingzcheung.xime.ui.theme.MetroKeyboardThemes.resolvePressedKeyColors(
+        backgroundColor, textColor, isPressed, frostedGlass.enabled
+    )
+    val effectiveTextColor = metroPressed?.second ?: textColor
+    val shadowModifier = remember(shadowEnabled, shadowElevation, shadowShapeRadius, KeyShapes.current, density, backgroundColor, frostedGlass.enabled, metroActive) {
+        if (shadowEnabled && !frostedGlass.enabled && !metroActive) {
             val offsetPx = with(density) { shadowElevation.toPx() }
             val cornerPx = with(density) { KeyShapes.current.radius(shadowShapeRadius).toPx() }
             val color = crispShadowColor(backgroundColor)
@@ -201,8 +206,8 @@ fun KeyButton(
             }
         } else Modifier
     }
-    val keyCornerRadius = LocalKeyCornerRadius.current
-    val keyClipShape = remember(keyCornerRadius) { RoundedCornerShape(keyCornerRadius) }
+    val keyCornerRadius = if (metroActive) 0.dp else LocalKeyCornerRadius.current
+    val keyClipShape = RectangleShape
     
     // 辅助函数：生成更深的颜色（混合黑色）
     fun darkenColor(color: Color, factor: Float = 0.15f): Color {
@@ -222,8 +227,8 @@ fun KeyButton(
             .padding(scaledKeyVisualPadding())
             .keyGlow(Modifier.then(shadowModifier)
             .clip(keyClipShape)
-            .background(frostedKeyColor(
-                backgroundColor, textColor, frostedGlass,
+            .background(metroPressed?.first ?: frostedKeyColor(
+                backgroundColor, effectiveTextColor, frostedGlass,
                 legacyStateColor = if (isPressed) darkenColor(backgroundColor, 0.2f)
                 else if (isHighlighted) backgroundColor.copy(alpha = 0.8f)
                 else backgroundColor,
@@ -252,7 +257,7 @@ fun KeyButton(
             Text(
                 text = punctuationKeyLabel(text),
                 modifier = Modifier.fillMaxWidth().offset(y = if (!swipeText.isNullOrEmpty() && keyHeight >= 40.dp) 2.dp else 0.dp),
-                color = textColor,
+                color = effectiveTextColor,
                 fontSize = labelSize.sp,
                 lineHeight = (labelSize * 1.2f).sp,
                 fontWeight = if (text.length > 2) FontWeight.Medium else FontWeight.Normal,
@@ -265,7 +270,7 @@ fun KeyButton(
                 val displayText = if (swipeText.length <= 4) swipeText else swipeText.take(4)
                 Text(
                     text = punctuationKeyLabel(displayText),
-                    color = keyHintColor(textColor, frostedGlass, 0.5f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
+                    color = keyHintColor(effectiveTextColor, frostedGlass, 0.5f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
                     fontSize = hintSize.sp,
                     lineHeight = (hintSize * 1.2f).sp,
                     fontWeight = FontWeight.Normal,
@@ -279,7 +284,7 @@ fun KeyButton(
             if (badgeText != null && !(flickPreview?.fromTop == true && flickPreview?.text == badgeText)) {
                 Text(
                     text = badgeText,
-                    color = keyHintColor(textColor, frostedGlass, 0.5f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
+                    color = keyHintColor(effectiveTextColor, frostedGlass, 0.5f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
                     fontSize = (10f * hintScale).sp,
                     lineHeight = (12f * hintScale).sp,
                     fontWeight = FontWeight.Normal,
@@ -292,7 +297,7 @@ fun KeyButton(
                 )
             }
         }
-        flickPreview?.let { KeyFlickLabel(it, textColor, maxWidth.value, maxHeight.value, hintSize, labelSize) }
+        flickPreview?.let { KeyFlickLabel(it, effectiveTextColor, maxWidth.value, maxHeight.value, hintSize, labelSize) }
     }
 }
 
@@ -687,9 +692,10 @@ fun SwipeableKeyButton(
         LocalKeyboardInputPreferences.current.let { it.doublePinyinKeyHintsWithCorners || it.swipeUpHints || it.swipeDownHints }
 
     val frostedGlass = LocalKeyboardInputPreferences.current.frostedGlass
+    val metroActive = com.kingzcheung.xime.ui.theme.LocalMetroThemeActive.current
     val hexagonal = LocalHoneycombKeys.current && (letterGroup ?: text).let { it.length == 1 && it[0].lowercaseChar() in 'a'..'z' }
-    val shadowModifier = remember(shadowEnabled, shadowElevation, shadowShapeRadius, KeyShapes.current, density, resolvedBackground, frostedGlass.enabled, hexagonal) {
-        if (shadowEnabled && !frostedGlass.enabled && !hexagonal) {
+    val shadowModifier = remember(shadowEnabled, shadowElevation, shadowShapeRadius, KeyShapes.current, density, resolvedBackground, frostedGlass.enabled, hexagonal, metroActive) {
+        if (shadowEnabled && !frostedGlass.enabled && !hexagonal && !metroActive) {
             val offsetPx = with(density) { shadowElevation.toPx() }
             val cornerPx = with(density) { KeyShapes.current.radius(shadowShapeRadius).toPx() }
             val color = crispShadowColor(resolvedBackground)
@@ -703,10 +709,15 @@ fun SwipeableKeyButton(
             }
         } else Modifier
     }
-    val keyCornerRadius = LocalKeyCornerRadius.current
-    val keyClipShape = remember(keyCornerRadius, hexagonal) { if (hexagonal) HexagonShape else RoundedCornerShape(keyCornerRadius) }
+    val keyCornerRadius = if (metroActive) 0.dp else LocalKeyCornerRadius.current
+    val keyClipShape = remember(keyCornerRadius, hexagonal) { if (hexagonal) HexagonShape else RectangleShape }
     val keyLabelFontFamily = AppFonts.keyLabelFontFamily
     val keyFontFamily = AppFonts.keyFontFamily
+
+    val metroPressed = com.kingzcheung.xime.ui.theme.MetroKeyboardThemes.resolvePressedKeyColors(
+        resolvedBackground, resolvedText, pressedLook, frostedGlass.enabled
+    )
+    val effectiveTextColor = metroPressed?.second ?: resolvedText
 
     BoxWithConstraints(
         modifier = modifier
@@ -737,8 +748,8 @@ fun SwipeableKeyButton(
             .then(if (hexagonal) Modifier.honeycombCap() else Modifier)
             .keyGlow(Modifier.then(shadowModifier)
             .clip(keyClipShape)
-            .background(frostedKeyColor(
-                resolvedBackground, if (frostedGlass.enabled) textColor else resolvedText, frostedGlass,
+            .background(metroPressed?.first ?: frostedKeyColor(
+                resolvedBackground, if (frostedGlass.enabled) textColor else effectiveTextColor, frostedGlass,
                 legacyStateColor = if (pressedLook) resolvedBackground.copy(alpha = 0.7f)
                 else if (isHighlighted) resolvedBackground.copy(alpha = 0.8f)
                 else resolvedBackground,
@@ -794,7 +805,7 @@ fun SwipeableKeyButton(
                         Icon(
                             painter = icon,
                             contentDescription = text,
-                            tint = resolvedText,
+                            tint = effectiveTextColor,
                             modifier = Modifier
                                 .align(Alignment.TopStart)
                                 .padding(top = 2.dp, start = 4.dp)
@@ -802,8 +813,8 @@ fun SwipeableKeyButton(
                         )
                     } else {
                         Text(
-                            text = customLayoutLabel(customLayout, punctuationKeyLabel(text), glassLabelSurface ?: resolvedBackground, customAccent, textColor),
-                            color = resolvedText,
+                            text = customLayoutLabel(customLayout, punctuationKeyLabel(text), glassLabelSurface ?: resolvedBackground, customAccent, effectiveTextColor),
+                            color = effectiveTextColor,
                             fontSize = labelSize.sp,
                             fontWeight = if (text.length > 2) FontWeight.Medium else FontWeight.Normal,
                             textAlign = TextAlign.Start,
@@ -828,7 +839,7 @@ fun SwipeableKeyButton(
                             val displayText = if (swipeUpHint.length <= 2) swipeUpHint else swipeUpHint.take(2)
                             Text(
                                 text = punctuationKeyLabel(displayText),
-                                color = keyHintColor(resolvedText, frostedGlass, 0.6f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
+                                color = keyHintColor(effectiveTextColor, frostedGlass, 0.6f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
                                 fontSize = effectiveSwipeFontSize,
                                 fontWeight = FontWeight.Medium,
                                 textAlign = TextAlign.End,
@@ -850,7 +861,7 @@ fun SwipeableKeyButton(
                                 val displayText = if (swipeDownHint.length <= 12) swipeDownHint else swipeDownHint.take(12)
                                 Text(
                                     text = punctuationKeyLabel(displayText),
-                                    color = keyHintColor(resolvedText, frostedGlass, 0.7f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
+                                    color = keyHintColor(effectiveTextColor, frostedGlass, 0.7f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
                                     fontSize = adjustedFontSize,
                                     fontWeight = FontWeight.Medium,
                                     textAlign = TextAlign.Start,
@@ -867,16 +878,16 @@ fun SwipeableKeyButton(
                     Icon(
                         painter = icon,
                         contentDescription = text,
-                        tint = resolvedText,
+                        tint = effectiveTextColor,
                         modifier = Modifier.size(mainIconSize)
                     )
                 } else {
-                    val mainLabel = customLayoutLabel(customLayout, punctuationKeyLabel(text), glassLabelSurface ?: resolvedBackground, customAccent, textColor)
+                    val mainLabel = customLayoutLabel(customLayout, punctuationKeyLabel(text), glassLabelSurface ?: resolvedBackground, customAccent, effectiveTextColor)
                     // 笔画键 一丨丿丶乛 按同一线宽自己画，不随手机字体变细、粗细不一（见 [keycapStrokeLabel]）。
                     val strokeLabel = keycapStrokeLabel(mainLabel)
                     Text(
                         text = strokeLabel ?: mainLabel,
-                        inlineContent = if (strokeLabel != null) keycapStrokeInlineContent(mainLabel.text, resolvedText) else emptyMap(),
+                        inlineContent = if (strokeLabel != null) keycapStrokeInlineContent(mainLabel.text, effectiveTextColor) else emptyMap(),
                         // 双拼键位提示的韵母在字母下面：字母上移半个提示高，两者一起居中。
                         modifier = Modifier.fillMaxWidth().offset(y = if (dpCornerLayout != null) dpCornerLayout.letterOffsetDp.dp
                             else if (dpHint != null) (-(dpFinals?.heightDp ?: 0f) / 2f).dp
@@ -886,7 +897,7 @@ fun SwipeableKeyButton(
                             .then(if (dpCornerLayout != null) Modifier
                                 .height((dpCornerLayout.letterSp * 1.2f * density.fontScale).dp)
                                 .clipToBounds().wrapContentHeight(unbounded = true) else Modifier),
-                        color = resolvedText,
+                        color = effectiveTextColor,
                         fontSize = (dpCornerLayout?.letterSp ?: labelSize).sp,
                         lineHeight = ((dpCornerLayout?.letterSp ?: labelSize) * 1.2f).sp,
                         fontWeight = if (text.length > 2) FontWeight.Medium else FontWeight.Normal,
@@ -903,7 +914,7 @@ fun SwipeableKeyButton(
                     val displayText = if (keyLabel.length <= 4) keyLabel else keyLabel.take(4)
                     Text(
                         text = punctuationKeyLabel(displayText),
-                        color = keyHintColor(resolvedText, frostedGlass, 0.6f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
+                        color = keyHintColor(effectiveTextColor, frostedGlass, 0.6f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
                         fontSize = effectiveSwipeFontSize,
                         lineHeight = (effectiveSwipeFontSize.value * 1.2f).sp,
                         fontWeight = FontWeight.Medium,
@@ -918,7 +929,7 @@ fun SwipeableKeyButton(
                     val displayText = if (downCornerLabel.length <= 4) downCornerLabel else downCornerLabel.take(4)
                     Text(
                         text = punctuationKeyLabel(displayText),
-                        color = keyHintColor(resolvedText, frostedGlass, 0.5f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
+                        color = keyHintColor(effectiveTextColor, frostedGlass, 0.5f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
                         fontSize = effectiveSwipeFontSize,
                         lineHeight = (effectiveSwipeFontSize.value * 1.2f).sp,
                         fontWeight = FontWeight.Normal,
@@ -932,7 +943,7 @@ fun SwipeableKeyButton(
                 if (badgeText != null && !(flickPreview?.fromTop == true && flickPreview?.text == badgeText)) {
                     Text(
                         text = badgeText,
-                        color = keyHintColor(resolvedText, frostedGlass, 0.5f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
+                        color = keyHintColor(effectiveTextColor, frostedGlass, 0.5f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
                         fontSize = (10f * hintScale).sp,
                         fontWeight = FontWeight.Normal,
                         textAlign = TextAlign.End,
@@ -947,33 +958,33 @@ fun SwipeableKeyButton(
             if (dpCornerLayout != null) DoublePinyinCornerFace(doublePinyinHint, dpCornerLayout,
                 upCorner = dpUpCorner?.takeIf { flickPreview?.fromTop != true },
                 downCorner = dpDownCorner?.takeIf { flickPreview?.fromTop != false },
-                initialColor = keyHintColor(resolvedText, frostedGlass, 0.7f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
-                finalsColor = keyHintColor(resolvedText, frostedGlass, 0.6f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
-                upColor = keyHintColor(resolvedText, frostedGlass, 0.6f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
-                downColor = keyHintColor(resolvedText, frostedGlass, 0.5f, LocalKeyboardInputPreferences.current.cornerHintOpacity), fontFamily = keyLabelFontFamily)
+                initialColor = keyHintColor(effectiveTextColor, frostedGlass, 0.7f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
+                finalsColor = keyHintColor(effectiveTextColor, frostedGlass, 0.6f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
+                upColor = keyHintColor(effectiveTextColor, frostedGlass, 0.6f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
+                downColor = keyHintColor(effectiveTextColor, frostedGlass, 0.5f, LocalKeyboardInputPreferences.current.cornerHintOpacity), fontFamily = keyLabelFontFamily)
             if (downLine != null && flickPreview?.fromTop != false) DoublePinyinKeyHintFace(DoublePinyinKeyHint(null, emptyList()),
                 downLine, effectiveSwipeFontSize, initialColor = Color.Unspecified,
-                finalsColor = keyHintColor(resolvedText, frostedGlass, 0.5f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
+                finalsColor = keyHintColor(effectiveTextColor, frostedGlass, 0.5f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
                 fontFamily = keyLabelFontFamily)
             if (dpHint != null) DoublePinyinKeyHintFace(dpHint, dpFinals, effectiveSwipeFontSize,
-                initialColor = keyHintColor(resolvedText, frostedGlass, 0.7f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
-                finalsColor = keyHintColor(resolvedText, frostedGlass, 0.6f, LocalKeyboardInputPreferences.current.cornerHintOpacity), fontFamily = keyLabelFontFamily)
+                initialColor = keyHintColor(effectiveTextColor, frostedGlass, 0.7f, LocalKeyboardInputPreferences.current.cornerHintOpacity),
+                finalsColor = keyHintColor(effectiveTextColor, frostedGlass, 0.6f, LocalKeyboardInputPreferences.current.cornerHintOpacity), fontFamily = keyLabelFontFamily)
         }
         if (ctrlLetter != null) Box(Modifier.matchParentSize().graphicsLayer { alpha = ctrlFade.value }) {
-            CtrlShortcutFace(ctrlLetter, resolvedText, frostedGlass, labelSize,
+            CtrlShortcutFace(ctrlLetter, effectiveTextColor, frostedGlass, labelSize,
                 effectiveSwipeFontSize, hintsVisible, keyWidthDp, keyFontFamily,
                 cornerLabel = badgeText?.takeIf { ctrlShortcutLetter != null } ?: ctrlLetter.uppercase())
         }
         else if (showDisc && discLabels != null) {
             KanaDirectionIndicator(discDirection, MaterialTheme.colorScheme.primary.copy(alpha = .6f))
-            DirectionDiscPreview(discLabels, discDirection, resolvedBackground, resolvedText, contentScale)
+            DirectionDiscPreview(discLabels, discDirection, resolvedBackground, effectiveTextColor, contentScale)
         } else {
             // 四向键（14 键双字母键、九键拂动）拖动时在键上画出各方向的触发夹角，手指所在扇区随距离加深（用户 11-22）。
             if (currentActions.freeDirection) flickPreview?.let { preview ->
                 KeyFlickSector(keyFlickDragDirection(preview, currentActions.upPreviewFromTop, currentActions.downPreviewFromTop),
                     MaterialTheme.colorScheme.primary, preview.progress)
             }
-            KeyFlickLabels(flickFade, resolvedText, maxWidth.value, maxHeight.value, effectiveSwipeFontSize.value, labelSize,
+            KeyFlickLabels(flickFade, effectiveTextColor, maxWidth.value, maxHeight.value, effectiveSwipeFontSize.value, labelSize,
                 icons = buildMap {
                     swipeLeftIcon?.let { put(KeyFlickOrigin.LEFT, it) }
                     swipeRightIcon?.let { put(KeyFlickOrigin.RIGHT, it) }
@@ -1056,8 +1067,13 @@ fun IconKeyButton(
     val density = LocalDensity.current
 
     val frostedGlass = LocalKeyboardInputPreferences.current.frostedGlass
-    val shadowModifier = remember(shadowEnabled, shadowElevation, shadowShapeRadius, KeyShapes.current, density, backgroundColor, frostedGlass.enabled) {
-        if (shadowEnabled && !frostedGlass.enabled) {
+    val metroActive = com.kingzcheung.xime.ui.theme.LocalMetroThemeActive.current
+    val metroPressed = com.kingzcheung.xime.ui.theme.MetroKeyboardThemes.resolvePressedKeyColors(
+        backgroundColor, iconColor, isPressed, frostedGlass.enabled
+    )
+    val effectiveIconColor = metroPressed?.second ?: iconColor
+    val shadowModifier = remember(shadowEnabled, shadowElevation, shadowShapeRadius, KeyShapes.current, density, backgroundColor, frostedGlass.enabled, metroActive) {
+        if (shadowEnabled && !frostedGlass.enabled && !metroActive) {
             val offsetPx = with(density) { shadowElevation.toPx() }
             val cornerPx = with(density) { KeyShapes.current.radius(shadowShapeRadius).toPx() }
             val color = crispShadowColor(backgroundColor)
@@ -1071,8 +1087,8 @@ fun IconKeyButton(
             }
         } else Modifier
     }
-    val keyCornerRadius = LocalKeyCornerRadius.current
-    val keyClipShape = remember(keyCornerRadius) { RoundedCornerShape(keyCornerRadius) }
+    val keyCornerRadius = if (metroActive) 0.dp else LocalKeyCornerRadius.current
+    val keyClipShape = RectangleShape
     
     // 辅助函数：生成更深的颜色（混合黑色）
     fun darkenColor(color: Color, factor: Float = 0.15f): Color {
@@ -1109,8 +1125,8 @@ fun IconKeyButton(
             .padding(scaledKeyVisualPadding())
             .keyGlow(Modifier.then(shadowModifier)
             .clip(keyClipShape)
-            .background(frostedKeyColor(
-                backgroundColor, iconColor, frostedGlass,
+            .background(metroPressed?.first ?: frostedKeyColor(
+                backgroundColor, effectiveIconColor, frostedGlass,
                 legacyStateColor = if (isPressed) darkenColor(backgroundColor, 0.1f)
                 else if (isHighlighted) darkenColor(backgroundColor, 0.2f)
                 else backgroundColor,
@@ -1124,7 +1140,7 @@ fun IconKeyButton(
         Icon(
             painter = icon,
             contentDescription = contentDescription,
-            tint = iconColor,
+            tint = effectiveIconColor,
             modifier = Modifier.size(keyIconSizeDp(maxWidth.value, maxHeight.value, iconSize.value).dp)
         )
 
@@ -1135,8 +1151,8 @@ fun IconKeyButton(
                     .align(Alignment.TopEnd)
                     .padding(3.dp)
                     .size(6.dp)
-                    .clip(RoundedCornerShape(3.dp))
-                    .background(iconColor)
+                    .clip(RectangleShape)
+                    .background(effectiveIconColor)
             )
         }
     }
@@ -1204,8 +1220,9 @@ fun SwipeableIconKeyButton(
     val density = LocalDensity.current
 
     val frostedGlass = LocalKeyboardInputPreferences.current.frostedGlass
-    val shadowModifier = remember(shadowEnabled, shadowElevation, shadowShapeRadius, KeyShapes.current, density, backgroundColor, frostedGlass.enabled) {
-        if (shadowEnabled && !frostedGlass.enabled) {
+    val metroActive = com.kingzcheung.xime.ui.theme.LocalMetroThemeActive.current
+    val shadowModifier = remember(shadowEnabled, shadowElevation, shadowShapeRadius, KeyShapes.current, density, backgroundColor, frostedGlass.enabled, metroActive) {
+        if (shadowEnabled && !frostedGlass.enabled && !metroActive) {
             val offsetPx = with(density) { shadowElevation.toPx() }
             val cornerPx = with(density) { KeyShapes.current.radius(shadowShapeRadius).toPx() }
             val color = crispShadowColor(backgroundColor)
@@ -1219,10 +1236,10 @@ fun SwipeableIconKeyButton(
             }
         } else Modifier
     }
-    val keyCornerRadius = LocalKeyCornerRadius.current
+    val keyCornerRadius = if (metroActive) 0.dp else LocalKeyCornerRadius.current
     val honeycombEdge = LocalHoneycombEdge.current
     val keyClipShape = remember(keyCornerRadius, honeycombEdge) {
-        honeycombEdge?.let(::HalfHexagonShape) ?: RoundedCornerShape(keyCornerRadius)
+        honeycombEdge?.let(::HalfHexagonShape) ?: RectangleShape
     }
     
     fun darkenColor(color: Color, factor: Float = 0.15f): Color {
@@ -1237,13 +1254,19 @@ fun SwipeableIconKeyButton(
     // 预览从原提示所在一侧移入（上方 = 原上滑动作），颜色按该动作取，与手指方向无关。
     val feedback = flickPreview?.let { if (it.fromTop) upFeedback else downFeedback }
         ?: KeyFlickFeedback.NORMAL
-    val baseFill = frostedKeyColor(backgroundColor, iconColor, frostedGlass,
+    val metroPressed = if (feedback == KeyFlickFeedback.NORMAL) {
+        com.kingzcheung.xime.ui.theme.MetroKeyboardThemes.resolvePressedKeyColors(
+            backgroundColor, iconColor, isPressed, frostedGlass.enabled
+        )
+    } else null
+    val baseFill = metroPressed?.first ?: frostedKeyColor(backgroundColor, iconColor, frostedGlass,
         legacyStateColor = if (isPressed) darkenColor(backgroundColor, .2f)
             else if (isHighlighted) backgroundColor.copy(alpha = .8f) else backgroundColor,
         pressed = isPressed, highlighted = isHighlighted,
         opacityScale = glassFunctionKeyScale(backgroundColor),
         functionDepth = glassFunctionKeyDepth(backgroundColor))
-    val feedbackColors = keyFlickFeedbackColors(baseFill, iconColor,
+    val baseIconColor = metroPressed?.second ?: iconColor
+    val feedbackColors = keyFlickFeedbackColors(baseFill, baseIconColor,
         com.kingzcheung.xime.ui.theme.LocalKeyboardPalette.current?.accent ?: androidx.compose.material3.MaterialTheme.colorScheme.primary,
         feedback, flickPreview?.progress ?: 0f, frostedGlass.enabled)
 

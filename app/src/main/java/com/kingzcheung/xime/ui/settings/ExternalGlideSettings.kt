@@ -38,6 +38,10 @@ import com.kingzcheung.xime.settings.SchemaManager
 import com.kingzcheung.xime.ui.keyboard.KeyboardInputPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroRadioIndicator
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
 
 /**
  * 「滑行输入 › 布局」里，已启用的导入方案（自定义编码、字母键盘）各一行：选这个方案滑行时按全拼还是哪套双拼出码（#303）。
@@ -69,7 +73,7 @@ internal fun ExternalGlideSchemeItems(settings: KeyboardInputPreferences, onChan
     }
     editing?.let { (id, name) ->
         var selected by remember(id) { mutableStateOf(settings.externalGlideEncodings[id]) }
-        AlertDialog(onDismissRequest = { editing = null }, title = { Text("$name 滑行") }, text = {
+        MetroAlertDialog(onDismissRequest = { editing = null }, title = { Text("$name 滑行") }, text = {
             Column(Modifier.heightIn(max = 420.dp).verticalScroll(rememberScrollState())) {
                 Text("选这个方案用的拼音规则，选错了滑出的字不对。",
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -79,11 +83,14 @@ internal fun ExternalGlideSchemeItems(settings: KeyboardInputPreferences, onChan
                 }
             }
         }, confirmButton = {
-            TextButton(onClick = {
-                onChange(settings.copy(externalGlideEncodings = ExternalGlideEncodings.with(settings.externalGlideEncodings, id, selected)))
-                editing = null
-            }) { Text("确定") }
-        }, dismissButton = { TextButton(onClick = { editing = null }) { Text("取消") } })
+            MetroSolidButton(
+                text = "确定",
+                onClick = {
+                    onChange(settings.copy(externalGlideEncodings = ExternalGlideEncodings.with(settings.externalGlideEncodings, id, selected)))
+                    editing = null
+                },
+            )
+        }, dismissButton = { MetroOutlinedButton(text = "取消", onClick = { editing = null }) })
     }
 }
 
@@ -93,7 +100,7 @@ private class ExternalGlideChoices(val schemes: List<Pair<String, String>>, val 
 private fun ExternalGlideChoice(title: String, selected: Boolean, onClick: () -> Unit) {
     Row(Modifier.fillMaxWidth().selectable(selected, role = Role.RadioButton, onClick = onClick)
         .padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-        RadioButton(selected = selected, onClick = null)
+        MetroRadioIndicator(selected = selected)
         Spacer(Modifier.width(12.dp))
         Text(title, style = MaterialTheme.typography.bodyLarge)
     }

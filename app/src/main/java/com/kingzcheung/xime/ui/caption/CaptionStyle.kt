@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -44,8 +44,8 @@ import com.kingzcheung.xime.ui.theme.visualMaterial
 internal object CaptionStyle {
     val ButtonHeight = 56.dp
     val PrimaryHeight = 64.dp
-    val Corner = 16.dp
-    val PanelCorner = 24.dp
+    val Corner = 0.dp
+    val PanelCorner = 0.dp
     val Gap = 12.dp
     val Edge = 16.dp
 }
@@ -80,7 +80,7 @@ internal fun CaptionButton(
         CaptionEmphasis.Primary -> BorderStroke(2.dp, colors.primary.copy(alpha = .85f))
         else -> null
     }
-    Surface(onClick = onClick, modifier = modifier.heightIn(min = height), shape = RoundedCornerShape(CaptionStyle.Corner),
+    Surface(onClick = onClick, modifier = modifier.heightIn(min = height), shape = RectangleShape,
         color = container, contentColor = content, border = border) {
         if (stacked) Column(Modifier.visualMaterial(VisualStyles.current, CaptionStyle.Corner, level = MaterialLevel.RAISED)
             .padding(horizontal = 6.dp, vertical = 6.dp),
@@ -105,7 +105,7 @@ internal fun CaptionButton(
 @Composable
 internal fun CaptionPanel(modifier: Modifier = Modifier, padding: Dp = 12.dp, content: @Composable ColumnScope.() -> Unit) {
     val colors = MaterialTheme.colorScheme
-    Surface(modifier, shape = RoundedCornerShape(CaptionStyle.PanelCorner), color = colors.surfaceContainer.translucent(.82f),
+    Surface(modifier, shape = RectangleShape, color = colors.surfaceContainer.translucent(.82f),
         contentColor = colors.onSurface, border = BorderStroke(1.dp, colors.outlineVariant.copy(alpha = .35f))) {
         Column(Modifier.visualMaterial(VisualStyles.current, CaptionStyle.PanelCorner, level = MaterialLevel.FLOATING).padding(padding),
             verticalArrangement = Arrangement.spacedBy(10.dp), content = content)

@@ -43,21 +43,12 @@ fun PluginSettingsContent(
 
     if (pluginInfo == null) {
         Scaffold(
+            containerColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.background,
             topBar = {
-                TopAppBar(
-                    title = { Text("插件设置") },
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "返回"
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        titleContentColor = MaterialTheme.colorScheme.onSurface
-                    )
+                com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+                    parentTitle = "插件管理",
+                    pageTitle = "插件设置",
+                    onBack = onBack,
                 )
             }
         ) {
@@ -107,21 +98,12 @@ fun PluginSettingsContent(
 
         hasCustomSettings -> {
             Scaffold(
+                containerColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.background,
                 topBar = {
-                    TopAppBar(
-                        title = { Text(pluginInfo.name) },
-                        navigationIcon = {
-                            IconButton(onClick = onBack) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "返回"
-                                )
-                            }
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            titleContentColor = MaterialTheme.colorScheme.onSurface
-                        )
+                    com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+                        parentTitle = "插件管理",
+                        pageTitle = pluginInfo.name,
+                        onBack = onBack,
                     )
                 }
             ) {

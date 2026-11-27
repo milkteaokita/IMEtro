@@ -74,39 +74,18 @@ import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
 
-/** 悬浮键盘卡片圆角；调整覆盖层的四角示意与它同心，避免示意被圆角切掉。 */
-internal val FloatingKeyboardCardCorner = 16.dp
-internal val FloatingKeyboardCardShape = RoundedCornerShape(FloatingKeyboardCardCorner)
-// 固定面板底边与导航区连成一体，仅保留顶部圆角；预览使用同一形状。
-internal val FixedKeyboardCardShape = RoundedCornerShape(
-    topStart = FloatingKeyboardCardCorner, topEnd = FloatingKeyboardCardCorner,
-)
-/** 固定键盘顶部圆角关掉、底部圆角开着时，只有底部两角圆。 */
-private val FixedKeyboardBottomRoundedShape = RoundedCornerShape(
-    bottomStart = FloatingKeyboardCardCorner, bottomEnd = FloatingKeyboardCardCorner,
-)
-internal fun keyboardPanelShape(isFloating: Boolean, roundedBottom: Boolean = false, roundedTop: Boolean = true) = when {
-    isFloating || roundedTop && roundedBottom -> FloatingKeyboardCardShape
-    roundedTop -> FixedKeyboardCardShape
-    roundedBottom -> FixedKeyboardBottomRoundedShape
-    else -> RectangleShape
-}
+/** 悬浮键盘卡片圆角；Metro 风格固定为 0.dp 直角。 */
+internal val FloatingKeyboardCardCorner = 0.dp
+internal val FloatingKeyboardCardShape = RectangleShape
+internal val FixedKeyboardCardShape = RectangleShape
+private val FixedKeyboardBottomRoundedShape = RectangleShape
+internal fun keyboardPanelShape(isFloating: Boolean, roundedBottom: Boolean = false, roundedTop: Boolean = true) =
+    RectangleShape
 
-/**
- * 「填满留空处」时固定卡片和两侧拼成一整条键盘：圆角只留在整条的外角上（贴着屏幕边的那几个角），
- * 卡片和两侧相接的角是直角，否则两侧在卡片圆角那里露出一个台阶（2026-10-31 平板截图）。
- * 卡片铺满整宽或贴着一边时，贴边那侧照顶部/底部圆角设置。
- */
 internal fun filledSidesCardShape(touchesLeft: Boolean, touchesRight: Boolean, roundedTop: Boolean, roundedBottom: Boolean) =
-    if (touchesLeft && touchesRight) keyboardPanelShape(false, roundedBottom, roundedTop)
-    else RoundedCornerShape(
-        topStart = if (roundedTop && touchesLeft) FloatingKeyboardCardCorner else 0.dp,
-        topEnd = if (roundedTop && touchesRight) FloatingKeyboardCardCorner else 0.dp,
-        bottomEnd = if (roundedBottom && touchesRight) FloatingKeyboardCardCorner else 0.dp,
-        bottomStart = if (roundedBottom && touchesLeft) FloatingKeyboardCardCorner else 0.dp,
-    )
+    RectangleShape
 
-/** 键盘卡片顶部两角的圆角，由裁切卡片的容器提供；候选栏的描边按它画，才不会被卡片圆角切掉。 */
+/** 键盘卡片顶部两角的圆角，Metro 风格为 0.dp。 */
 internal val LocalKeyboardCardTopCorner = compositionLocalOf { FloatingKeyboardCardCorner }
 
 @Composable
@@ -729,7 +708,7 @@ private fun UndockHandle(
                 .padding(top = 4.dp)
                 .width((40f + 24f * progress).dp)
                 .height(4.dp)
-                .clip(RoundedCornerShape(50))
+                .clip(RectangleShape)
                 .background(lerp(indicatorColor, readyColor, progress))
                 .testTag("fixed-undock-indicator")
         )

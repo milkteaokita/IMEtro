@@ -16,7 +16,7 @@ import com.kingzcheung.xime.ui.theme.KeyboardThemes
 import com.kingzcheung.xime.ui.theme.LocalKeyboardPalette
 import com.kingzcheung.xime.ui.theme.keyboardBackground
 
-private fun readableOn(color: Color) = if (color.luminance() > .5f) Color(0xFF111111) else Color.White
+private fun readableOn(color: Color) = if (color.luminance() > .5f) Color.Black else Color.White
 
 /**
  * 字幕页跟随键盘主题：底图/渐变用键盘背景，按钮用键帽色，面板用功能键色，主操作用回车键色，
@@ -65,8 +65,8 @@ private const val CAPTION_MIN_OPACITY = .75f
 @Composable
 internal fun captionDialogColor(): Color = MaterialTheme.colorScheme.surfaceContainerHigh.compositeOver(MaterialTheme.colorScheme.surface)
 
-/** 玻璃键盘后面“透出来”的东西：字幕页后面没有别的应用，用一块和深浅色一致的中性底代替。 */
-internal fun captionBackstop(dark: Boolean) = if (dark) Color(0xFF0E0F12) else Color(0xFFF2F3F5)
+/** 玻璃键盘后面“透出来”的东西：字幕页后面没有别的应用，用纯黑/纯白高对比底代替。 */
+internal fun captionBackstop(dark: Boolean) = if (dark) Color.Black else Color.White
 
 /**
  * 页面底：和键盘一模一样地画主题背景（纯色、渐变或图片；开玻璃时按键盘的背景透明度和模糊），

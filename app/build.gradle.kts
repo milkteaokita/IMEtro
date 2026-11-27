@@ -93,20 +93,23 @@ android {
         unitTests.isReturnDefaultValues = true
         // Robolectric 渲染测试（如候选栏两端按钮对比图）需要真实资源与 assets。
         unitTests.isIncludeAndroidResources = true
+        unitTests.all {
+            it.maxHeapSize = "2048m"
+        }
     }
 
     defaultConfig {
         // 安装身份（对外）与源码 namespace（内部）分离：
         // applicationId 使用 CyIME 自己的包名，namespace 保留 com.kingzcheung.xime，
         // 以便继续跟踪上游、避免大规模移动源码目录。
-        applicationId = "com.cyletix.cyime"
+        applicationId = "com.metro.cyime"
         minSdk = libs.versions.androidMinSdk.get().toInt()
         targetSdk = libs.versions.androidTargetSdk.get().toInt()
         // 按发布批次定号：兼容修复升 PATCH，兼容功能升 MINOR 并归零 PATCH。
         // 不兼容变更升 MAJOR；日常编辑不逐次升号。完整规则见 docs/packaging.md。
         // versionCode 是独立递增的交付序号；同批普通版与内置版共用。
-        versionCode = 20261551
-        versionName = "1.15.108"
+        versionCode = 20262003
+        versionName = "2.0.3"
 
 
         // Isolated Compose rendering on a local x86 emulator; ordinary device tests keep the full app.
@@ -115,7 +118,7 @@ android {
 
         // NDK 配置
         ndk {
-            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            abiFilters += listOf("arm64-v8a")
         }
 
         // 构建信息
@@ -279,24 +282,38 @@ android {
         checkDependencies = true
     }
 
-    // 分架构打包
+    // 分架构打包（單一 arm64-v8a Metro APK）
     splits {
         abi {
-            isEnable = true
+            isEnable = false
             reset()
-            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
-            isUniversalApk = true
+            include("arm64-v8a")
+            isUniversalApk = false
         }
     }
 }
 
 android.applicationVariants.all {
-    val appName = "CyIME"
+    val appName = "IMEtro"
     outputs.all {
         val abi = filters.find { it.filterType.toString() == "ABI" }?.identifier ?: "universal"
         val buildLabel = if (buildType.name == "debug") "-debug" else ""
         val edition = if (providers.gradleProperty("bundleModels").orNull == "true") "-full" else ""
         (this as BaseVariantOutputImpl).outputFileName = "$appName-$versionName$edition$buildLabel-$abi.apk"
+    }
+}
+
+val apkHistoryDir = layout.buildDirectory.dir("outputs/apk/history")
+tasks.matching { it.name.startsWith("assemble") && (it.name.endsWith("Debug") || it.name.endsWith("Release") || it.name.endsWith("Offline")) }.configureEach {
+    doLast {
+        val targetDir = apkHistoryDir.get().asFile
+        targetDir.mkdirs()
+        layout.buildDirectory.dir("outputs/apk").get().asFile
+            .walkTopDown()
+            .filter { it.isFile && it.extension == "apk" && !it.parentFile.name.equals("history", ignoreCase = true) }
+            .forEach { apk ->
+                apk.copyTo(File(targetDir, apk.name), overwrite = true)
+            }
     }
 }
 

@@ -19,7 +19,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
+import com.kingzcheung.xime.ui.metro.LocalMetroUiState
+import com.kingzcheung.xime.ui.metro.metroTilt
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.WidthFull
@@ -42,7 +44,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import com.kingzcheung.xime.ui.settings.SettingsRoutes
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import com.kingzcheung.xime.ui.i18n.Text
 import androidx.compose.runtime.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -156,13 +158,15 @@ fun MenuItemButton(
     // 玻璃键盘上一整块实心格子（用户 11-09）。
     // 开启的开关用文字色作底、取反色作字，任何主题下都能一眼看出；玻璃上也留一点透。
     val glass = LocalKeyboardInputPreferences.current.frostedGlass
-    val fill = when {
-        on -> if (glass.enabled) textColor.copy(alpha = MENU_ON_GLASS_ALPHA) else textColor
+    val metro = LocalMetroUiState.current
+    val tileFill = when {
+        on -> metro.accent
         else -> frostedKeyColor(bgColor, textColor, glass)
     }
-    val content = if (on) (if (textColor.luminance() > .5f) Color.Black else Color.White) else textColor
+    val content = if (on) metro.onAccent else textColor
     Box(modifier.onGloballyPositioned { inlineEditor?.registerMenuSize(it.boundsInRoot()) }
         .then(if (item.toolbarItem != null && !item.hidden) Modifier.inlineQuickActionTarget(item.id) else Modifier)
+        .metroTilt(5f, 0.96f)
         .combinedClickable(enabled = inlineEditor?.active != true, onLongClick = item.onLongClick) { item.action() }
         .semantics {
             item.currentState?.let { stateDescription = it }
@@ -175,9 +179,9 @@ fun MenuItemButton(
     Column(
         modifier = Modifier.fillMaxSize()
             .graphicsLayer { alpha = if (item.hidden) .58f else 1f }
-            .clip(RoundedCornerShape(12.dp))
-            .background(fill)
-            .visualMaterial(VisualStyles.current, 12.dp, level = com.kingzcheung.xime.ui.theme.MaterialLevel.RAISED)
+            .clip(RectangleShape)
+            .background(tileFill)
+            .visualMaterial(VisualStyles.current, 0.dp, level = com.kingzcheung.xime.ui.theme.MaterialLevel.RAISED)
             .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -220,9 +224,9 @@ fun MenuItemButton(
                 inlineEditor.toggleVisibility(item.id)
             }.semantics { contentDescription = label }.testTag("quick-action-visibility:${item.id}"),
             contentAlignment = Alignment.Center) {
-            Box(Modifier.size(15.dp).clip(CircleShape)
+            Box(Modifier.size(15.dp).clip(RectangleShape)
                 .background(if (item.hidden) Color(0xFF2478F8) else Color(0xFFF83C3C))
-                .border(1.25.dp, Color.White, CircleShape), contentAlignment = Alignment.Center) {
+                .border(1.25.dp, Color.White, RectangleShape), contentAlignment = Alignment.Center) {
                 Icon(if (item.hidden) Icons.Default.Add else Icons.Default.Remove,
                     contentDescription = null, tint = Color.White, modifier = Modifier.size(10.dp))
             }

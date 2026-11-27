@@ -33,10 +33,12 @@ internal fun changeAppearance(context: Context, onChanged: () -> Unit, change: (
 @Composable
 internal fun IconSettingsContent(onBack: () -> Unit, onChanged: () -> Unit) {
     val context = LocalContext.current
-    Scaffold(containerColor = MaterialTheme.colorScheme.surface, topBar = {
-        TopAppBar(title = { Text("图标设置") }, navigationIcon = {
-            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回") }
-        }, colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface))
+    Scaffold(containerColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.background, topBar = {
+        com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+            parentTitle = "主题与外观",
+            pageTitle = "图标设置",
+            onBack = onBack,
+        )
     }) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).settingsVerticalScroll().padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -77,7 +79,7 @@ internal fun IconSettingsContent(onBack: () -> Unit, onChanged: () -> Unit) {
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         listOf(true, false).forEach { framed ->
                             val selected = IconAppearance.framed == framed
-                            val shape = RoundedCornerShape(12.dp)
+                            val shape = androidx.compose.ui.graphics.RectangleShape
                             Column(Modifier.weight(1f).testTag("icon-frame-$framed")
                                 .semantics { this.selected = selected }
                                 .background(MaterialTheme.colorScheme.surfaceContainerHigh, shape)
@@ -101,7 +103,7 @@ internal fun IconSettingsContent(onBack: () -> Unit, onChanged: () -> Unit) {
                             row.forEach { style ->
                                 val selected = IconAppearance.effective == style
                                 val palette = MaterialTheme.colorScheme
-                                val shape = RoundedCornerShape(12.dp)
+                                val shape = androidx.compose.ui.graphics.RectangleShape
                                 Column(Modifier.weight(1f).testTag("icon-style-${style.id}").semantics { this.selected = selected }
                                     .background(palette.surfaceContainerHigh, shape)
                                     .border(if (selected) 2.dp else 1.dp, palette.primary.copy(alpha = if (selected) 1f else .25f), shape)

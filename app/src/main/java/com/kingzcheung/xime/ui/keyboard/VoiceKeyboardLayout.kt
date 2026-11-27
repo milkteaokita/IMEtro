@@ -19,7 +19,7 @@ import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import com.kingzcheung.xime.ui.i18n.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -39,7 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import com.kingzcheung.xime.speech.RecognitionState
 import com.kingzcheung.xime.ui.theme.KeyboardThemes
 
@@ -155,15 +155,12 @@ fun VoiceKeyboardLayout(
                 modifier = Modifier
                     .weight(1f)
                     .height(56.dp)
-                    .clip(RoundedCornerShape(28.dp)),
+                    .clip(RectangleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
-                    drawRoundRect(
-                        color = inactiveColor.copy(alpha = 0.3f),
-                        topLeft = Offset.Zero,
-                        size = size,
-                        cornerRadius = CornerRadius(28.dp.toPx(), 28.dp.toPx())
+                    drawRect(
+                        color = inactiveColor.copy(alpha = 0.3f)
                     )
                 }
                 

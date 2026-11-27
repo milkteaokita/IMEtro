@@ -25,7 +25,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -301,7 +301,7 @@ internal fun speakerAccent(index: Int): Color = speakerColor(index)
 @Composable
 private fun TrackLabel(speaker: SpeakerUi, index: Int, height: Dp, onTap: (SpeakerUi) -> Unit) {
     Surface(onClick = { onTap(speaker) }, modifier = Modifier.height(height).fillMaxWidth().padding(end = 8.dp),
-        shape = RoundedCornerShape(CaptionStyle.Corner), color = MaterialTheme.colorScheme.surfaceContainerHigh.translucent(.86f)) {
+        shape = RectangleShape, color = MaterialTheme.colorScheme.surfaceContainerHigh.translucent(.86f)) {
         Row(Modifier.padding(horizontal = 10.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(16.dp).clip(CircleShape).background(speakerAccent(speaker.colorIndex)))
             Spacer(Modifier.width(8.dp))
@@ -315,7 +315,7 @@ private fun TrackLabel(speaker: SpeakerUi, index: Int, height: Dp, onTap: (Speak
 private fun TimelineBlock(turn: Turn, left: Dp, width: Dp, height: Dp, accent: Color, fontSp: Int, onLongPress: ((Turn) -> Unit)?) {
     val time = remember(turn.key) { clock.format(Date(turn.segments.first().wallMs)) }
     Row(Modifier.offset(x = left).width(width).height(height)
-        .clip(RoundedCornerShape(CaptionStyle.Corner)).background(MaterialTheme.colorScheme.surfaceContainerHigh.translucent(.86f))
+        .clip(RectangleShape).background(MaterialTheme.colorScheme.surfaceContainerHigh.translucent(.86f))
         .combinedClickable(onClick = { onLongPress?.invoke(turn) })) {
         Box(Modifier.width(6.dp).fillMaxHeight().background(accent))
         Box(Modifier.fillMaxSize().padding(start = 10.dp, end = 12.dp), contentAlignment = Alignment.CenterStart) {

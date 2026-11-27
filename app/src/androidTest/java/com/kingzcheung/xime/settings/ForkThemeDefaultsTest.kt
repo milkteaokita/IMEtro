@@ -19,7 +19,7 @@ class ForkThemeDefaultsTest {
 
     @Test fun freshInstallUsesBlackWhiteDarkWithoutPersonalConfiguration() {
         SettingsPreferences.applyForkThemeDefaults(context)
-        assertEquals("pure_black", SettingsPreferences.getKeyboardTheme(context))
+        assertEquals("metro_sync", SettingsPreferences.getKeyboardTheme(context))
         assertEquals(1, SettingsPreferences.getDarkMode(context))
         assertTrue(SettingsPreferences.shouldShowPressBubble(context))
         assertFalse(com.kingzcheung.xime.ui.keyboard.KeyboardInputPreferences.read(context).keyGlowEnabled)

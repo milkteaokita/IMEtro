@@ -7,7 +7,7 @@ import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -138,7 +138,7 @@ internal fun ReorderableToolbar(
                         contentAlignment = Alignment.Center) {
                         content(action)
                         // 拖动外框沿按钮胶囊描边，与按下、开启时的底色同尺寸。
-                        if (dragged == id) Box(Modifier.size(toolbarPillSize(slotWidth)).border(2.dp, accent, CircleShape)
+                        if (dragged == id) Box(Modifier.size(toolbarPillSize(slotWidth)).border(2.dp, accent, RectangleShape)
                             .testTag("toolbar-drag-outline"))
                     }
                 }

@@ -21,7 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material3.Text
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.CompositionLocalProvider
@@ -258,7 +258,7 @@ fun SymbolKeyboardLayout(
                     legacyStateColor = textColor.copy(alpha = 0.05f))
                 Row(
                     Modifier.fillMaxSize().padding(scaledKeyVisualPadding())
-                        .clip(RoundedCornerShape(LocalKeyCornerRadius.current))
+                        .clip(RectangleShape)
                         .background(categoryColor)
                         .horizontalScroll(rememberScrollState()),
                     verticalAlignment = Alignment.CenterVertically,
@@ -331,7 +331,7 @@ private fun SymbolButton(
                 onClick = onClick
             )
             .padding(scaledKeyVisualPadding())
-            .keyGlow(Modifier.clip(RoundedCornerShape(LocalKeyCornerRadius.current))
+            .keyGlow(Modifier.clip(RectangleShape)
                 .background(frostedKeyColor(backgroundColor, textColor,
                     LocalKeyboardInputPreferences.current.frostedGlass, pressed = isPressed))),
         contentAlignment = Alignment.Center

@@ -12,7 +12,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -144,7 +144,7 @@ private fun EmojiContent(
                     // always exposed for accessibility and multi-category plugins.
                     val asset = category.pluginIcon?.assetName.takeIf { category.isPlugin && !samePlugin }
                     if (asset != null) {
-                        Box(Modifier.size(32.dp).testTag("emoji-category:$index").clip(RoundedCornerShape(8.dp))
+                        Box(Modifier.size(32.dp).testTag("emoji-category:$index").clip(RectangleShape)
                             .background(if (index == pager.currentPage) accentColor.copy(alpha = .22f) else Color.Transparent)
                             .tolerantClick { onHapticFeedback?.invoke(); scope.launch { pager.animateScrollToPage(index) } }
                             .padding(4.dp)) {
@@ -249,7 +249,7 @@ private fun SkinTonePickerOverlay(picker: SkinTonePicker, onPick: (String) -> Un
                 .pointerInput(Unit) { detectTapGestures { } }
                 .testTag("emoji-skin-tones").padding(cardPadding)) {
                 picker.variants.forEachIndexed { index, variant ->
-                    Box(Modifier.size(itemSize).clip(RoundedCornerShape(8.dp))
+                    Box(Modifier.size(itemSize).clip(RectangleShape)
                         .clickable { onPick(variant) }.testTag("emoji-skin-tone:$index"),
                         contentAlignment = Alignment.Center) {
                         Text(variant, fontSize = (itemSize.value * 0.55f).coerceIn(20f, 32f).sp,
@@ -290,10 +290,10 @@ fun EmojiButton(
         modifier = modifier
             .then(if (cellHeightDp == null) Modifier.aspectRatio(1f) else Modifier)
             .then(if (onLongClick != null) Modifier.onPlaced { cell[0] = it } else Modifier)
-            .clip(RoundedCornerShape(4.dp))
+            .clip(RectangleShape)
             .tolerantClick(onLongClick = onLongClick?.let { callback -> { cell[0]?.let(callback) } },
                 onClick = onClick)
-            .keyGlow(Modifier.clip(RoundedCornerShape(4.dp)), liquid = false),
+            .keyGlow(Modifier.clip(RectangleShape), liquid = false),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -327,7 +327,7 @@ fun PluginEmojiButton(
                 if (emojiItem.imageUrl != null) Modifier.aspectRatio(1f)
                 else Modifier.fillMaxWidth()
             )
-            .clip(RoundedCornerShape(4.dp))
+            .clip(RectangleShape)
             .background(buttonBackgroundColor)
             .tolerantClick(onClick = onClick)
             .padding(horizontal = 4.dp, vertical = 2.dp),

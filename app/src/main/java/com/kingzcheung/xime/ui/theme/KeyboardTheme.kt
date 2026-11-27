@@ -106,13 +106,22 @@ object KeyboardThemes {
     /** 从 xime.yaml 加载的配置覆盖项。 */
     private var configOverrides: Map<String, ColorSchemeEntry> = emptyMap()
 
-    /** 硬编码的默认主题列表（兜底，其余主题由 xime.yaml color_schemes 提供）。 */
-    private val defaultThemes = listOf(
+    /** 硬编码的默认主题列表（Metro 主題優先，其餘兜底由 xime.yaml color_schemes 提供）。 */
+    private val defaultThemes = MetroKeyboardThemes.createPresets() + listOf(
         TransparentGlassTheme.create(),
         PureBlackTheme.create(),
         SoftLavenderTheme.create(),
         SoftBlueTheme.create()
     ) + TonalThemes.create()
+
+    fun refreshMetroSyncScheme() {
+        val updatedSync = MetroKeyboardThemes.createSyncScheme()
+        val refreshed = themesCache.map { scheme ->
+            if (scheme.id == MetroKeyboardThemes.SYNC_ID) updatedSync else scheme
+        }
+        themesCache = refreshed
+        themesMapCache = refreshed.associateBy { it.id }
+    }
 
     /**
      * 预计算后的主题缓存（避免每次访问都重新计算颜色）。
@@ -136,7 +145,10 @@ object KeyboardThemes {
             it != "858AdvanceColor"
         }
         // 1) 对硬编码主题应用配置覆盖
-        val overridden = defaultThemes.map { applyConfigOverrides(context, it) }
+        val overridden = defaultThemes.map { scheme ->
+            val fresh = if (scheme.id == MetroKeyboardThemes.SYNC_ID) MetroKeyboardThemes.createSyncScheme() else scheme
+            applyConfigOverrides(context, fresh)
+        }
         // 2) 把配置中有但硬编码列表中没有的新主题也加入缓存
         //    （dynamic_color: true 的条目由 DynamicThemes 运行时从壁纸调色板构建；
         //     内置莫奈取色由 withDynamicTheme 加在黑白后面）

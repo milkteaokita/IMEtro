@@ -15,7 +15,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroRadioIndicator
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
+import com.kingzcheung.xime.ui.metro.MetroToggleSwitch
 import androidx.compose.material.icons.twotone.AutoAwesome
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -84,17 +89,17 @@ fun SmartPredictionSettingsContent(
         androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
     ) { uri -> pendingImport = uri }
     pendingImport?.let { uri ->
-        androidx.compose.material3.AlertDialog(
+        MetroAlertDialog(
             onDismissRequest = { pendingImport = null },
             title = { Text("导入学习文件或文字") },
             text = { Text("新增：保留已学的，加入文件里的内容。\n替换：用文件内容替换已学的。\n也可以选普通文字文件，当作打过一遍来学。") },
             confirmButton = {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(onClick = { pendingImport = null; viewModel.importLearningData(uri, merge = false) }) { Text("替换") }
-                    Button(onClick = { pendingImport = null; viewModel.importLearningData(uri, merge = true) }) { Text("新增") }
+                    MetroOutlinedButton(text = "替换", onClick = { pendingImport = null; viewModel.importLearningData(uri, merge = false) })
+                    MetroSolidButton(text = "新增", onClick = { pendingImport = null; viewModel.importLearningData(uri, merge = true) })
                 }
             },
-            dismissButton = { androidx.compose.material3.TextButton(onClick = { pendingImport = null }) { Text("取消") } }
+            dismissButton = { MetroOutlinedButton(text = "取消", onClick = { pendingImport = null }) }
         )
     }
 
@@ -143,10 +148,10 @@ fun SmartPredictionSettingsContent(
                                 strokeWidth = 2.dp
                             )
                         } else {
-                            Switch(
+                            MetroToggleSwitch(
                                 checked = uiState.isEnabled,
                                 onCheckedChange = { viewModel.setEnabled(it) },
-                                colors = SwitchDefaults.colors()
+                                showStatusLabel = false,
                             )
                         }
                     }
@@ -317,7 +322,7 @@ private fun AssociationModeRow(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        RadioButton(selected = isSelected, onClick = onClick)
+        MetroRadioIndicator(selected = isSelected)
     }
 }
 

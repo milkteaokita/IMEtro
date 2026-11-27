@@ -17,6 +17,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.kingzcheung.xime.settings.HardwareKeyboardPreferences
+import com.kingzcheung.xime.ui.metro.MetroCheckbox
+import com.kingzcheung.xime.ui.metro.MetroRadioIndicator
+import com.kingzcheung.xime.ui.metro.MetroToggleSwitch
+import androidx.compose.ui.graphics.RectangleShape
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -108,7 +112,7 @@ private fun FloatingBarEdgeOption(selected: com.kingzcheung.xime.settings.Hardwa
                 Row(Modifier.fillMaxWidth().testTag("hardware-fixed-edge:${edge?.key ?: "free"}")
                     .selectable(selected == edge, role = Role.RadioButton) { onSelect(edge) }
                     .padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(selected = selected == edge, onClick = null)
+                    MetroRadioIndicator(selected = selected == edge)
                     Spacer(Modifier.width(12.dp))
                     Text(label, style = MaterialTheme.typography.titleSmall)
                 }
@@ -122,14 +126,13 @@ private fun FloatingBarEdgeOption(selected: com.kingzcheung.xime.settings.Hardwa
 private fun BottomCandidatesLegend(on: Boolean) {
     val primary = MaterialTheme.colorScheme.primary
     SettingsLegend("bottom-candidates-legend") {
-        Box(Modifier.fillMaxWidth().height(64.dp).background(MaterialTheme.colorScheme.surface,
-            androidx.compose.foundation.shape.RoundedCornerShape(4.dp))) {
+        Box(Modifier.fillMaxWidth().height(64.dp).background(MaterialTheme.colorScheme.surface, RectangleShape)) {
             Text("屏幕底部", Modifier.align(Alignment.TopStart).padding(6.dp), style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
             val words = listOf("你好", "拟好", "你号", "泥好", "倪浩")
             Row(
                 (if (on) Modifier.fillMaxWidth() else Modifier.padding(bottom = 6.dp)).align(Alignment.BottomCenter)
-                    .background(primary.copy(alpha = 0.22f), androidx.compose.foundation.shape.RoundedCornerShape(if (on) 0.dp else 6.dp))
+                    .background(primary.copy(alpha = 0.22f), RectangleShape)
                     .padding(horizontal = 6.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -147,7 +150,7 @@ private fun BottomCandidatesLegend(on: Boolean) {
 private fun HardwareOption(title: String, detail: String, checked: Boolean,
                            /** 当前用不上时写原因：整行置灰、点不动，原因写在说明下面；存的值不变。 */
                            lockMessage: String? = null, onChange: (Boolean) -> Unit) {
-    Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surfaceContainer) {
+    Surface(shape = RectangleShape, color = MaterialTheme.colorScheme.surfaceContainer) {
         Row(Modifier.settingsSearchAnchor(title, bleed = 8.dp, bleedVertical = 4.dp).fillMaxWidth()
             .toggleable(checked, enabled = lockMessage == null, role = Role.Switch, onValueChange = onChange)
             .padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -156,7 +159,7 @@ private fun HardwareOption(title: String, detail: String, checked: Boolean,
                 Text(detail, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 lockMessage?.let { SettingsLockNote(it) }
             }
-            Switch(checked = checked, onCheckedChange = null, enabled = lockMessage == null)
+            MetroToggleSwitch(checked = checked, onCheckedChange = null, enabled = lockMessage == null, showStatusLabel = false)
         }
     }
 }
@@ -178,7 +181,7 @@ private fun PassthroughAppsSection(selected: Set<String>, onChange: (String, Boo
     apps.forEach { app ->
         val checked = app in selected
         val label = remember(app) { passthroughAppLabel(context, app) }
-        Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surfaceContainer) {
+        Surface(shape = RectangleShape, color = MaterialTheme.colorScheme.surfaceContainer) {
             Row(Modifier.fillMaxWidth().testTag("hardware-passthrough-app:$app")
                 .toggleable(checked, role = Role.Switch) { onChange(app, it) }
                 .padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -187,7 +190,7 @@ private fun PassthroughAppsSection(selected: Set<String>, onChange: (String, Boo
                     androidx.compose.material3.Text(app, style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Switch(checked = checked, onCheckedChange = null)
+                MetroToggleSwitch(checked = checked, onCheckedChange = null, showStatusLabel = false)
             }
         }
     }
@@ -201,7 +204,7 @@ private fun passthroughAppLabel(context: android.content.Context, packageName: S
 
 @Composable
 private fun CandidatePageOption(title: String, detail: String, key: String, checked: Boolean, onChange: (Boolean) -> Unit) {
-    Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surfaceContainer) {
+    Surface(shape = RectangleShape, color = MaterialTheme.colorScheme.surfaceContainer) {
         Row(Modifier.settingsSearchAnchor(title, bleed = 8.dp, bleedVertical = 4.dp).fillMaxWidth().testTag("hardware-$key")
             .toggleable(checked, role = Role.Checkbox, onValueChange = onChange)
             .padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -209,7 +212,7 @@ private fun CandidatePageOption(title: String, detail: String, key: String, chec
                 Text(title, style = MaterialTheme.typography.titleSmall)
                 Text(detail, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Checkbox(checked = checked, onCheckedChange = null)
+            MetroCheckbox(checked = checked, onCheckedChange = null)
         }
     }
 }

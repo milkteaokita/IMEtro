@@ -126,6 +126,11 @@ class MainActivity : ComponentActivity() {
         override fun handleOnBackPressed() = finishAndRemoveTask()
     }
 
+    override fun onResume() {
+        super.onResume()
+        com.kingzcheung.xime.ui.theme.MetroThemeSync.refresh(this)
+    }
+
     override fun onDestroy() {
         prewarmScope.cancel()
         super.onDestroy()
@@ -228,7 +233,10 @@ class MainActivity : ComponentActivity() {
                 onDispose { preferences.unregisterOnSharedPreferenceChangeListener(listener) }
             }
             
-            val isDarkTheme = when (darkMode) {
+            val syncedMetro = com.kingzcheung.xime.ui.theme.MetroThemeSync.syncedState
+            val isDarkTheme = if (keyboardTheme == com.kingzcheung.xime.ui.theme.MetroKeyboardThemes.SYNC_ID && syncedMetro.fromLauncher) {
+                syncedMetro.darkMode
+            } else when (darkMode) {
                 2 -> isSystemInDarkTheme()
                 1 -> true
                 else -> false
@@ -301,22 +309,6 @@ class MainActivity : ComponentActivity() {
 
                     // 装的不是作者签名的包就提示（每次打开设置一次）。
                     com.kingzcheung.xime.security.InstallIntegrityWarning()
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(scrimHeight)
-                            .align(Alignment.BottomCenter)
-                            .background(
-                                Brush.verticalGradient(
-                                    colors = if (isDarkTheme) {
-                                        listOf(Color.Transparent, Color.White.copy(alpha = 0.10f))
-                                    } else {
-                                        listOf(Color.Transparent, Color.Black.copy(alpha = 0.10f))
-                                    }
-                                )
-                            )
-                    )
 
                     // 启动广告彩蛋：盖在最上面，5 秒或点「跳过」后收掉。
                     com.kingzcheung.xime.ui.settings.LaunchAdEasterEgg(launchAdAllowed, blocked = showWizard || showGuide)

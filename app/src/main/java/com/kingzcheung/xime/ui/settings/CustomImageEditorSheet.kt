@@ -22,7 +22,10 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
+import com.kingzcheung.xime.ui.metro.LocalMetroUiState
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -109,11 +112,14 @@ internal fun CustomImageEditorSheet(
     }
     var placement by remember(src) { mutableStateOf(initial) }
 
+    val metro = LocalMetroUiState.current
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         modifier = Modifier.windowInsetsPadding(SheetOuterInsets),
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = RectangleShape,
+        dragHandle = null,
+        containerColor = metro.chrome,
         contentWindowInsets = sheetContentInsets,
     ) {
         Column(
@@ -158,27 +164,27 @@ internal fun CustomImageEditorSheet(
                     "上下对齐" to ThemeImagePlacement("fit_height"),
                     "左右对齐" to ThemeImagePlacement("fit_width"),
                 ).forEach { (label, target) ->
-                    OutlinedButton(
+                    MetroOutlinedButton(
+                        text = label,
                         onClick = { placement = target },
                         modifier = Modifier.weight(1f).height(40.dp),
-                        shape = RoundedCornerShape(20.dp),
-                    ) { Text(label, fontSize = 14.sp, maxLines = 1) }
+                    )
                 }
             }
 
             Spacer(Modifier.height(24.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedButton(
+                MetroOutlinedButton(
+                    text = "取消",
                     onClick = onDismiss,
                     modifier = Modifier.weight(1f).height(48.dp),
-                    shape = RoundedCornerShape(24.dp),
-                ) { Text("取消", fontSize = 16.sp) }
-                Button(
+                )
+                MetroSolidButton(
+                    text = "应用",
                     onClick = { onConfirm(placement) },
                     enabled = bitmap != null,
                     modifier = Modifier.weight(1f).height(48.dp),
-                    shape = RoundedCornerShape(24.dp),
-                ) { Text("应用", fontSize = 16.sp) }
+                )
             }
         }
     }
@@ -296,7 +302,7 @@ private fun CustomImageEditorCanvas(
                         .offset { IntOffset(origin.x.roundToInt(), origin.y.roundToInt()) }
                         .size(frameWidthDp, frameHeightDp)
                         .graphicsLayer { alpha = if (touching) 0f else 1f }
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RectangleShape)
                         .background(glassPreviewHost(isDark)),
                 ) {
                     CompositionLocalProvider(LocalKeyboardInputPreferences provides KeyboardInputPreferences(

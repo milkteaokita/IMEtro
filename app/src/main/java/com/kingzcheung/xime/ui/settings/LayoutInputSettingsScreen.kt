@@ -36,6 +36,7 @@ import kotlinx.coroutines.launch
 import com.kingzcheung.xime.ui.keyboard.normalizeLetterSwipeDistance
 import com.kingzcheung.xime.ui.keyboard.normalizeCandidateDragPercent
 import com.kingzcheung.xime.ui.keyboard.rememberKeyboardInputPreferences
+import com.kingzcheung.xime.ui.metro.MetroSlider
 
 internal enum class LayoutInputCategory(val route: String, val title: String, val description: String) {
     Qwerty("layout_input_qwerty", "26 键", "中英混输、字母错位、标点键、分词键"),
@@ -210,13 +211,16 @@ internal fun LayoutInputSettingsContent(category: LayoutInputCategory, onBack: (
                         HorizontalDivider()
                         Column(Modifier.settingsSearchAnchor("拖到候选选词的距离").padding(horizontal = 16.dp, vertical = 8.dp)) {
                             Text("拖到候选选词的距离：键盘的 ${settings.candidateDragPercent.toInt()}%", style = MaterialTheme.typography.titleSmall)
-                            Slider(value = settings.candidateDragPercent,
+                            MetroSlider(
+                                value = settings.candidateDragPercent,
                                 modifier = Modifier.testTag("t9-candidate-drag-percent"),
                                 // 去掉了 0 键就没有「下一项」可拖，这项不起作用：置灰并写明。
                                 enabled = !settings.t9MergeZeroIntoEnter,
-                                valueRange = 20f..80f, steps = 5,
+                                valueRange = 20f..80f,
+                                steps = 5,
                                 onValueChange = { settings = settings.copy(candidateDragPercent = normalizeCandidateDragPercent(it)) },
-                                onValueChangeFinished = { settings.save(context) })
+                                onValueChangeFinished = { settings.save(context) },
+                            )
                             Text(if (settings.t9MergeZeroIntoEnter) "已去掉 0 键，这项不起作用"
                                 else "拖动「下一项」超过这个距离才算选词",
                                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -232,11 +236,14 @@ internal fun LayoutInputSettingsContent(category: LayoutInputCategory, onBack: (
                         HorizontalDivider()
                         Column(Modifier.settingsSearchAnchor("滑动触发距离").padding(horizontal = 16.dp, vertical = 8.dp)) {
                             Text("滑动触发距离：${settings.fourteenLetterSwipeDp.toInt()} dp", style = MaterialTheme.typography.titleSmall)
-                            Slider(value = settings.fourteenLetterSwipeDp,
+                            MetroSlider(
+                                value = settings.fourteenLetterSwipeDp,
                                 modifier = Modifier.testTag("fourteen-letter-distance"),
-                                valueRange = 12f..72f, steps = 29,
+                                valueRange = 12f..72f,
+                                steps = 29,
                                 onValueChange = { settings = settings.copy(fourteenLetterSwipeDp = normalizeLetterSwipeDistance(it)) },
-                                onValueChangeFinished = { settings.save(context) })
+                                onValueChangeFinished = { settings.save(context) },
+                            )
                             Text("越大越不容易误触",
                                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
@@ -434,12 +441,17 @@ private fun <T> TypoLevelSlider(
             Text(label(shown), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
         }
         Text(description, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Slider(value = position, onValueChange = { position = it }, modifier = Modifier.testTag(tag),
+        MetroSlider(
+            value = position,
+            onValueChange = { position = it },
+            modifier = Modifier.testTag(tag),
             onValueChangeFinished = {
                 val chosen = levels[position.roundToInt().coerceIn(levels.indices)]
                 if (chosen != current) onChoose(chosen)
             },
-            valueRange = 0f..(levels.size - 1).toFloat(), steps = levels.size - 2)
+            valueRange = 0f..(levels.size - 1).toFloat(),
+            steps = levels.size - 2,
+        )
         Row(Modifier.fillMaxWidth()) {
             Text(label(levels.first()), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.weight(1f))
@@ -603,11 +615,13 @@ private fun QwertyStaggerSettings(
                 }
                 Column(Modifier.weight(1f).padding(horizontal = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        Slider(value = -custom, onValueChange = { custom = com.kingzcheung.xime.ui.keyboard.customStaggerFromSlider(it) },
+                        MetroSlider(
+                            value = -custom,
+                            onValueChange = { custom = com.kingzcheung.xime.ui.keyboard.customStaggerFromSlider(it) },
                             onValueChangeFinished = { onChange(settings.copy(qwertyStaggerCustom = custom)) },
                             valueRange = com.kingzcheung.xime.ui.keyboard.QWERTY_STAGGER_MIN..com.kingzcheung.xime.ui.keyboard.QWERTY_STAGGER_MAX,
-                            track = { sliderState -> SliderDefaults.Track(sliderState = sliderState, drawStopIndicator = {}) },
-                            modifier = Modifier.fillMaxWidth().onSizeChanged { sliderWidth = it.width }.testTag("qwerty-stagger-custom"))
+                            modifier = Modifier.fillMaxWidth().onSizeChanged { sliderWidth = it.width }.testTag("qwerty-stagger-custom"),
+                        )
                         Box(Modifier.size(4.dp).background(MaterialTheme.colorScheme.onSurfaceVariant, CircleShape))
                     }
                     Text("S 与 Z 对齐", style = MaterialTheme.typography.bodySmall,

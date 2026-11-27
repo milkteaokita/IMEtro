@@ -28,6 +28,9 @@ import com.kingzcheung.xime.settings.SpellingPatches
 import com.kingzcheung.xime.ui.keyboard.InputGestureLock
 import com.kingzcheung.xime.ui.keyboard.InputGestureLocks
 import com.kingzcheung.xime.ui.keyboard.KeyboardInputPreferences
+import com.kingzcheung.xime.ui.metro.MetroRadioIndicator
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -67,7 +70,8 @@ internal fun DoublePinyinAuxCodeSetting(keyboardPrefs: KeyboardInputPreferences)
                         SpellingPatches.setAuxCode(context, code)
                         scope.launch(Dispatchers.IO) { runCatching { SpellingPatches.apply(context) } }
                     }, verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(selected = selected == code, onClick = null, enabled = enabled)
+                    MetroRadioIndicator(selected = selected == code)
+                    Spacer(Modifier.width(12.dp))
                     Column(Modifier.weight(1f)) {
                         Text(code?.title ?: "关", style = MaterialTheme.typography.bodyMedium)
                         if (code != null) Text(code.example, style = MaterialTheme.typography.bodySmall,

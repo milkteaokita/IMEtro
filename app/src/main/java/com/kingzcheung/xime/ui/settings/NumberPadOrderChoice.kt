@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Dialpad
 import androidx.compose.material3.Icon
@@ -43,7 +43,7 @@ internal fun NumberPadOrderChoice() {
     Column(Modifier.settingsSearchAnchor("数字位置").fillMaxWidth().padding(16.dp).testTag("number-pad-order")) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             // 图标、标题和说明同 SettingsItem，一列对齐。
-            Box(Modifier.size(40.dp).clip(RoundedCornerShape(10.dp)).background(colors.surfaceVariant.copy(alpha = 0.5f)),
+            Box(Modifier.size(40.dp).clip(RectangleShape).background(colors.surfaceVariant.copy(alpha = 0.5f)),
                 contentAlignment = Alignment.Center) {
                 Icon(Icons.TwoTone.Dialpad, contentDescription = null, tint = colors.primary, modifier = Modifier.size(22.dp))
             }

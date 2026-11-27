@@ -13,7 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import com.kingzcheung.xime.ui.common.wheelScroll
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.Keyboard
@@ -185,10 +185,10 @@ internal fun PreviewChoiceCard(label: String, chosen: Boolean, width: Dp, previe
             unavailable -> Modifier.alpha(.4f).semantics { stateDescription = "没有当前方案" }
             else -> Modifier
         },
-        shape = RoundedCornerShape(14.dp), color = containerColor,
+        shape = RectangleShape, color = containerColor,
         border = if (liquid) null else BorderStroke(if (chosen) 1.5.dp else 1.dp,
             if (chosen) accentColor else contentColor.copy(alpha = idleBorderAlpha(containerColor)))) {
-        Column(Modifier.then(if (liquid) Modifier.liquidGlassEdge(14.dp) else Modifier).width(width).testTag(tag).then(if (isAction) Modifier.clickable(role = Role.Button, onClick = onSelect)
+        Column(Modifier.then(if (liquid) Modifier.liquidGlassEdge(0.dp) else Modifier).width(width).testTag(tag).then(if (isAction) Modifier.clickable(role = Role.Button, onClick = onSelect)
             else Modifier.selectable(chosen, role = Role.RadioButton, onClick = onSelect))) {
             Box(Modifier.fillMaxWidth().height(previewHeight).padding(4.dp), contentAlignment = Alignment.Center) {
                 if (explained) {

@@ -18,7 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -114,13 +114,13 @@ internal fun IllustratedChoiceCard(
                 .then(if (tag != null) Modifier.testTag(tag) else Modifier)
                 .semantics { this.selected = selected }
                 .border(if (selected) 2.dp else 0.5.dp,
-                    if (selected) primary else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp)),
-            shape = RoundedCornerShape(12.dp),
+                    if (selected) primary else MaterialTheme.colorScheme.outlineVariant, RectangleShape),
+            shape = RectangleShape,
             color = MaterialTheme.colorScheme.surface,
         ) {
             LegendKeyboardColors {
                 Column(
-                    Modifier.fillMaxSize().padding(illustrationPadding).clip(RoundedCornerShape(6.dp))
+                    Modifier.fillMaxSize().padding(illustrationPadding).clip(RectangleShape)
                         .background(MaterialTheme.colorScheme.surfaceVariant).padding(illustrationPadding),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -141,9 +141,9 @@ internal fun IllustratedChoiceCard(
 private fun MiniKey(main: String, top: String?, bottom: String?, highlight: Color? = null) {
     val onSurface = MaterialTheme.colorScheme.onSurface
     Box(
-        Modifier.size(width = 44.dp, height = 50.dp).clip(RoundedCornerShape(7.dp))
+        Modifier.size(width = 44.dp, height = 50.dp).clip(RectangleShape)
             .background(MaterialTheme.colorScheme.surface)
-            .border(0.5.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(7.dp)),
+            .border(0.5.dp, MaterialTheme.colorScheme.outlineVariant, RectangleShape),
     ) {
         Text(main, Modifier.align(Alignment.Center), fontSize = 20.sp, color = onSurface)
         if (top != null) Text(top, Modifier.align(Alignment.TopEnd).padding(top = 2.dp, end = 5.dp),
@@ -168,7 +168,7 @@ private fun CandidateStrip(withComments: Boolean, narrow: Boolean = false) {
     val hint = onSurface.copy(alpha = 0.55f)
     Row(
         Modifier.then(if (narrow) Modifier.width(70.dp) else Modifier.fillMaxWidth())
-            .clip(RoundedCornerShape(4.dp)).background(MaterialTheme.colorScheme.surface)
+            .clip(RectangleShape).background(MaterialTheme.colorScheme.surface)
             .padding(horizontal = 6.dp, vertical = 3.dp),
         verticalAlignment = Alignment.Bottom,
     ) {
@@ -216,9 +216,9 @@ private fun CandidateCancelContent(show: Boolean) {
             Icon(icon, contentDescription = null, tint = if (highlight) primary else muted, modifier = Modifier.size(20.dp))
         }
     }
-    Column(Modifier.fillMaxWidth().testTag("candidate-cancel-illustration").clip(RoundedCornerShape(6.dp))
+    Column(Modifier.fillMaxWidth().testTag("candidate-cancel-illustration").clip(RectangleShape)
         .background(MaterialTheme.colorScheme.surfaceVariant).padding(8.dp)) {
-        Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(4.dp)).background(MaterialTheme.colorScheme.surface)
+        Row(Modifier.fillMaxWidth().clip(RectangleShape).background(MaterialTheme.colorScheme.surface)
             .padding(horizontal = 4.dp, vertical = 3.dp), verticalAlignment = Alignment.CenterVertically) {
             if (show) EdgeButton(Icons.AutoMirrored.Filled.KeyboardArrowLeft, highlight = true)
             Spacer(Modifier.width(if (show) 8.dp else 4.dp))
@@ -245,7 +245,7 @@ internal fun CandidateCommentContentIllustration(content: com.kingzcheung.xime.s
     Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
         listOf(if (gloss) "你好" to " hello" else "你好" to " nǐ hǎo",
             if (gloss) "apple" to " 苹果" else "苹果" to " píng guǒ").forEachIndexed { index, (word, note) ->
-            Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(4.dp)).background(MaterialTheme.colorScheme.surface)
+            Row(Modifier.fillMaxWidth().clip(RectangleShape).background(MaterialTheme.colorScheme.surface)
                 .padding(horizontal = 6.dp, vertical = 3.dp), verticalAlignment = Alignment.Bottom) {
                 androidx.compose.material3.Text(word, fontSize = 13.sp, maxLines = 1, fontWeight = if (index == 0) FontWeight.Medium else null,
                     color = if (index == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface)
@@ -312,7 +312,7 @@ private fun SpacePunctuationContent(comma: Boolean, period: Boolean) {
     @Composable
     fun RowScopeKey(label: String, sub: String?, weight: Float, scope: androidx.compose.foundation.layout.RowScope, accent: Boolean = false) {
         with(scope) {
-            Box(Modifier.weight(weight).height(34.dp).padding(horizontal = 2.dp).clip(RoundedCornerShape(5.dp))
+            Box(Modifier.weight(weight).height(34.dp).padding(horizontal = 2.dp).clip(RectangleShape)
                 .background(if (accent) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f) else MaterialTheme.colorScheme.surface)) {
                 Text(label, Modifier.align(Alignment.Center), fontSize = 12.sp, color = onSurface, maxLines = 1)
                 if (sub != null) Text(sub, Modifier.align(Alignment.TopEnd).padding(end = 3.dp), fontSize = 9.sp,
@@ -321,7 +321,7 @@ private fun SpacePunctuationContent(comma: Boolean, period: Boolean) {
         }
     }
     // 和真键盘底排一样：键画在键盘底色上（原来直接画在设置卡片上，浅色主题键和卡片分不开）。
-    Row(Modifier.widthIn(max = SETTINGS_LEGEND_MAX_WIDTH).fillMaxWidth().clip(RoundedCornerShape(6.dp))
+    Row(Modifier.widthIn(max = SETTINGS_LEGEND_MAX_WIDTH).fillMaxWidth().clip(RectangleShape)
         .background(MaterialTheme.colorScheme.surfaceVariant).padding(4.dp), verticalAlignment = Alignment.CenterVertically) {
         RowScopeKey("!@#", null, 1.2f, this)
         RowScopeKey("123", null, 1.2f, this)
@@ -340,7 +340,7 @@ private fun SpacePunctuationContent(comma: Boolean, period: Boolean) {
 @Composable
 internal fun SettingsLegend(tag: String, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) =
     LegendKeyboardColors {
-        Column(modifier.widthIn(max = SETTINGS_LEGEND_MAX_WIDTH).fillMaxWidth().testTag(tag).clip(RoundedCornerShape(6.dp))
+        Column(modifier.widthIn(max = SETTINGS_LEGEND_MAX_WIDTH).fillMaxWidth().testTag(tag).clip(RectangleShape)
             .background(MaterialTheme.colorScheme.surfaceVariant).padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp), content = content)
     }
@@ -355,7 +355,7 @@ private fun LegendField(before: String, after: String, pinyin: String? = null, l
     Row(verticalAlignment = Alignment.CenterVertically) {
         if (label != null) Text(label, fontSize = 11.sp, color = onSurface.copy(alpha = 0.6f), maxLines = 1,
             modifier = Modifier.width(34.dp))
-        Row(Modifier.weight(1f).clip(RoundedCornerShape(4.dp)).background(MaterialTheme.colorScheme.surface)
+        Row(Modifier.weight(1f).clip(RectangleShape).background(MaterialTheme.colorScheme.surface)
             .padding(horizontal = 6.dp, vertical = 3.dp), verticalAlignment = Alignment.CenterVertically) {
             LegendFieldText(before, after, pinyin)
         }
@@ -387,7 +387,7 @@ private fun SettingsStepLegend(
     after: @Composable ColumnScope.() -> Unit,
 ) = LegendKeyboardColors {
     val primary = MaterialTheme.colorScheme.primary
-    Row(Modifier.widthIn(max = SETTINGS_LEGEND_MAX_WIDTH).fillMaxWidth().testTag(tag).clip(RoundedCornerShape(6.dp))
+    Row(Modifier.widthIn(max = SETTINGS_LEGEND_MAX_WIDTH).fillMaxWidth().testTag(tag).clip(RectangleShape)
         .background(MaterialTheme.colorScheme.surfaceVariant).padding(8.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp), content = before)
@@ -403,7 +403,7 @@ private fun SettingsStepLegend(
 /** 图例卡片一格里的输入框：占满这一格。 */
 @Composable
 private fun LegendBox(before: String, after: String = "", pinyin: String? = null) {
-    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(4.dp)).background(MaterialTheme.colorScheme.surface)
+    Row(Modifier.fillMaxWidth().clip(RectangleShape).background(MaterialTheme.colorScheme.surface)
         .padding(horizontal = 6.dp, vertical = 3.dp), verticalAlignment = Alignment.CenterVertically) {
         LegendFieldText(before, after, pinyin)
     }
@@ -413,7 +413,7 @@ private fun LegendBox(before: String, after: String = "", pinyin: String? = null
 @Composable
 private fun LegendChip(lead: String, words: String, highlight: Boolean = false) {
     val onSurface = MaterialTheme.colorScheme.onSurface
-    Row(Modifier.clip(RoundedCornerShape(4.dp)).background(MaterialTheme.colorScheme.surface)
+    Row(Modifier.clip(RectangleShape).background(MaterialTheme.colorScheme.surface)
         .padding(horizontal = 6.dp, vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(lead, fontSize = 11.sp, color = onSurface.copy(alpha = 0.6f), maxLines = 1)
         Spacer(Modifier.width(6.dp))
@@ -488,7 +488,7 @@ internal fun SpaceHoldChoiceIllustration(action: com.kingzcheung.xime.ui.keyboar
         }
     }
     Spacer(Modifier.height(6.dp))
-    Box(Modifier.width(84.dp).height(20.dp).clip(RoundedCornerShape(5.dp)).background(primary.copy(alpha = 0.3f)),
+    Box(Modifier.width(84.dp).height(20.dp).clip(RectangleShape).background(primary.copy(alpha = 0.3f)),
         contentAlignment = Alignment.Center) {
         Text("空格", fontSize = 10.sp, color = onSurface)
     }
@@ -508,7 +508,7 @@ internal fun KeyboardSwipeCursorLegend(on: Boolean) {
     SettingsLegend("keyboard-swipe-cursor-legend") {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
             listOf("q", "w", "e", "r", "t", "y").forEach { key ->
-                Box(Modifier.size(width = 22.dp, height = 26.dp).clip(RoundedCornerShape(4.dp))
+                Box(Modifier.size(width = 22.dp, height = 26.dp).clip(RectangleShape)
                     .background(if (on) primary.copy(alpha = 0.3f) else surface), contentAlignment = Alignment.Center) {
                     Text(key, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface)
                 }
@@ -566,7 +566,7 @@ internal fun KeyLabelCaseIllustration(choice: com.kingzcheung.xime.ui.keyboard.K
     fun line(tag: String, letters: String) = Row(verticalAlignment = Alignment.CenterVertically) {
         Text(tag, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), modifier = Modifier.width(20.dp))
         letters.forEach { c ->
-            Box(Modifier.padding(horizontal = 1.dp).size(width = 16.dp, height = 20.dp).clip(RoundedCornerShape(3.dp))
+            Box(Modifier.padding(horizontal = 1.dp).size(width = 16.dp, height = 20.dp).clip(RectangleShape)
                 .background(MaterialTheme.colorScheme.surface), contentAlignment = Alignment.Center) {
                 Text(c.toString(), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurface)
             }
@@ -596,9 +596,9 @@ internal fun KeyFaceHintsLegend(up: Boolean, down: Boolean, doublePinyin: Boolea
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
             keys.zip(corners).forEach { (key, corner) ->
                 val (letter, initial, finals) = key
-                Box(Modifier.size(width = 48.dp, height = 54.dp).clip(RoundedCornerShape(7.dp))
+                Box(Modifier.size(width = 48.dp, height = 54.dp).clip(RectangleShape)
                     .background(MaterialTheme.colorScheme.surface)
-                    .border(0.5.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(7.dp))) {
+                    .border(0.5.dp, MaterialTheme.colorScheme.outlineVariant, RectangleShape)) {
                     Text(letter, Modifier.align(Alignment.Center), fontSize = if (doublePinyin) 16.sp else 20.sp, color = onSurface)
                     if (doublePinyin && initial != null) Text(initial, Modifier.align(Alignment.TopStart).padding(start = 4.dp, top = 2.dp),
                         fontSize = 10.sp, color = primary, fontWeight = FontWeight.Medium)
@@ -661,8 +661,8 @@ internal fun LiquidGlassStrengthIllustration(strength: com.kingzcheung.xime.ui.t
     val dark = key.luminance() < .5f
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         for (label in listOf("A", "S")) {
-            Box(Modifier.weight(1f).height(38.dp).clip(RoundedCornerShape(7.dp)).background(key)
-                .liquidGlassSample(7.dp, dark, strength), contentAlignment = Alignment.Center) {
+            Box(Modifier.weight(1f).height(38.dp).clip(RectangleShape).background(key)
+                .liquidGlassSample(0.dp, dark, strength), contentAlignment = Alignment.Center) {
                 Text(label, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
             }
         }
@@ -674,14 +674,13 @@ internal fun LiquidGlassStrengthIllustration(strength: com.kingzcheung.xime.ui.t
 internal fun KeyboardTopStyleIllustration(style: com.kingzcheung.xime.ui.keyboard.KeyboardTopStyle) {
     val keyboard = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)
     val app = MaterialTheme.colorScheme.surface
-    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(4.dp)).background(app)) {
+    Column(Modifier.fillMaxWidth().clip(RectangleShape).background(app)) {
         // 应用界面里的几行字
         Column(Modifier.padding(horizontal = 6.dp, vertical = 4.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Box(Modifier.fillMaxWidth(0.8f).height(3.dp).background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)))
             Box(Modifier.fillMaxWidth(0.55f).height(3.dp).background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)))
         }
-        val shape = if (style == com.kingzcheung.xime.ui.keyboard.KeyboardTopStyle.ROUNDED)
-            RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp) else RoundedCornerShape(0.dp)
+        val shape = RectangleShape
         val fill = if (style == com.kingzcheung.xime.ui.keyboard.KeyboardTopStyle.SOFT)
             Modifier.background(androidx.compose.ui.graphics.Brush.verticalGradient(
                 0f to keyboard.copy(alpha = 0f), 0.35f to keyboard, 1f to keyboard))
@@ -691,7 +690,7 @@ internal fun KeyboardTopStyleIllustration(style: com.kingzcheung.xime.ui.keyboar
             repeat(2) {
                 Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                     repeat(6) {
-                        Box(Modifier.weight(1f).height(9.dp).clip(RoundedCornerShape(2.dp)).background(app))
+                        Box(Modifier.weight(1f).height(9.dp).clip(RectangleShape).background(app))
                     }
                 }
             }
@@ -706,10 +705,10 @@ internal fun JapaneseLongVowelIllustration(mode: com.kingzcheung.xime.ui.keyboar
     val onSurface = MaterialTheme.colorScheme.onSurface
     @Composable
     fun Key(main: String, below: String? = null, corner: String? = null, accent: Boolean = false) {
-        Box(Modifier.size(34.dp).clip(RoundedCornerShape(6.dp))
+        Box(Modifier.size(34.dp).clip(RectangleShape)
             .background(if (accent) primary.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surface)
             .border(if (accent) 1.dp else 0.5.dp, if (accent) primary else MaterialTheme.colorScheme.outlineVariant,
-                RoundedCornerShape(6.dp))) {
+                RectangleShape)) {
             Text(main, Modifier.align(Alignment.Center).padding(bottom = if (below != null) 9.dp else 0.dp),
                 fontSize = if (below != null) 14.sp else 16.sp, color = if (accent) primary else onSurface, maxLines = 1)
             if (below != null) Text(below, Modifier.align(Alignment.BottomCenter).padding(bottom = 2.dp),

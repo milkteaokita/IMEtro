@@ -13,7 +13,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
+import com.kingzcheung.xime.ui.metro.LocalMetroUiState
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroRadioIndicator
+import com.kingzcheung.xime.ui.metro.MetroSubPageHeader
+import com.kingzcheung.xime.ui.metro.MetroToggleSwitch
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.GraphicEq
 import androidx.compose.material.icons.twotone.Tune
@@ -74,7 +80,7 @@ private fun VoiceOtherAudioItem() {
     var picking by remember { mutableStateOf(false) }
     SettingsItem(icon = Icons.AutoMirrored.TwoTone.VolumeOff, title = "屏蔽外放音",
         subtitle = "说话时压低或暂停正在放的音乐、视频", status = current.label, onClick = { picking = true })
-    if (picking) AlertDialog(
+    if (picking) MetroAlertDialog(
         onDismissRequest = { picking = false },
         title = { Text("屏蔽外放音") },
         text = {
@@ -86,8 +92,8 @@ private fun VoiceOtherAudioItem() {
                     }
                     Row(Modifier.fillMaxWidth().heightIn(min = 52.dp).clickable(onClick = choose)
                         .testTag("voice-other-audio:${mode.id}"), verticalAlignment = Alignment.CenterVertically) {
-                        RadioButton(selected = mode == current, onClick = choose)
-                        Spacer(Modifier.width(8.dp))
+                        MetroRadioIndicator(selected = mode == current)
+                        Spacer(Modifier.width(12.dp))
                         Text(mode.label, style = MaterialTheme.typography.bodyLarge,
                             fontWeight = if (mode == current) FontWeight.Medium else FontWeight.Normal)
                     }
@@ -98,7 +104,7 @@ private fun VoiceOtherAudioItem() {
                     modifier = Modifier.padding(top = 8.dp))
             }
         },
-        confirmButton = { TextButton(onClick = { picking = false }) { Text("关闭") } },
+        confirmButton = { MetroOutlinedButton(text = "关闭", onClick = { picking = false }) },
     )
 }
 
@@ -110,30 +116,19 @@ fun SpeechToTextSettingsContent(
     onNavigateToSetupGuide: () -> Unit = {},
 ) {
     val context = LocalContext.current
-
+    val metro = LocalMetroUiState.current
 
     var saveTuningAudio by remember {
         mutableStateOf(SettingsPreferences.isSttDebugRecord(context))
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = metro.background,
         topBar = {
-            TopAppBar(
-                title = { Text("语音转文本", style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "返回"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                ),
+            MetroSubPageHeader(
+                parentTitle = "智能",
+                pageTitle = "语音转文本",
+                onBack = onBack,
             )
         }
     ) { padding ->
@@ -209,12 +204,13 @@ fun SpeechToTextSettingsContent(
                                     fontWeight = FontWeight.Medium,
                                     modifier = Modifier.weight(1f)
                                 )
-                                Switch(
+                                MetroToggleSwitch(
                                     checked = saveTuningAudio,
                                     onCheckedChange = {
                                         saveTuningAudio = it
                                         SettingsPreferences.setSttDebugRecord(context, it)
                                     },
+                                    showStatusLabel = false,
                                 )
                             }
                             Text(

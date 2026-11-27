@@ -57,8 +57,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.ContentCopy
@@ -619,7 +618,7 @@ fun CandidateBar(
             if (baseSlot < 44.dp) baseSlot else 44.dp + 20.dp * stretch
         }
         // 同心：胶囊圆角 = 键盘卡片圆角 - 胶囊离栏边的距离（上下各 6dp），和卡片四角同心。
-        val edgeCorner = if (edgeStyle == EdgeButtonStyle.CONCENTRIC) FloatingKeyboardCardCorner - 6.dp else null
+        val edgeCorner = 0.dp
 
         if (state is CandidateBarState.ClipboardDisplay) {
             ClipboardPreviewBar(state.candidates, protectedVisuals, callbacks, iconButtonContainer, state.image,
@@ -939,7 +938,7 @@ fun CandidateBar(
                         modifier = Modifier
                             .width(30.dp)
                             .height(24.dp)
-                            .clip(RoundedCornerShape(6.dp))
+                            .clip(RectangleShape)
                             .background(
                                 if (isClearPressed) (if (protectedVisuals.isDarkTheme) Color.White.copy(alpha = 0.15f) else Color.Black.copy(
                                     alpha = 0.1f
@@ -1088,14 +1087,14 @@ internal fun ToolbarActionButton(
     Box(
         Modifier.inlineQuickActionMotion(action.item.id).testTag("toolbar-visual:${action.item.id}")
             .size(if (listening) androidx.compose.ui.unit.DpSize(36.dp, 36.dp) else toolbarPillSize(maxWidth))
-            .clip(CircleShape)
+            .clip(RectangleShape)
             .background(if (listening) Color.Transparent else glassActiveFill ?: visuals.glassControlBackground?.let { fill ->
                 if (action.active) androidx.compose.ui.graphics.lerp(fill, visuals.accentColor, 0.18f).copy(alpha = fill.alpha)
                 else fill.copy(alpha = fill.alpha * pressAlpha)
             } ?: if (action.active) visuals.accentColor.copy(alpha = 0.28f)
                 else if (visuals.isDarkTheme) Color.White.copy(alpha = 0.25f * pressAlpha)
                 else Color(0xFFE0E0E0).copy(alpha = pressAlpha))
-            .then(if (liquidEdge) Modifier.liquidGlassEdge(CAPSULE_RADIUS) { if (action.active) 1f else pressAlpha }
+            .then(if (liquidEdge) Modifier.liquidGlassEdge(0.dp) { if (action.active) 1f else pressAlpha }
                 else Modifier),
         contentAlignment = Alignment.Center,
     ) {
@@ -1106,9 +1105,6 @@ internal fun ToolbarActionButton(
     }
     }
 }
-
-/** 胶囊的圆角：比任何胶囊的半高都大，细亮边按半高画成全圆头。 */
-private val CAPSULE_RADIUS = 999.dp
 
 /** 麦克风峰值（0~1 线性）转成 0~1 的显示音量：-50 dB 以下当静音，-15 dB 以上算满，小声说话也能明显撑开。 */
 internal fun microphoneLevel(peak: Float): Float {
@@ -1154,11 +1150,11 @@ private fun ClipboardPreviewBar(
         ?: MaterialTheme.colorScheme.surfaceContainer
     val liquidEdge = com.kingzcheung.xime.ui.theme.LiquidGlass.surfacesOn()
     val capsuleModifier = Modifier.heightIn(min = 36.dp)
-        .clip(CircleShape)
+        .clip(RectangleShape)
         .background(capsuleColor)
         // 液态玻璃：强调色描边换成按键同款细亮边。
-        .then(if (liquidEdge) Modifier.liquidGlassEdge(CAPSULE_RADIUS)
-            else Modifier.border(1.dp, visuals.accentColor.copy(alpha = 0.45f), CircleShape))
+        .then(if (liquidEdge) Modifier.liquidGlassEdge(0.dp)
+            else Modifier.border(1.dp, visuals.accentColor.copy(alpha = 0.45f), RectangleShape))
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         KeyboardBackButton({ callbacks.onDismissClipboardPreview?.invoke() },
             iconButtonContainer, visuals.textColor, label = "返回工具栏",
@@ -1226,7 +1222,7 @@ private fun ClipboardPreviewBar(
                                     .padding(vertical = verticalTextPadding, horizontal = if (index == 0) 0.dp else 8.dp))
                         }
                     }
-                    Box(Modifier.size(30.dp).clip(CircleShape)
+                    Box(Modifier.size(30.dp).clip(RectangleShape)
                         .then(if (image != null) Modifier.testTag("clipboard-image-more") else Modifier)
                         .clickable {
                             (callbacks.onOpenClipboard ?: if (image != null) callbacks.onExpandClipboardImages else null)?.invoke()
@@ -1459,7 +1455,7 @@ fun CandidateItem(
                 CandidateDropTargets.shared.put(dropId, dragSpace.bounds(it)) { currentClick() } } else Modifier)
             .height(if (fit?.twoLines == true) maxOf(candidateItemHeight(fontSize), LocalCandidateRowHeight.current - 4.dp)
                 else candidateItemHeight(fontSize))
-            .clip(RoundedCornerShape(5.dp))
+            .clip(RectangleShape)
             .background(
                 if (isSelected && selectionFill) accentColor.copy(alpha = 0.2f)
                 else Color.Transparent
@@ -1545,7 +1541,7 @@ fun CandidateItem(
                     }
                     .size(with(LocalDensity.current) { learnedMarkSize(fontSize).toDp() })
                     .padding(with(LocalDensity.current) { (learnedMarkSize(fontSize) * 0.2f).toDp() })
-                    .background(accentColor, androidx.compose.foundation.shape.CircleShape)
+                    .background(accentColor, RectangleShape)
                     .testTag("candidate-learned:$index"),
             )
         }
@@ -1777,7 +1773,7 @@ private fun PreeditPreview(text: String, visuals: CandidateBarVisuals, onEdit: (
         // 气泡内容最少 44dp 高、上下各留 6dp，真正的底色块在中间，圆角 4dp（见下面 PreeditLabel）。
         val inset = with(density) { 6.dp.roundToPx() }
         PreeditBubbleBlur(bubbleBounds.value?.let { IntRect(it.left, it.top + inset, it.right, it.bottom - inset) },
-            glass.blurRadiusDp, with(density) { 4.dp.toPx() }, hidden)
+            glass.blurRadiusDp, 0f, hidden)
     }
     val origin = LocalPreeditOrigin.current
     val fontSp = PreeditStyle.FontSize.value
@@ -1854,7 +1850,7 @@ private fun PreeditTab(text: androidx.compose.ui.text.AnnotatedString, textColor
     val outline = textColor.copy(alpha = PREEDIT_TAB_OUTLINE_ALPHA)
     val glass = LocalKeyboardInputPreferences.current.frostedGlass.normalized()
     if (floatingPreeditBlurBehind(glass)) PreeditBubbleBlur(tabBounds.value, glass.blurRadiusDp,
-        if (strip) cardCornerPx else if (block) 0f else 8f * platformDensity, hidden)
+        0f, hidden)
     val sizeSp = (if (block) 18f else PREEDIT_TAB_TEXT_SP) * LocalCandidateSizeFactor.current
     val size = sizeSp.sp
     val height = if (block) PREEDIT_BLOCK_HEIGHT else PREEDIT_TAB_HEIGHT
@@ -1875,14 +1871,7 @@ private fun PreeditTab(text: androidx.compose.ui.text.AnnotatedString, textColor
         val stripWidth = with(popupDensity) { stripWidthPx.toDp() }
         val notchDp = with(popupDensity) { notch.toDp() }
         val popupScreenWidth = LocalConfiguration.current.screenWidthDp.dp
-        val corner = when {
-            strip -> with(popupDensity) { cardCornerPx.toDp() }
-            block -> 0.dp
-            else -> 8.dp
-        }
-        val startCorner = if (strip || !left) corner else 0.dp
-        val endCorner = if (strip || !right) corner else 0.dp
-        val shape = RoundedCornerShape(topStart = startCorner, topEnd = endCorner)
+        val shape = RectangleShape
         // 清空后透明的那几帧要整块透明：透明层放在最外面。以前放在底色、描边之后，只把字藏了，底色和描边照画，
         // 拼音一空小签缩成最小宽度的空壳；窗口拆掉时系统又拿这一帧放约半秒的退出动画（11-23 他：上屏、清空后
         // 「先清空内容、标签还在、最小宽度，等一会才消失」）。
@@ -1890,7 +1879,7 @@ private fun PreeditTab(text: androidx.compose.ui.text.AnnotatedString, textColor
             horizontalAlignment = if (right && !strip) Alignment.End else Alignment.Start) {
         Box(Modifier.then(if (strip) Modifier.width(stripWidth) else Modifier.widthIn(max = popupScreenWidth))
             .heightIn(min = height).clip(shape).background(color)
-            .preeditTabOutline(outline, startCorner, endCorner)
+            .preeditTabOutline(outline, 0.dp, 0.dp)
             .then(if (edit != null && !hidden) tap.record().clickable(role = Role.Button, onClickLabel = "编辑拼音", onClick = edit) else Modifier)
             .padding(horizontal = if (strip) 12.dp else 8.dp).testTag("preedit-tab")
             .then(if (placed != null) Modifier.semantics { this[PreeditPopupBoundsKey] = placed } else Modifier),
@@ -2138,7 +2127,7 @@ internal fun PreeditLabel(text: String, visuals: CandidateBarVisuals,
     val background = if (visuals.preeditBackgroundColor != Color.Unspecified) visuals.preeditBackgroundColor
         else if (visuals.textColor.luminance() > 0.5f) Color(0xFF2D2F31) else Color(0xFFFAFAFA)
     val surface = solidBackground?.let {
-        Modifier.heightIn(min = PreeditStyle.SurfaceHeight).clip(RoundedCornerShape(4.dp)).background(it)
+        Modifier.heightIn(min = PreeditStyle.SurfaceHeight).clip(RectangleShape).background(it)
             .padding(horizontal = 8.dp)
     } ?: Modifier.preeditSurface(background)
     val textColor = solidBackground?.let { readableThemeText(visuals.textColor, it.copy(alpha = 1f)) }
@@ -2342,8 +2331,7 @@ internal fun FixedCandidateStrip(
         .drawBehind {
             val rect = highlightBox.value
             if (highlightShown && highlightVisible && focusedOnScreen && CandidateDropTargets.shared.hoveredBounds == null && rect.width > 0f)
-                drawRoundRect(highlightAccent.copy(alpha = 0.2f), rect.topLeft - stripRootOrigin, rect.size,
-                    androidx.compose.ui.geometry.CornerRadius(5.dp.toPx()))
+                drawRect(highlightAccent.copy(alpha = 0.2f), rect.topLeft - stripRootOrigin, rect.size)
         }, contentAlignment = Alignment.CenterStart) {
         // 中缝在本条内的位置（像素）；未测到位置前按整条排。
         val localGap = gapWindowX?.takeUnless { stripOriginX.isNaN() }?.let { (l, r) ->
@@ -2742,8 +2730,7 @@ private fun Modifier.shiftDragOverlay(rootOrigin: () -> androidx.compose.ui.geom
         val origin = rootOrigin()
         val rect = box.value
         if (drops.hoveredBounds != null && rect.width > 0f) {
-            drawRoundRect(accent.copy(alpha = 0.2f), rect.topLeft - origin, rect.size,
-                androidx.compose.ui.geometry.CornerRadius(5.dp.toPx()))
+            drawRect(accent.copy(alpha = 0.2f), rect.topLeft - origin, rect.size)
         }
         drops.dragLine?.let { (from, to) ->
             clipRect {

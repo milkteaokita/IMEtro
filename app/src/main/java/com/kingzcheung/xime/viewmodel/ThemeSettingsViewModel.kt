@@ -5,24 +5,16 @@ import androidx.lifecycle.AndroidViewModel
 import com.kingzcheung.xime.settings.SettingsPreferences
 import com.kingzcheung.xime.ui.theme.KeyboardColorScheme
 import com.kingzcheung.xime.ui.theme.KeyboardThemes
+import com.kingzcheung.xime.ui.theme.MetroKeyboardThemes
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-/**
- * 2026-10-11 列表只留四个；2026-10-18 用户要求把 1.9.15 移除的主题按新配色加回，每个色系一套（[TonalThemes]）。
- * 2026-11-03 莫奈取色加回，排在黑白后面（顺序由 [KeyboardThemes.withDynamicTheme] 定）；Android 12 以下主题表里没有它，不显示。
- */
-internal val OFFERED_THEMES = setOf(
-    com.kingzcheung.xime.ui.theme.TransparentGlassTheme.ID,
-    com.kingzcheung.xime.ui.theme.PureBlackTheme.ID,
-    com.kingzcheung.xime.ui.theme.DynamicThemes.THEME_ID,
-    "lavender_purple",
-    com.kingzcheung.xime.ui.theme.SoftBlueTheme.ID,
-) + com.kingzcheung.xime.ui.theme.TonalThemes.create().map { it.id } +
-    // 「我的图片」只在用户选过图片后才在主题列表里（[com.kingzcheung.xime.ui.theme.CustomImageTheme]）。
-    com.kingzcheung.xime.ui.theme.CustomImageTheme.ID
+internal val OFFERED_THEMES = (
+    MetroKeyboardThemes.createPresets().map { it.id } +
+        com.kingzcheung.xime.ui.theme.CustomImageTheme.ID
+).toSet()
 
 data class ThemeUiState(
     val darkMode: Int = 1,
@@ -32,18 +24,20 @@ data class ThemeUiState(
 
 class ThemeSettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val context = application.applicationContext
-    
-    private val _uiState = MutableStateFlow(ThemeUiState(
-        darkMode = SettingsPreferences.getDarkMode(context),
-        colorTheme = SettingsPreferences.getKeyboardTheme(context),
-    ))
+
+    private val _uiState = MutableStateFlow(
+        ThemeUiState(
+            darkMode = SettingsPreferences.getDarkMode(context),
+            colorTheme = SettingsPreferences.getKeyboardTheme(context),
+        )
+    )
     val uiState: StateFlow<ThemeUiState> = _uiState.asStateFlow()
-    
+
     fun setDarkMode(mode: Int) {
         SettingsPreferences.setDarkMode(context, mode)
         _uiState.update { it.copy(darkMode = mode) }
     }
-    
+
     /** 主题列表变了（选了自己的图片）后重新取。 */
     fun refreshThemes() {
         _uiState.update { it.copy(colorThemes = KeyboardThemes.themes.filter { theme -> theme.id in OFFERED_THEMES }) }

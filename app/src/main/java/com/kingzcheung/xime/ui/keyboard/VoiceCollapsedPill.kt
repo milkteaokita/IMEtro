@@ -26,12 +26,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material3.Text
+import com.kingzcheung.xime.ui.i18n.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -118,13 +118,12 @@ internal fun VoiceCollapsedPill(
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr, LocalFrostedTextSurface provides textSurface) {
             // 底板加一圈浅阴影和细边：玻璃开着、主题底色和页面同色时（黑白浅色），底板本身和页面分不出来，
             // 横条只因压在页面按钮上才像有底，竖条靠在空白处就只剩四个按钮浮着（平板 11-18 截图）。
-            val pillShape = RoundedCornerShape(HardwareCandidateCornerRadius)
+            val pillShape = RectangleShape
             val pillSurface = Modifier
                 .onGloballyPositioned { coordinates ->
                     val bounds = coordinates.boundsInWindow()
                     currentBoundsCallback(Rect(floor(bounds.left).toInt(), floor(bounds.top).toInt(), ceil(bounds.right).toInt(), ceil(bounds.bottom).toInt()))
                 }
-                .shadow(3.dp, pillShape)
                 .clip(pillShape).then(surface())
                 .border(1.dp, color.copy(alpha = 0.12f), pillShape)
                 .testTag("voice-collapsed-pill").padding(4.dp)
@@ -196,7 +195,7 @@ private fun VoicePillContinuous(on: Boolean, color: Color, accentColor: Color, o
             .testTag("voice-pill-continuous"),
         contentAlignment = Alignment.Center,
     ) {
-        val shape = RoundedCornerShape(10.dp)
+        val shape = RectangleShape
         Box(Modifier.size(width = 40.dp, height = 26.dp)
             .clip(shape)
             .background(accentColor.copy(alpha = fill))

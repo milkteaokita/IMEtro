@@ -4,11 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import com.kingzcheung.xime.ui.i18n.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,7 +40,7 @@ internal fun ExpressionPanelBar(
         leadingTabs()
         Box(Modifier.width(1.dp).height(16.dp).background(textColor.copy(alpha = .16f)))
         categories()
-        Box(Modifier.size(PanelCategoryHeight).testTag("expression-delete").clip(RoundedCornerShape(8.dp))
+        Box(Modifier.size(PanelCategoryHeight).testTag("expression-delete").clip(RectangleShape)
             .background(textColor.copy(alpha = .12f))
             .combinedClickable(role = Role.Button, onClick = onDelete, onLongClick = onDeleteFace,
                 onLongClickLabel = if (onDeleteFace != null) "删除整个颜文字" else null),
@@ -53,7 +53,7 @@ internal fun ExpressionPanelBar(
 @Composable
 internal fun ExpressionTab(label: String, chosen: Boolean, textColor: Color, accentColor: Color,
     modifier: Modifier = Modifier, description: String = label, onClick: () -> Unit) {
-    Box(modifier.heightIn(min = PanelCategoryHeight).widthIn(min = 28.dp).clip(RoundedCornerShape(8.dp))
+    Box(modifier.heightIn(min = PanelCategoryHeight).widthIn(min = 28.dp).clip(RectangleShape)
         .background(if (chosen) accentColor.copy(alpha = .22f) else Color.Transparent)
         .semantics { selected = chosen; contentDescription = description }
         .clickable(role = Role.Tab, onClick = onClick).padding(horizontal = 6.dp, vertical = PanelCategoryVerticalPadding),

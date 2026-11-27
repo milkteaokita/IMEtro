@@ -28,6 +28,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import com.kingzcheung.xime.ui.i18n.Text
+import com.kingzcheung.xime.ui.metro.metroTilt
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.activity.compose.BackHandler
@@ -239,33 +240,39 @@ internal fun SetupGuideContent(
     onOpenMore: (() -> Unit)? = null,
     scroll: ScrollState = rememberScrollState(),
 ) {
+    val metro = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = metro.background,
         topBar = {
-            TopAppBar(
-                title = { Text("按设备推荐配置", style = GuideText.heading()) },
-                navigationIcon = {
-                    if (!firstRun) IconButton(onClick = onDone) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+            if (firstRun) {
+                Column(
+                    Modifier.fillMaxWidth().background(metro.background).statusBarsPadding()
+                        .padding(horizontal = 20.dp, vertical = 10.dp)
+                ) {
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Text("CYIME • METRO", style = MaterialTheme.typography.labelMedium, color = metro.accent, modifier = Modifier.weight(1f))
+                        if (result == null) com.kingzcheung.xime.ui.metro.MetroOutlinedButton("以后再说", onClick = onSkip)
                     }
-                },
-                actions = { if (firstRun && result == null) TextButton(onClick = onSkip) { Text("以后再说", style = GuideText.body()) } },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                ),
-            )
+                    Text("按设备推荐配置", style = MaterialTheme.typography.headlineLarge, color = metro.onBackground)
+                }
+            } else {
+                com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+                    parentTitle = "设置",
+                    pageTitle = "按设备推荐配置",
+                    onBack = onDone,
+                )
+            }
         }
     ) { padding ->
         Column(
-            Modifier.fillMaxSize().padding(padding).verticalScroll(scroll).padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+            Modifier.fillMaxSize().padding(padding).verticalScroll(scroll).padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
             Spacer(Modifier.height(4.dp))
             Text("回答几个问题，按你的习惯设好键盘，并清掉用不到的模型。",
-                style = GuideText.body(), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                style = GuideText.body(), color = metro.onBackgroundMuted)
             if (facts == null || plan == null) {
-                Row(Modifier.fillMaxWidth().padding(24.dp), horizontalArrangement = Arrangement.Center) { CircularProgressIndicator() }
+                Row(Modifier.fillMaxWidth().padding(24.dp), horizontalArrangement = Arrangement.Center) { CircularProgressIndicator(color = metro.accent) }
             } else if (result != null) {
                 DeviceSection(facts, onOpenPerformance)
                 ResultSection(result, onDone, onOpenMore)
@@ -283,16 +290,14 @@ internal fun SetupGuideContent(
                         subtitle = "要下载 ${SetupGuidePlanner.mbText(plan.downloadBytes)}；不打开就等连上 Wi-Fi 自动下载",
                         checked = allowMetered, tag = "setup-metered", onCheckedChange = onAllowMetered)
                 }
-                Button(onClick = onApply, enabled = !applying,
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("setup-guide-apply")) {
-                    if (applying) {
-                        CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onPrimary)
-                        Spacer(Modifier.width(8.dp))
-                        Text("正在整理…", style = GuideText.optionTitle())
-                    } else Text("按推荐设置", style = GuideText.optionTitle())
-                }
+                com.kingzcheung.xime.ui.metro.MetroSolidButton(
+                    text = if (applying) "正在整理…" else "按推荐设置",
+                    onClick = onApply,
+                    enabled = !applying,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag("setup-guide-apply"),
+                )
                 Text("以后可以随时重新设置。",
-                    style = GuideText.note(), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    style = GuideText.note(), color = metro.onBackgroundMuted)
                 onOpenMore?.let { MoreEntry(it) }
                 Spacer(Modifier.height(24.dp))
             }
@@ -316,7 +321,7 @@ private fun GuideHeading(text: String) {
 
 @Composable
 private fun GuideCard(content: @Composable ColumnScope.() -> Unit) {
-    Surface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceContainerLow) {
+    Surface(shape = androidx.compose.ui.graphics.RectangleShape, color = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.surface) {
         Column(Modifier.fillMaxWidth().animateContentSize(tween(CyMotion.GUIDE, easing = CyMotion.Standard)), content = content)
     }
 }
@@ -373,24 +378,25 @@ private fun FactLine(text: String) {
 @Composable
 private fun GuideOption(selected: Boolean, title: String, subtitle: String, tag: String, multi: Boolean = false,
     extra: (@Composable (Color) -> Unit)? = null, onClick: () -> Unit) {
-    val colors = MaterialTheme.colorScheme
-    val container by animateColorAsState(if (selected) colors.primaryContainer else colors.surfaceContainerLow,
+    val metro = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current
+    val container by animateColorAsState(if (selected) metro.accent else metro.surface,
         tween(CyMotion.GUIDE, easing = CyMotion.Standard), label = "guide-option-container")
-    val edge by animateColorAsState(if (selected) colors.primary else colors.outlineVariant,
+    val edge by animateColorAsState(if (selected) metro.accent else metro.divider,
         tween(CyMotion.GUIDE, easing = CyMotion.Standard), label = "guide-option-edge")
     val edgeWidth by animateDpAsState(if (selected) 2.dp else 1.dp, tween(CyMotion.GUIDE, easing = CyMotion.Standard),
         label = "guide-option-edge-width")
-    val content by animateColorAsState(if (selected) colors.onPrimaryContainer else colors.onSurface,
+    val content by animateColorAsState(if (selected) metro.onAccent else metro.onBackground,
         tween(CyMotion.GUIDE, easing = CyMotion.Standard), label = "guide-option-content")
-    val shape = RoundedCornerShape(16.dp)
+    val shape = androidx.compose.ui.graphics.RectangleShape
     Surface(shape = shape, color = container, border = BorderStroke(edgeWidth, edge),
-        modifier = Modifier.fillMaxWidth().heightIn(min = 76.dp).testTag(tag).clip(shape)
+        modifier = Modifier.fillMaxWidth().heightIn(min = 76.dp).testTag(tag)
+            .metroTilt(4f, 0.98f)
             .then(if (multi) Modifier.toggleable(selected, role = Role.Checkbox, onValueChange = { onClick() })
                 else Modifier.selectable(selected, role = Role.RadioButton, onClick = onClick))) {
         Row(Modifier.padding(horizontal = 20.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(title, style = GuideText.optionTitle(), color = content)
-                if (subtitle.isNotEmpty()) Text(subtitle, style = GuideText.body(), color = content.copy(alpha = 0.8f))
+                if (subtitle.isNotEmpty()) Text(subtitle, style = GuideText.body(), color = content.copy(alpha = 0.85f))
                 extra?.invoke(content)
             }
             Spacer(Modifier.width(16.dp))
@@ -401,17 +407,18 @@ private fun GuideOption(selected: Boolean, title: String, subtitle: String, tag:
 
 @Composable
 private fun CheckBadge(selected: Boolean) {
-    val colors = MaterialTheme.colorScheme
-    val fill by animateColorAsState(if (selected) colors.primary else Color.Transparent,
+    val metro = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current
+    val fill by animateColorAsState(if (selected) metro.onAccent else Color.Transparent,
         tween(CyMotion.GUIDE, easing = CyMotion.Standard), label = "guide-check-fill")
-    val ring by animateColorAsState(if (selected) colors.primary else colors.outline,
+    val ring by animateColorAsState(if (selected) metro.onAccent else metro.onBackgroundSubtle,
         tween(CyMotion.GUIDE, easing = CyMotion.Standard), label = "guide-check-ring")
-    Box(Modifier.size(32.dp).clip(CircleShape).background(fill).border(2.dp, ring, CircleShape),
+    Box(Modifier.size(28.dp).background(fill, androidx.compose.ui.graphics.RectangleShape)
+        .border(2.dp, ring, androidx.compose.ui.graphics.RectangleShape),
         contentAlignment = Alignment.Center) {
         AnimatedVisibility(selected,
             enter = scaleIn(tween(CyMotion.GUIDE, easing = CyMotion.Enter), initialScale = 0.4f) + fadeIn(tween(CyMotion.GUIDE)),
             exit = scaleOut(tween(CyMotion.GUIDE, easing = CyMotion.Exit), targetScale = 0.4f) + fadeOut(tween(CyMotion.GUIDE))) {
-            Icon(Icons.Filled.Check, contentDescription = null, tint = colors.onPrimary, modifier = Modifier.size(22.dp))
+            Icon(Icons.Filled.Check, contentDescription = null, tint = metro.accent, modifier = Modifier.size(20.dp))
         }
     }
 }
@@ -615,7 +622,7 @@ private fun GuideSwitchRow(title: String, subtitle: String, checked: Boolean, ta
             Text(subtitle, style = GuideText.body(), color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Spacer(Modifier.width(12.dp))
-        Switch(checked = checked, onCheckedChange = null)
+        com.kingzcheung.xime.ui.metro.MetroToggleSwitch(checked = checked, onCheckedChange = onCheckedChange, showStatusLabel = false)
     }
 }
 
@@ -653,12 +660,12 @@ private fun SummarySection(facts: SetupFacts, plan: SetupPlan, removeIds: Set<St
 
 @Composable
 private fun ResultSection(result: SetupGuide.Result, onDone: () -> Unit, onOpenMore: (() -> Unit)? = null) {
-    Surface(color = MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(16.dp)) {
+    val metro = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current
+    Surface(color = metro.accent, shape = androidx.compose.ui.graphics.RectangleShape) {
         Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("✓ 已按推荐设置好", style = GuideText.heading(), color = MaterialTheme.colorScheme.onPrimaryContainer)
+            Text("✓ 已按推荐设置好", style = GuideText.heading(), color = metro.onAccent)
             val lines = buildList {
                 if (result.removed > 0) add("删掉了 ${result.removed} 个用不到的模型，空出 ${SetupGuidePlanner.mbText(result.freedBytes)}。")
-                // 写明是哪些模型在下载（语音、联想…），不只写多少 MB。
                 if (result.downloading > 0) add(if (result.waitingForWifi)
                     "${SetupGuidePlanner.kindsText(result.downloadingIds)}还要下载 ${SetupGuidePlanner.mbText(result.downloading)}，连上 Wi-Fi 后自动下载。"
                     else "${SetupGuidePlanner.kindsText(result.downloadingIds)}正在后台下载(${SetupGuidePlanner.mbText(result.downloading)})，下好就能用。")
@@ -668,37 +675,35 @@ private fun ResultSection(result: SetupGuide.Result, onDone: () -> Unit, onOpenM
                 addAll(result.inputDone)
                 addAll(result.inputFailed)
             }
-            lines.forEach { Text(it, color = MaterialTheme.colorScheme.onPrimaryContainer, style = GuideText.body()) }
+            lines.forEach { Text(it, color = metro.onAccent, style = GuideText.body()) }
         }
     }
     onOpenMore?.let { MoreEntry(it) }
-    Button(onClick = onDone, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text("完成", style = GuideText.optionTitle()) }
+    com.kingzcheung.xime.ui.metro.MetroSolidButton("完成", onClick = onDone, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp))
 }
 
 /** 推荐配置页底部、完成页上的入口：主题色边框的整行卡片，和完成按钮分开，看得出是可选的。 */
 @Composable
 private fun MoreEntry(onClick: () -> Unit) {
-    val shape = RoundedCornerShape(16.dp)
-    Surface(shape = shape, color = MaterialTheme.colorScheme.surface, border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
-        modifier = Modifier.fillMaxWidth().heightIn(min = 76.dp).testTag("setup-open-more").clip(shape)
+    val metro = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current
+    val shape = androidx.compose.ui.graphics.RectangleShape
+    Surface(shape = shape, color = metro.background, border = BorderStroke(2.dp, metro.accent),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 76.dp).testTag("setup-open-more")
+            .metroTilt(4f, 0.98f)
             .clickable(role = Role.Button, onClick = onClick)) {
         Row(Modifier.padding(horizontal = 20.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("更多配置", style = GuideText.optionTitle(), color = MaterialTheme.colorScheme.primary)
+                Text("更多配置", style = GuideText.optionTitle(), color = metro.accent)
                 Text("滑行、角标、删除键、字号、声音振动等，可以跳过",
                     style = GuideText.body(),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    color = metro.onBackgroundMuted)
             }
             Spacer(Modifier.width(12.dp))
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = metro.accent)
         }
     }
 }
 
-/**
- * 「更多配置」：大家最常问的几项，一题一组大选项卡。每题先选着现在的设置，点哪项就马上改成哪项（11-14 起，和设置页随时一致）；
- * 「好了」列出这次改了哪些；一项都没改时右上角是「跳过」，直接离开。说不清的几样（剪贴板同步、键盘尺寸、性能与省电）只放跳转行。
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SetupMoreContent(
@@ -713,46 +718,49 @@ internal fun SetupMoreContent(
     onOpenRoute: ((String) -> Unit)? = null,
     scroll: ScrollState = rememberScrollState(),
 ) {
+    val metro = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = metro.background,
         topBar = {
-            TopAppBar(
-                title = { Text("更多配置", style = GuideText.heading()) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
+            com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+                parentTitle = "按设备推荐配置",
+                pageTitle = "更多配置",
+                onBack = onBack,
+                actions = {
+                    if (result == null && facts?.current == answers) {
+                        com.kingzcheung.xime.ui.metro.MetroOutlinedButton(
+                            text = "跳过",
+                            onClick = onSkip,
+                            modifier = Modifier.testTag("setup-more-skip"),
+                        )
+                    }
                 },
-                // 改过的已经生效，再写「跳过」像是能撤销；改过就只留下面的「好了」。
-                actions = { if (result == null && facts?.current == answers) TextButton(onClick = onSkip, modifier = Modifier.testTag("setup-more-skip")) {
-                    Text("跳过", style = GuideText.body())
-                } },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                ),
             )
         }
     ) { padding ->
         Column(
-            Modifier.fillMaxSize().padding(padding).verticalScroll(scroll).padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+            Modifier.fillMaxSize().padding(padding).verticalScroll(scroll).padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
             Spacer(Modifier.height(4.dp))
             if (facts == null || answers == null) {
-                Row(Modifier.fillMaxWidth().padding(24.dp), horizontalArrangement = Arrangement.Center) { CircularProgressIndicator() }
+                Row(Modifier.fillMaxWidth().padding(24.dp), horizontalArrangement = Arrangement.Center) { CircularProgressIndicator(color = metro.accent) }
             } else if (result != null) {
-                Surface(color = MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(16.dp)) {
+                Surface(color = metro.accent, shape = androidx.compose.ui.graphics.RectangleShape) {
                     Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("✓ 已改好", style = GuideText.heading(), color = MaterialTheme.colorScheme.onPrimaryContainer)
-                        result.forEach { Text(it, color = MaterialTheme.colorScheme.onPrimaryContainer, style = GuideText.body()) }
+                        Text("✓ 已改好", style = GuideText.heading(), color = metro.onAccent)
+                        result.forEach { Text(it, color = metro.onAccent, style = GuideText.body()) }
                     }
                 }
-                Button(onClick = onDone, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("setup-more-done")) {
-                    Text("完成", style = GuideText.optionTitle())
-                }
+                com.kingzcheung.xime.ui.metro.MetroSolidButton(
+                    text = "完成",
+                    onClick = onDone,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag("setup-more-done"),
+                )
                 Spacer(Modifier.height(24.dp))
             } else {
                 Text("选中的是现在的设置，点一下立即生效。",
-                    style = GuideText.body(), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    style = GuideText.body(), color = metro.onBackgroundMuted)
                 MoreQuestions(facts, answers, onAnswers)
                 if (onOpenRoute != null) {
                     GuideHeading("要到单独页面设的")
@@ -768,19 +776,21 @@ internal fun SetupMoreContent(
                                 verticalAlignment = Alignment.CenterVertically) {
                                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                     Text(title, style = GuideText.optionTitle())
-                                    Text(subtitle, style = GuideText.body(), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text(subtitle, style = GuideText.body(), color = metro.onBackgroundMuted)
                                 }
                                 Spacer(Modifier.width(12.dp))
                                 Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    tint = metro.accent)
                             }
                         }
                     }
                 }
                 val changed = facts.current != answers
-                Button(onClick = onApply, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("setup-more-apply")) {
-                    Text(if (changed) "好了" else "不改了", style = GuideText.optionTitle())
-                }
+                com.kingzcheung.xime.ui.metro.MetroSolidButton(
+                    text = if (changed) "好了" else "不改了",
+                    onClick = onApply,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag("setup-more-apply"),
+                )
                 Spacer(Modifier.height(24.dp))
             }
         }

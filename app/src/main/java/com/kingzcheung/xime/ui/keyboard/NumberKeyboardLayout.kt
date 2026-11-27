@@ -17,7 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material3.Text
@@ -339,7 +339,7 @@ private fun NumberSymbolRail(
     }
     BoxWithConstraints(modifier
         .then(shadowModifier)
-        .clip(RoundedCornerShape(LocalKeyCornerRadius.current))
+        .clip(RectangleShape)
         .background(frostedKeyColor(backgroundColor, textColor, frostedGlass))) {
         val rowHeight = maxHeight / NineGridFrame.SIDE_VISIBLE_SLOTS
         val railState = rememberLazyListState()

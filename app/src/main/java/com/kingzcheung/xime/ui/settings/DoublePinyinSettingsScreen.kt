@@ -4,7 +4,11 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
+import com.kingzcheung.xime.ui.metro.MetroToggleSwitch
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -121,7 +125,7 @@ fun DoublePinyinSettingsContent(onBack: () -> Unit) {
         preview = draft == null, example = com.kingzcheung.xime.keyboard.KeyboardPanelLaunch.Example.DoublePinyin,
         modifier = Modifier.testTag("double-pinyin-settings")) { modifier ->
         Column(modifier.then(if (draft != null) Modifier.imePadding() else Modifier).settingsVerticalScroll()
-            .padding(horizontal = 16.dp).padding(bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            .padding(horizontal = 16.dp).padding(bottom = 16.dp + LocalKeyboardPreviewInset.current), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             val current = draft
             val keyboardPrefs = com.kingzcheung.xime.ui.keyboard.rememberKeyboardInputPreferences()
             if (current == null) {
@@ -171,7 +175,11 @@ fun DoublePinyinSettingsContent(onBack: () -> Unit) {
                                         Text(subtitle, style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     }
-                                    Switch(id in enabled, enabled = !busy, colors = settingsSwitchColors(), modifier = Modifier.testTag("double-pinyin-enabled:$id"),
+                                    MetroToggleSwitch(
+                                        checked = id in enabled,
+                                        enabled = !busy,
+                                        modifier = Modifier.testTag("double-pinyin-enabled:$id"),
+                                        showStatusLabel = false,
                                         onCheckedChange = { on ->
                                             busy = true
                                             scope.launch {
@@ -182,7 +190,8 @@ fun DoublePinyinSettingsContent(onBack: () -> Unit) {
                                                     .onFailure { message = "设置失败：${it.message}" }
                                                 busy = false
                                             }
-                                        })
+                                        },
+                                    )
                                 }
                             }
                             // ing 在分号上的方案（微软双拼）：ing 改放 Shift 键，多数手机输入法这样做；所有这类方案共用这一个开关。
@@ -197,9 +206,13 @@ fun DoublePinyinSettingsContent(onBack: () -> Unit) {
                                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     if (ingLock != null) SettingsLockNote(ingLock.message)
                                 }
-                                Switch(keyboardPrefs.doublePinyinSemicolonOnShift, enabled = !busy && ingLock == null, colors = settingsSwitchColors(),
+                                MetroToggleSwitch(
+                                    checked = keyboardPrefs.doublePinyinSemicolonOnShift,
+                                    enabled = !busy && ingLock == null,
                                     modifier = Modifier.testTag("double-pinyin-semicolon-on-shift:${scheme.id}"),
-                                    onCheckedChange = { keyboardPrefs.copy(doublePinyinSemicolonOnShift = it).save(context) })
+                                    showStatusLabel = false,
+                                    onCheckedChange = { keyboardPrefs.copy(doublePinyinSemicolonOnShift = it).save(context) },
+                                )
                             }
                             if (scheme.usesSemicolon) SemicolonOnShiftLegend(keyboardPrefs.doublePinyinSemicolonOnShift)
                             Row {
@@ -278,19 +291,19 @@ fun DoublePinyinSettingsContent(onBack: () -> Unit) {
             if (message.isNotBlank()) Text(message, style = MaterialTheme.typography.bodyMedium)
         }
     }
-    if (discard) AlertDialog(onDismissRequest = { discard = false }, title = { Text("放弃未保存的修改？") },
-        confirmButton = { TextButton(onClick = { discard = false; draft = null }) { Text("放弃") } },
-        dismissButton = { TextButton(onClick = { discard = false }) { Text("继续编辑") } })
-    deleteId?.let { target -> AlertDialog(onDismissRequest = { deleteId = null }, title = { Text("删除这个双拼方案？") },
+    if (discard) MetroAlertDialog(onDismissRequest = { discard = false }, title = { Text("放弃未保存的修改？") },
+        confirmButton = { MetroSolidButton(text = "放弃", onClick = { discard = false; draft = null }) },
+        dismissButton = { MetroOutlinedButton(text = "继续编辑", onClick = { discard = false }) })
+    deleteId?.let { target -> MetroAlertDialog(onDismissRequest = { deleteId = null }, title = { Text("删除这个双拼方案？") },
         text = { Text("只删除键位，不删词库。正在用的话会换回小鹤双拼。") },
-        confirmButton = { TextButton(onClick = {
+        confirmButton = { MetroSolidButton(text = "删除", containerColor = MaterialTheme.colorScheme.error, onClick = {
             deleteId = null; busy = true
             scope.launch {
                 runCatching { withContext(Dispatchers.IO) { DoublePinyinSchemes.delete(context, target); DoublePinyinSchemes.all(context) } }
                     .onSuccess { schemes = it; message = "已删除" }.onFailure { message = "删除失败：${it.message}" }
                 busy = false
             }
-        }) { Text("删除") } }, dismissButton = { TextButton(onClick = { deleteId = null }) { Text("取消") } }) }
+        }) }, dismissButton = { MetroOutlinedButton(text = "取消", onClick = { deleteId = null }) }) }
 }
 
 /**
@@ -320,7 +333,7 @@ internal fun DoublePinyinKeyMap(scheme: DoublePinyinScheme, highlight: Char? = n
                         val moved = scheme.plainInitials.filterValues { it == key }.keys.sorted().joinToString(" ")
                         val initial = listOfNotNull(special, moved.takeIf { it.isNotEmpty() }).joinToString(" ").ifEmpty { null }
                         val chosen = key == highlight
-                        Surface(shape = RoundedCornerShape(7.dp),
+                        Surface(shape = RectangleShape,
                             color = if (chosen) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHighest,
                             border = BorderStroke(if (chosen) 2.dp else 1.dp,
                                 if (chosen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant),

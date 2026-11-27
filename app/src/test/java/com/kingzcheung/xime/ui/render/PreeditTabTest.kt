@@ -141,7 +141,7 @@ class PreeditTabTest {
         set(SettingsPreferences.PREEDIT_STYLE_LINE, SettingsPreferences.PREEDIT_ALIGN_RIGHT)
         assertEquals("小签靠右贴死右边缘", bar.right, tab().right, 1f)
         assertEquals("底边贴着栏顶", bar.top, tab().bottom, 2f)
-        rule.onNodeWithTag("preedit-tab-corner-fill", true).assertExists()
+        rule.onNodeWithTag("preedit-tab-corner-fill", true).assertDoesNotExist()
         set(SettingsPreferences.PREEDIT_STYLE_LINE, SettingsPreferences.PREEDIT_ALIGN_CENTER)
         assertEquals("小签居中", bar.center.x, tab().center.x, px)
         rule.onNodeWithTag("preedit-tab-corner-fill", true).assertDoesNotExist()

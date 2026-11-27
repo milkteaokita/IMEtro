@@ -18,7 +18,7 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import com.kingzcheung.xime.ui.i18n.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -168,7 +168,7 @@ fun LaunchAdPoster(secondsLeft: Int, blink: Boolean, poked: Int, onSkip: () -> U
         }
         // 真的跳过：不跟着版面缩放，永远在右上角，随时能点。
         Text(if (secondsLeft > 0) "跳过 $secondsLeft" else "跳过", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Medium,
-            modifier = Modifier.align(Alignment.TopEnd).padding(top = 10.dp, end = 12.dp).background(Color(0xCC000000), RoundedCornerShape(50))
+            modifier = Modifier.align(Alignment.TopEnd).padding(top = 10.dp, end = 12.dp).background(Color(0xCC000000), RectangleShape)
                 .clickable(onClick = onSkip).padding(horizontal = 14.dp, vertical = 7.dp).testTag("launch-ad-egg-skip"))
     }
 }

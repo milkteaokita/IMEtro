@@ -23,7 +23,12 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
+import com.kingzcheung.xime.ui.metro.LocalMetroUiState
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
+import com.kingzcheung.xime.ui.metro.MetroSubPageHeader
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -128,28 +133,25 @@ fun MarketHubContent(
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     val tabIndex = pagerState.currentPage
 
+    val metro = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current
     Scaffold(
+        containerColor = metro.background,
         topBar = {
-            TopAppBar(
-                title = { Text("扩展") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-                    }
-                },
+            com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+                parentTitle = "系统",
+                pageTitle = "扩展",
+                onBack = onBack,
                 actions = {
-                    TextButton(modifier = Modifier.testTag("market-installed"), onClick = when (tabIndex) {
-                        0 -> onNavigateToLocal
-                        1 -> onNavigateToModelLocal
-                        else -> onNavigateToPlugins
-                    }) {
-                        Text("已安装", style = MaterialTheme.typography.labelMedium)
-                    }
+                    com.kingzcheung.xime.ui.metro.MetroOutlinedButton(
+                        text = "已安装",
+                        modifier = Modifier.testTag("market-installed"),
+                        onClick = when (tabIndex) {
+                            0 -> onNavigateToLocal
+                            1 -> onNavigateToModelLocal
+                            else -> onNavigateToPlugins
+                        },
+                    )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                ),
             )
         },
     ) { padding ->
@@ -158,22 +160,33 @@ fun MarketHubContent(
                 .fillMaxSize()
                 .padding(padding),
         ) {
-            PrimaryTabRow(selectedTabIndex = tabIndex) {
-                Tab(
-                    selected = tabIndex == 0,
-                    onClick = { scope.launch { pagerState.animateScrollToPage(0) } },
-                    text = { Text("方案") },
-                )
-                Tab(
-                    selected = tabIndex == 1,
-                    onClick = { scope.launch { pagerState.animateScrollToPage(1) } },
-                    text = { Text("模型") },
-                )
-                Tab(
-                    selected = tabIndex == 2,
-                    onClick = { scope.launch { pagerState.animateScrollToPage(2) } },
-                    text = { Text("插件") },
-                )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(24.dp),
+            ) {
+                listOf("方案", "模型", "插件").forEachIndexed { index, label ->
+                    val active = tabIndex == index
+                    Column(
+                        modifier = Modifier
+                            .clickable { scope.launch { pagerState.animateScrollToPage(index) } }
+                            .padding(bottom = 4.dp),
+                    ) {
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = if (active) metro.onBackground else metro.onBackgroundSubtle,
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Box(
+                            modifier = Modifier
+                                .width(32.dp)
+                                .height(3.dp)
+                                .background(if (active) metro.accent else Color.Transparent)
+                        )
+                    }
+                }
             }
             androidx.compose.foundation.pager.HorizontalPager(
                 state = pagerState,
@@ -357,7 +370,7 @@ private fun SchemesMarketTab(
 /** 方案市场顶部：内置方案不用下载，点「去选」到「语言与方案」。 */
 @Composable
 private fun BuiltinSchemesCard(onOpen: () -> Unit) {
-    Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surfaceContainerLow,
+    Surface(shape = RectangleShape, color = MaterialTheme.colorScheme.surfaceContainerLow,
         modifier = Modifier.fillMaxWidth().testTag("market-builtin-schemes")) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f).padding(end = 12.dp)) {
@@ -395,7 +408,7 @@ private fun SchemeTrailingButton(
 
         scheme.id in uiState.downloadedIds && item.hasUpdate -> Button(
             onClick = onUpdate,
-            shape = RoundedCornerShape(50),
+            shape = RectangleShape,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -426,7 +439,7 @@ private fun SchemeTrailingButton(
 
         else -> Button(
             onClick = onDownload,
-            shape = RoundedCornerShape(50),
+            shape = RectangleShape,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -627,7 +640,7 @@ private fun ModelTrailingButton(
             Column(horizontalAlignment = Alignment.End) {
                 Button(
                     onClick = onDownload,
-                    shape = RoundedCornerShape(50),
+                    shape = RectangleShape,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -653,7 +666,7 @@ private fun ModelTrailingButton(
         )
         else -> Button(
             onClick = onDownload,
-            shape = RoundedCornerShape(50),
+            shape = RectangleShape,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -689,7 +702,7 @@ internal fun MarketStoreCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RectangleShape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
@@ -708,7 +721,7 @@ internal fun MarketStoreCard(
                 Box(
                     modifier = Modifier
                         .size(48.dp)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RectangleShape)
                         .background(iconContainerColor),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -876,7 +889,7 @@ private fun MarketCenterBox(
 @Composable
 private fun MarketTag(text: String) {
     Surface(
-        shape = RoundedCornerShape(8.dp),
+        shape = RectangleShape,
         color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f),
     ) {
         Text(
@@ -932,19 +945,14 @@ fun MarketSchemeDetailContent(
 
     val item = uiState.schemes.firstOrNull { it.scheme.id == schemeId }
 
+    val metro = LocalMetroUiState.current
     Scaffold(
+        containerColor = metro.background,
         topBar = {
-            TopAppBar(
-                title = { Text("方案详情") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                ),
+            MetroSubPageHeader(
+                parentTitle = "扩展中心",
+                pageTitle = "方案详情",
+                onBack = onBack,
             )
         },
     ) { padding ->
@@ -1000,7 +1008,7 @@ private fun SchemeDetailBody(
                 Box(
                     modifier = Modifier
                         .size(64.dp)
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(RectangleShape)
                         .background(iconContainer),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -1066,7 +1074,7 @@ private fun SchemeDetailBody(
         if (scheme.warning.isNotEmpty()) {
             item {
                 Surface(
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RectangleShape,
                     color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f),
                 ) {
                     Text(
@@ -1158,7 +1166,7 @@ private fun SchemeVersionDownloadButton(
         !item.compatible -> OutlinedButton(
             onClick = {},
             enabled = false,
-            shape = RoundedCornerShape(12.dp),
+            shape = RectangleShape,
             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
         ) {
             Text("需 App ≥ ${item.minAppVersion}", style = MaterialTheme.typography.labelSmall)
@@ -1166,7 +1174,7 @@ private fun SchemeVersionDownloadButton(
 
         scheme.id in uiState.downloadedIds -> OutlinedButton(
             onClick = onDownload,
-            shape = RoundedCornerShape(12.dp),
+            shape = RectangleShape,
             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
         ) {
             Text("重新下载", style = MaterialTheme.typography.labelSmall)
@@ -1174,7 +1182,7 @@ private fun SchemeVersionDownloadButton(
 
         else -> Button(
             onClick = onDownload,
-            shape = RoundedCornerShape(12.dp),
+            shape = RectangleShape,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -1200,7 +1208,7 @@ private fun SchemeVersionCard(
     }
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RectangleShape,
         colors = CardDefaults.cardColors(containerColor = containerColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
@@ -1282,19 +1290,14 @@ fun MarketModelDetailContent(
 
     val item = uiState.models.firstOrNull { it.model.id == modelId }
 
+    val metro = LocalMetroUiState.current
     Scaffold(
+        containerColor = metro.background,
         topBar = {
-            TopAppBar(
-                title = { Text("模型详情") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                ),
+            MetroSubPageHeader(
+                parentTitle = "扩展中心",
+                pageTitle = "模型详情",
+                onBack = onBack,
             )
         },
     ) { padding ->
@@ -1359,7 +1362,7 @@ private fun ModelDetailBody(
                 Box(
                     modifier = Modifier
                         .size(64.dp)
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(RectangleShape)
                         .background(iconContainer),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -1399,7 +1402,7 @@ private fun ModelDetailBody(
 
         item {
             Surface(
-                shape = RoundedCornerShape(8.dp),
+                shape = RectangleShape,
                 color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f),
             ) {
                 Row(
@@ -1526,7 +1529,7 @@ private fun ModelVersionDownloadButton(
 
         else -> Button(
             onClick = onDownload,
-            shape = RoundedCornerShape(12.dp),
+            shape = RectangleShape,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -1552,7 +1555,7 @@ private fun ModelVersionCard(
     }
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RectangleShape,
         colors = CardDefaults.cardColors(containerColor = containerColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
@@ -1702,34 +1705,35 @@ fun PluginDetailContent(
     val plugin = remember(pluginId) { PluginManager.getAllInstallPlugins().find { it.id == pluginId } }
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     var confirmUninstall by remember { mutableStateOf(false) }
-    if (confirmUninstall && plugin != null) androidx.compose.material3.AlertDialog(
+    if (confirmUninstall && plugin != null) MetroAlertDialog(
         onDismissRequest = { confirmUninstall = false },
         title = { Text("卸载插件") },
         text = { Text("确定要卸载「${plugin.name.ifEmpty { plugin.id }}」吗？插件文件和配置会删掉。") },
         confirmButton = {
-            TextButton(onClick = {
-                confirmUninstall = false
-                scope.launch {
-                    uninstallPluginCompletely(context, plugin.id)
-                    onBack()
-                }
-            }) { Text("卸载", color = MaterialTheme.colorScheme.error) }
-        },
-        dismissButton = { TextButton(onClick = { confirmUninstall = false }) { Text("取消") } },
-    )
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("插件详情") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+            MetroSolidButton(
+                text = "卸载",
+                containerColor = MaterialTheme.colorScheme.error,
+                onClick = {
+                    confirmUninstall = false
+                    scope.launch {
+                        uninstallPluginCompletely(context, plugin.id)
+                        onBack()
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                ),
+            )
+        },
+        dismissButton = {
+            MetroOutlinedButton(text = "取消", onClick = { confirmUninstall = false })
+        },
+    )
+    val metro = LocalMetroUiState.current
+    Scaffold(
+        containerColor = metro.background,
+        topBar = {
+            MetroSubPageHeader(
+                parentTitle = "扩展中心",
+                pageTitle = "插件详情",
+                onBack = onBack,
             )
         },
     ) { padding ->
@@ -1762,7 +1766,7 @@ fun PluginDetailContent(
                     Box(
                         modifier = Modifier
                             .size(64.dp)
-                            .clip(RoundedCornerShape(16.dp))
+                            .clip(RectangleShape)
                             .background(iconContainer),
                         contentAlignment = Alignment.Center,
                     ) {
@@ -1824,7 +1828,7 @@ fun PluginDetailContent(
                 item {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RectangleShape,
                         color = MaterialTheme.colorScheme.surfaceContainerLow,
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {

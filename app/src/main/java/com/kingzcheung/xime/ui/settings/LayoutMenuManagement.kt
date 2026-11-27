@@ -23,6 +23,7 @@ import com.kingzcheung.xime.service.settingsActivityIntent
 import com.kingzcheung.xime.settings.*
 import com.kingzcheung.xime.ui.menubar.dragOrderItem
 import com.kingzcheung.xime.ui.menubar.rememberDragOrder
+import com.kingzcheung.xime.ui.metro.MetroToggleSwitch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.onStart
@@ -99,8 +100,13 @@ internal fun LayoutMenuManagement(initialLanguage: InputLanguage?, layoutStatus:
                             .toggleable(checked, enabled = canChange, role = Role.Switch) { show ->
                                 if (drag.dragging == null) LayoutMenuPreferences.setVisible(context, language, layouts, layout.id, show)
                             }) {
-                        Switch(checked, onCheckedChange = null, enabled = canChange,
-                            modifier = Modifier.padding(end = 12.dp), colors = settingsSwitchColors())
+                        MetroToggleSwitch(
+                            checked = checked,
+                            onCheckedChange = null,
+                            enabled = canChange,
+                            showStatusLabel = false,
+                            modifier = Modifier.padding(end = 12.dp),
+                        )
                     }
                 }
             }

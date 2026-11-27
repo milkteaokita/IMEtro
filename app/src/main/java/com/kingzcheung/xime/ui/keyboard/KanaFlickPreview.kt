@@ -2,8 +2,10 @@ package com.kingzcheung.xime.ui.keyboard
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material3.Text
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.animation.core.animateFloatAsState
@@ -73,13 +75,19 @@ internal fun DirectionDiscPreview(labels: Map<KanaFlickDirection, String>, direc
                 placement.place(directionDiscPosition(anchorBounds, windowSize, popupContentSize, margin))
         }
     }
+    val metroActive = com.kingzcheung.xime.ui.theme.LocalMetroThemeActive.current
+    val containerShape = if (metroActive) RectangleShape else CircleShape
     // 方向盘悬在上一排键上：只显示不接触摸，另一只手快速点上一排的键不被它吃掉。
     Popup(popupPositionProvider = position, properties = DisplayOnlyPopupProperties) {
         VerifyPopupWindowPlacement(placement)
         Box(Modifier.size((112f * scale).dp).testTag("$tagPrefix-flick-preview")
             .semantics { stateDescription = labels[direction] ?: "无字符" }, contentAlignment = Alignment.Center) {
             Box(Modifier.size((100f * scale).dp).testTag("$tagPrefix-preview-bubble")
-                .shadow(4.dp, CircleShape).background(background, CircleShape).padding((5f * scale).dp)) {
+                .let { mod ->
+                    if (metroActive) mod.border(1.5.dp, foreground.copy(alpha = 0.45f), containerShape)
+                    else mod.shadow(4.dp, containerShape)
+                }
+                .background(background, containerShape).padding((5f * scale).dp)) {
                 for (item in KanaFlickDirection.entries) {
                     val selected = direction == item
                     // Re-aiming fades the highlight across instead of jumping (stable call count per direction).
@@ -94,7 +102,7 @@ internal fun DirectionDiscPreview(labels: Map<KanaFlickDirection, String>, direc
                         30f * scale, 30f * scale, density.fontScale, scaleOverride = 1f)
                     Box(Modifier.align(kanaDirectionAlignment(item)).size((30f * scale).dp)
                         .testTag("$tagPrefix-preview-choice:${item.name}").semantics { this.selected = selected }
-                        .background(foreground.copy(alpha = .2f * emphasis), CircleShape),
+                        .background(foreground.copy(alpha = .2f * emphasis), containerShape),
                         contentAlignment = Alignment.Center) {
                         Text(punctuationKeyLabel(label), color = foreground.copy(alpha = .75f + .25f * emphasis),
                             fontSize = sizeSp.sp, lineHeight = (sizeSp * 1.15f).sp,

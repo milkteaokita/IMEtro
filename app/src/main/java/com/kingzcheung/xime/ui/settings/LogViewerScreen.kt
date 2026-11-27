@@ -95,19 +95,13 @@ fun LogViewerScreen(
     }
     
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = { Text("日志查看器") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "返回"
-                        )
-                    }
-                },
+            com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+                parentTitle = "关于",
+                pageTitle = "日志查看器",
+                onBack = onBack,
                 actions = {
                     val targetFile = uiState.selectedLogFile
                         ?: uiState.logFiles.firstOrNull()
@@ -137,10 +131,6 @@ fun LogViewerScreen(
                         }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                ),
             )
         }
     ) { padding ->

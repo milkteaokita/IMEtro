@@ -1,286 +1,130 @@
-<h1 align="center">CyIME</h1>
+<h1 align="center">IMEtro</h1>
 
 <p align="center">
-  <a href="README.en.md">English</a> · <a href="README.zh-TW.md">繁體中文</a>
+  <strong>Windows Phone 7 / 8.1 / 10 Mobile Metro 風格離線 Android 輸入法</strong><br/>
+  <a href="README.zh-CN.md">简体中文</a> · <a href="README.en.md">English</a>
 </p>
 
-**CyIME** 是 Cyletix 开发的 Android 输入法，基于 [Rime](https://rime.im/) 引擎，fork自Xime。中文拼音九键双拼五笔笔画仓颉注音英日西俄法德意越，离线语音手写拍照OCR识别，另有给听障人士用的实时字幕。
+**IMEtro**（v2.0.0）是基於開源輸入法 [CyIME](https://github.com/Cyletix/CyIME)（fork 自 [Xime](https://github.com/ximeiorg/Xime)）打造的 **Windows Phone Metro** 風格 Android 輸入法，底層採用 [Rime](https://rime.im/) 引擎。從設定介面、快速設定引導、鍵盤面板、動態磚工具選單到即時字幕，全面重塑為純正 **0dp 銳利直角、純黑 OLED 高對比與 Windows Phone 動態磚美學**，同時完整保留離線詞庫、手寫、語音辨識、拍照識字與即時字幕功能。
 
-## 目标
+---
 
-我想做出世界上最好用的开源输入法：最好的词库、最好的算法、最好的性能优化、最全面的多模态辅助输入、最好看的主题、音效、震动，最合理的排布，最全面的输入法，以及离线语音手写拍照识别。
+## Metro 設計亮點
 
-- **全功能离线服务**：词库、手写、语音识别、拍照识字、实时字幕都在手机上运行，完整版装上就能离线用。
-- **个人算法模型**：九键用 CyIME 自己训练的词组模型，长句一口气打完，逐键选词。
-- **多语言布局方案**：全拼 26 键、九键、14 键；六种内置双拼，还能自建方案；五笔、笔画、仓颉、注音；英语、日语、韩语、西班牙语、俄语、法语、德语、意大利语、越南语、马来语。
-- **手写**：中文、英文、日语连写，LaTeX公式识别，支持 S Pen。
-- **自定义外观**：固定、悬浮、分体三种放法，悬浮键盘能拖动、缩放、旋转；多套配色、玻璃效果、自己的图片做背景。
-- **无障碍服务**：听障 言语障碍人士， 把周围的话转成字幕，自动区分说话人，通话时也能用，有人叫你名字时振动。将来会支持肢体残疾障碍人士的输入方式。
+- **100% 純正 Metro 視覺語言**：全介面採用 `0.dp` 銳利幾何方塊（`RectangleShape`）、零陰影平面設計、純黑（`#000000`）／純白（`#FFFFFF`）OLED 高對比襯底，徹底移除圓角卡片與原生 Material 3 控制項。
+- **Metro 時代風格切換**：支援 **Early WP7**、**Mid WP8.1** 與 **Late W10M** 三種時代排版尺度與互動指標（Pivot 巨型標題＋W10M 強調色底線）。
+- **14 種經典 Metro 強調色與桌面連動**：內建 Zune 桃紅、Cobalt 鈷藍、Metro Cyan 等 14 款強調色，並可透過 `MetroThemeSync` 與 Metro Launcher（`com.metro.launcher`）即時同步深淺色與強調色。
+- **標誌性 Metro 動態表現**：設定頁採用 5 分頁 **Metro Pivot** 架構搭配 **3D Turnstile（旋轉門）** 轉場與 **3D Tilt** 觸控下沉動態（快速打字字母／數字鍵維持零延遲無傾斜）；功能選單採用 **Metro Live Tile** 方磚網格。
+- **全功能本機離線運行**：詞庫、手寫、語音辨識、拍照 OCR 與即時字幕全部在手機本機運作，不聯網也能完整使用。
+- **多語言與豐富輸入方案**：全拼 26 鍵、九鍵、14 鍵；六種內建雙拼並可自訂方案；筆畫、倉頡五代、速成、注音大千、五筆 86／98；英語、日語、韓語、西語、俄語、法語、德語、義大利語、越南語、馬來語。
+- **手寫與語音轉文字**：支援中／英／日文連寫、LaTeX 數學公式辨識與 S Pen；本機離線語音辨識（SenseVoice、Paraformer、Zipformer 等），長按空白鍵即可說話。
+- **無障礙即時字幕**：即時將周遭語音轉成對話字幕或橫向時間軸，支援講者區分、通話字幕、後台浮窗與呼叫名字震動提醒。
 
-## 下载与安装
+---
 
-要求 Android 9.0（API 28）及以上，安装包只有 ARM64。如有32位要求可以另提，不会为每个版本都打包32位安装包。
+## 下載與安裝
 
-1. 在 此GitHub页面的[Releases](https://github.com/Cyletix/CyIME/releases) 或[魔搭社区](https://www.modelscope.cn/models/Cyletix/cyime-model/files)（国内，`app/<版本>/` 文件夹）下载安装包，两个包源码相同，区别只是带不带离线模型：
-   - **轻量版** `CyIME-<版本>-arm64-v8a.apk`：不带语音、手写、联想等模型，需要时在「扩展 › 模型」下载。
-   - **完整版** `CyIME-<版本>-full-arm64-v8a.apk`：内置 SenseVoice 语音、手写、声纹、联想模型和九键词组模型，装上就能离线用。边说边出字的 Paraformer 不内置，需要时在应用里下载。
-2. 安装后在系统设置里启用 **CyIME**，并把它设为当前输入法。
-3. 以后在「设置 › 关于 › 检查更新」更新，会下载和现在同一种（轻量／完整）的安装包交给系统安装，国内先从魔搭下载。
+需要 Android 9.0（API 28）或更新版本。
 
-<details>
-<summary>安装失败、谷歌开发者验证、从旧版迁移</summary>
+1. 前往 [**milkteaokita/IMEtro Releases**](https://github.com/milkteaokita/IMEtro/releases) 下載最新安裝檔：
+   - **標準 / 輕量版** `IMEtro-<版本>-arm64-v8a.apk`（或 `-universal.apk`）：可在安裝後於「擴充 › 模型」按需下載語音、手寫與聯想模型。
+   - **完整版** `IMEtro-<版本>-full-arm64-v8a.apk`：內建 SenseVoice 語音、手寫、聲紋與聯想模型，安裝即可離線使用。
+2. 安裝後依照 **IMEtro 設定精靈** 於系統設定啟用 **IMEtro**，並切換為目前輸入法。
+3. 日後可在「設定 › 關於 IMEtro › 檢查更新」取得 GitHub Releases 的最新版本；若遇到安裝異常或問題，歡迎於 [Issues](https://github.com/milkteaokita/IMEtro/issues) 回報。
 
-**安装失败时，先看系统安装器弹窗的原文。**
+> 應用 ID 為 `com.metro.cyime`，與原版 `com.cyletix.cyime` / `com.kingzcheung.xime` 彼此獨立，可共存於同一台裝置而不互相覆蓋資料。
 
-- **「安装包缺乏开发者证书」或「未包含任何证书」**　华为、三星、vivo 上都有人遇到过。安装包本身签名没问题，原因还在查。用户试过管用的办法有两个：删掉已下载的安装包，重新下载再装，可能要多试一两次；或者用 MT 管理器打开安装包安装。[官方发布文件](https://github.com/Cyletix/CyIME/releases/latest)
-- **「不允许此来源安装应用」**　在手机设置里搜索「安装未知应用」，只给实际打开官方 APK 的浏览器或文件管理器开启安装权限。[vivo 安装说明](https://kefu.vivo.com.cn/robot/imgmsgData/e61815a2c963482ebbaf71a4adebb160/index_1.html)
-- **「与已安装应用签名不一致」**　保留旧版和词库，先核对旧版的下载渠道。覆盖更新要求签名兼容，卸载会清除应用数据。[Android 应用签名说明](https://developer.android.com/studio/publish/app-signing)
+---
 
-如果官方包仍被拦截，请附上**系统安装失败弹窗**、机型和系统版本、APK 文件名和下载来源，并注明是首次安装还是覆盖更新。[反馈安装问题](https://github.com/Cyletix/CyIME/issues)
+## 完整功能一覽
 
-> 带谷歌服务的手机（三星、海外版机型等）从 2027 年起安装未在谷歌登记的应用要先开一次「高级安装」，国行手机和 adb 安装不受影响，见 [谷歌开发者验证与安装](docs/android-developer-verification.md)。
+以下標記「預設關」的功能可在 **IMEtro 設定** 中自行開啟。
 
-> 从旧版 `com.kingzcheung.xime` 迁移：安装身份已独立为 `com.cyletix.cyime`，系统当作新应用，可以并存，旧版数据不会自动继承。
+**中文輸入**
+- 全拼 26 鍵、九鍵、14 鍵（基於霧凇拼音詞庫）；九鍵可下載詞組模型與語法增強模型，長句逐鍵選詞。
+- 雙拼：內建小鶴、首道、自然碼、智慧 ABC、拼音加加、微軟雙拼，支援複製修改或新建自訂方案（含 14 鍵與九鍵版本，預設關）。
+- 筆畫、倉頡五代、倉頡速成、注音大千隨包內建；五筆 86、五筆 98 可於「擴充 › 方案」下載。
+- 支援繁體輸出（台灣用語，預設關）、模糊音、生僻字、中英混輸、中文滑行輸入；26 鍵支援智慧糾錯且不搶佔首位候選。
+- 詞庫管理：個人短語、匯入 TXT／搜狗／QQ／Rime 詞庫、管理已刪候選、查詞與分類詞庫。
 
-</details>
+**多語言支援**
+- **英文**：整詞補全與滑行輸入。
+- **日語**：羅馬字 26 鍵與假名拂動鍵盤（基於 rime-jaroomaji）。
+- **其他語言**：西語、德語、法語、義大利語、俄語、韓語、越南語、馬來語專用鍵盤與補全詞表（預設關）。
 
-## 功能
+**手寫、語音與拍照識字**
+- **手寫**：支援中／英／日多字連寫與數學公式轉 LaTeX，支援 S Pen。
+- **語音**：預設離線 SenseVoice（自動標點、整句定稿），另可選串流 Paraformer、Zipformer、X-ASR 與日語模型，或自訂線上辨識介面。
+- **拍照 OCR**：於剪貼簿中拍照或選取圖片，離線擷取文字。
 
-下面写「默认关」的功能要在设置里自己打开。
+**即時字幕與無障礙**
+- 支援中／英／日即時字幕、講者自動分類與命名、背景浮窗、通話字幕、3 天本機紀錄搜尋分享與點名震動提醒；桌面提供獨立「字幕」捷徑。
 
-**中文**
+**鍵盤外觀、剪貼簿與擴充**
+- **擺放模式**：固定、懸浮（自由拖曳／縮放／旋轉）、分體鍵盤；平板固定鍵盤可由頂邊把手向上拉成懸浮。
+- **字母排列**：QWERTY、Colemak、QWJRTK、Cyletix10、六邊形蜂巢排列，以及自訂鍵盤編輯器。
+- **工具列與剪貼簿**：支援 Live Tile 動態磚選單與拖曳排序；剪貼簿歷史、釘選、搜尋、自訂分組、匯出（TXT / Markdown / JSON）、簡訊驗證碼自動擷取與 Windows 配對同步。
+- **擴充與設定**：設定頁全文搜尋（支援同義詞與繁簡互通）、本機備份還原、效能檔位調整，以及支援 Lua 插件（`.xipk`）市場。
 
-- 全拼 26 键、九键、14 键，词库用雾凇拼音；九键可下载词组模型和语法增强模型，长句逐键选词。
-- 双拼：内置小鹤、首道、自然码、智能ABC、拼音加加、微软双拼，可以复制修改或新建自己的方案；每个双拼方案都有 14 键版本，小鹤、首道和自建方案另有九键版本（默认关）。
-- 笔画、仓颉五代、仓颉速成、注音大千键盘随包，五笔 86、五笔 98 在「扩展 › 方案」下载（约 2 MB），都在「语言与方案」里启用。
-- 繁体输出（按台湾用字，默认关）、模糊音（默认关）、生僻字（默认关）、中英混输（默认关）、中文滑行输入（默认关）。
-- 候选可显示拼音或中英释义；26 键能纠正多打、少打的字母，纠错候选不抢第一位。
-- 词库页：自己的短语、导入 TXT／搜狗／QQ／Rime 词库、删掉的候选、查词；带动漫、游戏、编程、数学等分类词库（默认关）。
-- 选词用固定测试集检查：题目主要取自公开的短信和对话语料，只用来打分，不参与训练和调参。
-- 改词库、解码或排序时，首选率和每键耗时都和上一版对比，任一项超出允许范围就不合入。
+---
 
-**多语言**
-
-- 英文：整词补全、滑行输入。
-- 日语：罗马字 26 键和假名键盘，词库来自 rime-jaroomaji。
-- 西班牙语：带 ñ、长按出重音字母、词表补全（默认关）。
-- 德语、法语、意大利语、俄语、韩语、越南语、马来语：各有自己的键盘（默认关），在「语言与方案」里打开。
-
-**手写、语音、文本表格识别**
-
-- 手写：中文、英文、日语（假名和汉字）、数学公式（识别成 LaTeX）；中文、英文、日语一次可以写好几个字，支持 S Pen。
-- 语音：本地离线识别，新装默认 SenseVoice（带标点、整句定稿）；下载 Paraformer 后边说边出字；另可下载 Zipformer、X-ASR、日语模型。长按空格按住说话。也可以填自己的在线识别接口，测试通过才会用。
-- 拍照识字：在剪贴板里拍照或选图，离线识别出文字。
-
-**实时字幕与无障碍**
-
-- 把周围的话实时转成字幕，支持中文、英文、日语；自动分说话人，可以给说话人起名字。
-- 后台浮窗、通话字幕、字幕记录（可搜索、分享，默认保留 3 天）、有人叫你名字时振动。桌面有单独的「字幕」图标。
-
-**键盘与外观**
-
-- 固定、悬浮、分体三种放法；悬浮键盘可以拖动、缩放、旋转；平板固定键盘可以从顶边把手拉成悬浮。
-- 字母排列：QWERTY、Colemak、QWJRTK、Cyletix10、Typewise 风格蜂窝六边形，也可以自己排。
-- 多套配色主题、玻璃效果、自己的图片做背景，按键形状可选圆角、方形、直角。
-- 工具栏和菜单可以拖动排列；按键音、振动、滑动手势可调。
-- 实体键盘：浮动候选栏、快捷键切换语言。
-
-**剪贴板与同步**
-
-- 剪贴板历史、固定、搜索、自定义分组，导出 TXT／Markdown／JSON；短信验证码在候选栏提示。
-- 和 Windows 版 CyIME（还没公开）扫码配对后，两边剪贴板互相同步。
-- 本地备份与恢复。
-
-**扩展与设置**
-
-- 设置搜索（认同义词、错别字、繁体字）、按设备推荐配置、性能档位。
-- 扩展页可以下载输入方案和模型，也可以在插件市场按需安装 AI 翻译、帮写、智能回复和输入统计，或从文件导入 Lua 插件（`.xipk`）。
-
-## 更多
-
-- [使用说明](docs/usage.md)：各项功能在哪里设置、怎么用。
-- [贡献](CONTRIBUTING.md)：先提 Issue，再提最小修改的 PR。
-- 作者自己的前作：[Cyletix-Keyboard](https://github.com/Cyletix/Cyletix-Keyboard)（2024 年的键盘布局研究，Cyletix10 布局出自这里）、ASRInput（PC语音字幕软件，语音参数和矫正逻辑沿用此项目）。
-- 社区 Linux 版：[tuxKOH/CyIME 的 linux-desktop-preview 分支](https://github.com/tuxKOH/CyIME/tree/feat/linux-desktop-preview)（IBus 拼音 + 电脑剪贴板，tuxKOH 维护）。欢迎 Linux 版本的魔改，但由于本人精力有限，暂时不会维护 Linux 版本。
-
-<details>
-<summary>构建</summary>
+## 從原始碼建置
 
 ```bash
-# 克隆项目（含子模块）
-git clone --recursive https://github.com/Cyletix/CyIME.git
+# 複製專案（含子模組）
+git clone --recursive https://github.com/milkteaokita/IMEtro.git
+cd IMEtro
 
-# 已克隆过则初始化子模块
+# 若已複製專案，初始化子模組
 git submodule update --init --recursive
 
-# 调试包 / 发布包
+# 建置 Debug / Release APK
 ./gradlew assembleDebug
 ./gradlew assembleRelease
 
-# 离线包（高敏感环境）：同发布包，但移除 INTERNET 权限，系统层面禁止联网
+# 高敏感離線版（移除 INTERNET 權限）
 ./gradlew assembleOffline
 ```
 
-需要 JDK 17 和 NDK `29.0.14206865`。构建时会联网下载雾凇拼音、日语词库、笔画、仓颉码表和 sherpa-onnx 运行库，按记录的 SHA-256 校验后打进安装包。日常出包用仓库根目录的 `packager.cmd`（双击打开图形界面，带参数是命令行），预设见 `scripts/packager/config.json`；版本规则见 [打包与版本规则](docs/packaging.md)。
+- 建置環境需求：**JDK 17 / 21** 與 Android NDK（專案設定於 Gradle / SDK 版本清單）。
+- 技術堆疊：Kotlin · Jetpack Compose · Metro Design System · librime (JNI / C++) · ONNX Runtime · sherpa-onnx · OpenCV。
+- 原始碼內部命名空間沿用上游 `com.kingzcheung.xime`，對外安裝套件名為 `com.metro.cyime`。
 
-离线包 `assembleOffline` 在发布包基础上经 `app/src/offline/AndroidManifest.xml` 移除 `INTERNET` 权限，安装后由系统禁止一切联网：模型/词库下载、扩展商店、检查更新、在线语音、样本贡献、剪贴板同步均不可用，请配合完整版离线模型内置包使用，适合高敏感环境。
+---
 
-技术栈：Kotlin · Jetpack Compose · Material 3 · librime（JNI / C++）· ONNX Runtime · sherpa-onnx · OpenCV
+## 致謝
 
-源码包名 `com.kingzcheung.xime`、插件标识、`xime.yaml` / `xime.custom.yaml` 和扩展商店协议沿用早期命名，安装身份是 `com.cyletix.cyime`。取舍见 [命名与身份记录](docs/cyime-identity.md)。
+**IMEtro** 站在以下優秀開源專案、詞庫、語料與模型的基礎上完成，謹此向所有原作者與貢獻者致謝；完整授權條款見倉庫 [LICENSE](LICENSE)、`app/src/main/assets/NOTICE.txt` 與應用內「設定 › 關於 IMEtro › 致謝／開源授權條款」。
 
-</details>
-
-## 鸣谢
-
-CyIME 用到了下面这些项目、数据和模型，感谢作者们的工作。许可证全文和版权声明见 `app/src/main/assets/NOTICE.txt`、`app/src/main/assets/licenses/` 和各方案目录下的 NOTICE 文件；应用里在「设置 › 关于 › 鸣谢」和「开源许可证」。
-
-| 项目 | 作者 | 用途 | 许可证 |
+| 專案 | 作者 | 說明 | 授權條款 |
 | --- | --- | --- | --- |
-| [Xime](https://github.com/ximeiorg/Xime) | Kingz Cheung | CyIME 基于 Xime 2.8.5 版本开发 | GPL-3.0 |
-
-核心依赖：[librime](https://github.com/rime/librime)、[雾凇拼音](https://github.com/iDvel/rime-ice)、[sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx)、[SenseVoice](https://github.com/FunAudioLLM/SenseVoice)、[Paraformer](https://github.com/modelscope/FunASR)、[ochwpro](https://www.modelscope.cn/models/bikeand/ochwpro)、[PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)、[ONNX Runtime](https://github.com/microsoft/onnxruntime)、[LCCC](https://github.com/thu-coai/CDial-GPT)。
+| [**CyIME**](https://github.com/Cyletix/CyIME) | Cyletix | IMEtro 上游專案（完整輸入引擎與多模態基礎） | GPL-3.0 |
+| [**Xime**](https://github.com/ximeiorg/Xime) | Kingz Cheung | CyIME 上游原始專案 | GPL-3.0 |
+| [**metro-home**](https://github.com/milkteaokita) | — | Metro 視覺語彙與動態系統設計參考 | — |
 
 <details>
-<summary>完整清单（含作者、用途和许可证）</summary>
+<summary>完整依賴與資料模型清單</summary>
 
-### 输入引擎
+### 輸入引擎與基礎庫
+- [librime](https://github.com/rime/librime)（BSD-3-Clause）、[librime-lua](https://github.com/hchunhui/librime-lua)（BSD-3-Clause）、[librime-octagram](https://github.com/lotem/librime-octagram)（GPL-3.0）、[librime-predict](https://github.com/rime/librime-predict)（BSD-3-Clause）、[OpenCC](https://github.com/BYVoid/OpenCC)（Apache-2.0）
+- Kotlin / Jetpack Compose / AndroidX / OkHttp / Coil / kaml / ZXing / exp4j / Apache Commons Compress（Apache-2.0）、LuaJ（MIT）、sora-editor（LGPL-2.1）
 
-| 项目 | 作者 | 用途 | 许可证 |
-| --- | --- | --- | --- |
-| [librime](https://github.com/rime/librime)（经 [ximeiorg/librime](https://github.com/ximeiorg/librime)） | 佛振（lotem）及 Rime 社区 | 输入引擎 | BSD-3-Clause |
-| [librime-lua](https://github.com/hchunhui/librime-lua) | hchunhui | 方案里的 Lua 脚本 | BSD-3-Clause |
-| [librime-octagram](https://github.com/lotem/librime-octagram) | 佛振（lotem） | 九键语法模型 | GPL-3.0 |
-| [librime-predict](https://github.com/rime/librime-predict) | Rime | 联想 | BSD-3-Clause |
-| [OpenCC](https://github.com/BYVoid/OpenCC) | BYVoid（Carbo Kuo） | 简繁转换 | Apache-2.0 |
-| [Boost](https://www.boost.org) | Boost 社区 | librime 依赖 | BSL-1.0 |
-| [glog](https://github.com/google/glog) | Google | librime 依赖 | BSD-3-Clause |
-| [yaml-cpp](https://github.com/jbeder/yaml-cpp) | Jesse Beder | librime 依赖 | MIT |
-| [LevelDB](https://github.com/google/leveldb) | Google | librime 依赖 | BSD-3-Clause |
-| [marisa-trie](https://github.com/s-yata/marisa-trie) | Susumu Yata | librime 依赖 | BSD-2-Clause 或 LGPL-2.1 |
-| [Snappy](https://github.com/google/snappy) | Google | librime 依赖 | BSD-3-Clause |
+### 詞庫、方案與釋義
+- [霧凇拼音 rime-ice](https://github.com/iDvel/rime-ice)（GPL-3.0）、[萬象語言模型 RIME-LMDG](https://github.com/amzxyz/RIME-LMDG)（CC BY 4.0）
+- [rime-wubi](https://github.com/kingzcheung/rime-wubi)（Apache-2.0）、[rime-wubi98](https://github.com/cz-archive/rime-wubi98)（GPL-3.0）、[rime-stroke](https://github.com/rime/rime-stroke)（LGPL-3.0）
+- [Cangjie5](https://github.com/Jackchows/Cangjie5)（MIT）、[小麥注音 McBopomofo](https://github.com/openvanilla/McBopomofo)（MIT）、[rime-jaroomaji](https://github.com/lazyfoxchan/rime-jaroomaji)（Apache-2.0）
+- [ECDICT](https://github.com/skywind3000/ECDICT)（MIT）、[CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict)（CC BY-SA 4.0）、[ChaiPUA 字型](https://github.com/tansongchen/input)
 
-### 词库与方案
-
-| 项目 | 作者 | 用途 | 许可证 |
-| --- | --- | --- | --- |
-| [雾凇拼音](https://github.com/iDvel/rime-ice) | iDvel（Dvel） | 全拼、小鹤双拼、九键、14 键的词库和方案 | GPL-3.0 |
-| [万象语言模型](https://github.com/amzxyz/RIME-LMDG) | amzxyz | 九键语法增强（可下载） | CC BY 4.0 |
-| [rime-wubi](https://github.com/kingzcheung/rime-wubi)（fork 自 [rime-wubi86-jidian](https://github.com/KyleBing/rime-wubi86-jidian)） | kingzcheung；KyleBing | 五笔 86 方案、手写的五笔反查 | Apache-2.0 |
-| [rime-wubi98](https://github.com/cz-archive/rime-wubi98) | cz-archive | 五笔 98（可下载） | GPL-3.0 |
-| [ChaiPUA 字体](https://github.com/tansongchen/input) | 谭淞宸（tansongchen） | 显示五笔字根等扩展区字符 | 未标明 |
-| [rime-stroke](https://github.com/rime/rime-stroke) | 四季的風、雪齋、Kunki Chou、宋天 | 笔画方案 | LGPL-3.0 |
-| [Cangjie5](https://github.com/Jackchows/Cangjie5) | Jackchows；倉頡之友·馬來西亞 | 仓颉五代码表 | MIT |
-| [rime-cangjie](https://github.com/rime/rime-cangjie)、[rime-bopomofo](https://github.com/rime/rime-bopomofo) | Rime | 仓颉、注音方案的写法参照 | LGPL-3.0 |
-| [小麦注音](https://github.com/openvanilla/McBopomofo) | OpenVanilla | 台湾词、读音和词频 | MIT |
-| [rime-jaroomaji](https://github.com/lazyfoxchan/rime-jaroomaji) | lazy fox chan | 日语方案和词库 | Apache-2.0（词库另附 Mozc、JMdict 许可） |
-| [FrequencyWords](https://github.com/hermitdave/FrequencyWords) | Hermit Dave | 西班牙语补全词表 | MIT；词表 CC BY-SA 4.0 |
-| [搜狗细胞词库](https://pinyin.sogou.com/dict/) | 搜狗及词库作者 | 分类词库（应用内从搜狗下载） | 版权归原作者 |
-
-### 候选释义
-
-| 项目 | 作者 | 用途 | 许可证 |
-| --- | --- | --- | --- |
-| [ECDICT](https://github.com/skywind3000/ECDICT) | skywind3000（Linwei） | 英→中释义 | MIT |
-| [CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict) | MDBG | 中→英释义 | CC BY-SA 4.0 |
-| [opus-mt-zh-en](https://huggingface.co/Helsinki-NLP/opus-mt-zh-en) | Helsinki-NLP | 常见短语的参考译文（电脑上离线生成） | CC BY 4.0 |
-
-### 语料（训练 CyIME 自己的模型）
-
-| 语料 | 作者 | 用途 | 许可证 |
-| --- | --- | --- | --- |
-| [LCCC](https://github.com/thu-coai/CDial-GPT) | 清华大学 CoAI 小组 | 九键词组模型、联想底表、26 键词频 | MIT |
-| [OpenSubtitles](https://opus.nlpl.eu/OpenSubtitles/corpus/version/OpenSubtitles) | opensubtitles.org；OPUS | 九键词组模型、联想底表的口语部分 | 未标明 |
-| [Natural Language Corpus Data](https://github.com/norvig/pytudes) | Peter Norvig | 英文滑行的词频和词对 | MIT |
-| [Cornell Movie-Dialogs Corpus](https://www.cs.cornell.edu/~cristian/Cornell_Movie-Dialogs_Corpus.html) | Cristian Danescu-Niculescu-Mizil、Lillian Lee | 英文滑行的口语词对 | 研究用公开数据 |
-| [MathWriting](https://github.com/google-research/google-research/tree/master/mathwriting) | Google | 公式手写模型 | CC BY-NC-SA 4.0 |
-
-### 语音
-
-| 项目 | 作者 | 用途 | 许可证 |
-| --- | --- | --- | --- |
-| [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx) | k2-fsa（新一代 Kaldi） | 语音识别、断句、声纹运行库和模型导出 | Apache-2.0 |
-| [Silero VAD](https://github.com/snakers4/silero-vad) | Silero | 语音断句 | MIT |
-| [SenseVoice](https://github.com/FunAudioLLM/SenseVoice) | 阿里巴巴 FunAudioLLM | 多语言识别、整句定稿 | FunASR 模型许可（需署名） |
-| [Paraformer](https://github.com/modelscope/FunASR) | 阿里巴巴达摩院 FunASR | 中英流式识别 | Apache-2.0 |
-| [Zipformer 中文](https://github.com/k2-fsa/sherpa-onnx) | k2-fsa | 中文流式识别 | Apache-2.0 |
-| [X-ASR zh-en](https://huggingface.co/GilgameshWind/X-ASR-zh-en) | GilgameshWind | 中文整句定稿（可下载） | Apache-2.0 |
-| [ReazonSpeech k2 v2](https://huggingface.co/reazon-research/reazonspeech-k2-v2) | Reazon Research | 日语识别 | Apache-2.0 |
-| [3D-Speaker CAM++](https://github.com/modelscope/3D-Speaker) | 阿里巴巴 3D-Speaker | 字幕区分说话人 | Apache-2.0 |
-
-### 手写与识字
-
-| 项目 | 作者 | 用途 | 许可证 |
-| --- | --- | --- | --- |
-| [ochwpro](https://www.modelscope.cn/models/bikeand/ochwpro) | bikeand | 中文手写识别 | MIT |
-| [Make Me a Hanzi](https://github.com/skishore/makemeahanzi) | Shaunak Kishore | 生僻字模板的笔顺、部件（电脑上离线生成） | Arphic；字典 LGPL-3.0 |
-| [AnimCJK](https://github.com/parsimonhi/animCJK) | parsimonhi | 生僻字模板的笔顺（电脑上离线生成） | Arphic |
-| [cjkvi-ids](https://github.com/cjkvi/cjkvi-ids) | CJKVI（数据源自 CHISE） | 生僻字按部件拼笔顺（电脑上离线生成） | GPL-2.0 |
-| [KaTeX](https://github.com/KaTeX/KaTeX) | KaTeX 作者 | 显示手写公式 | MIT |
-| [PaddleOCR PP-OCRv5](https://github.com/PaddlePaddle/PaddleOCR) | PaddlePaddle | 拍照识字模型 | Apache-2.0 |
-| [RapidOCR](https://github.com/RapidAI/RapidOCR) | RapidAI | 识字模型的 ONNX 版本 | Apache-2.0 |
-| [OpenCV](https://github.com/opencv/opencv) | OpenCV | 拍照识字的图像处理 | Apache-2.0 |
-
-### 翻译与推理
-
-| 项目 | 作者 | 用途 | 许可证 |
-| --- | --- | --- | --- |
-| [ONNX Runtime](https://github.com/microsoft/onnxruntime) | Microsoft | 手写、联想、识字等模型推理 | MIT |
-| [slimt](https://github.com/jerinphilip/slimt) | Jerin Philip；David Ventura | 离线翻译引擎 | GPL-2.0 |
-| [Firefox 翻译模型](https://github.com/mozilla/translations) | Mozilla | 中英离线翻译（可下载） | MPL-2.0 |
-| [UER-py](https://github.com/dbiir/UER-py) 中文 RoBERTa | UER 团队 | 九键整句打分（已停用，词表仍在包里） | Apache-2.0 |
-
-### Android 库
-
-| 项目 | 作者 | 用途 | 许可证 |
-| --- | --- | --- | --- |
-| [Kotlin](https://kotlinlang.org)、[kotlinx.serialization](https://github.com/Kotlin/kotlinx.serialization) | JetBrains | 开发语言、数据读写 | Apache-2.0 |
-| [Jetpack Compose 与 AndroidX](https://developer.android.com/jetpack/androidx)（含 CameraX、Room） | Google | 界面、相机、数据库 | Apache-2.0 |
-| [Material Components](https://github.com/material-components/material-components-android) | Google | 界面控件 | Apache-2.0 |
-| [OkHttp](https://github.com/square/okhttp) | Square | 下载 | Apache-2.0 |
-| [Coil](https://github.com/coil-kt/coil) | Coil 作者 | 图片加载 | Apache-2.0 |
-| [kaml](https://github.com/charleskorn/kaml) | Charles Korn | 读写 YAML | Apache-2.0 |
-| [ZXing](https://github.com/zxing/zxing) | ZXing 作者 | 配对二维码 | Apache-2.0 |
-| [exp4j](https://github.com/fasseg/exp4j) | Frank Asseg | 计算器 | Apache-2.0 |
-| [Apache Commons Compress](https://commons.apache.org/proper/commons-compress/) | Apache 软件基金会 | 解压 | Apache-2.0 |
-| [LuaJ](https://github.com/luaj/luaj) | LuaJ 作者 | 插件运行时 | MIT |
-| [sora-editor](https://github.com/Rosemoe/sora-editor) | Rosemoe | 方案文件编辑器 | LGPL-2.1 |
-
-### 设计参考
-
-| 产品 | 参考内容 |
-| --- | --- |
-| [三星键盘](https://www.samsung.com/) | 键盘整体的交互和外观 |
-| [Gboard](https://play.google.com/store/apps/details?id=com.google.android.inputmethod.latin) | 键盘交互和外观，如大屏工具栏 |
-| [首道双拼](https://sspai.com/post/108949) | 内置双拼方案 |
-| [小鹤双拼/音形](https://flypy.cc/) | 内置双拼方案 |
-| 自然码 | 内置双拼方案 |
-| 微软双拼 | 内置双拼方案 |
-| 智能ABC | 内置双拼方案 |
-| 拼音加加 | 内置双拼方案 |
-| [Colemak](https://colemak.com/) | Colemak 字母布局 |
-| [Typewise](https://www.typewise.app/) | 蜂窝六边形布局 |
+### 語音、手寫、OCR 與模型
+- [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx)（Apache-2.0）、[ONNX Runtime](https://github.com/microsoft/onnxruntime)（MIT）、[Silero VAD](https://github.com/snakers4/silero-vad)（MIT）
+- [SenseVoice](https://github.com/FunAudioLLM/SenseVoice)、[Paraformer](https://github.com/modelscope/FunASR)、[3D-Speaker](https://github.com/modelscope/3D-Speaker)
+- [ochwpro](https://www.modelscope.cn/models/bikeand/ochwpro)（MIT）、[PaddleOCR PP-OCRv5](https://github.com/PaddlePaddle/PaddleOCR) / [RapidOCR](https://github.com/RapidAI/RapidOCR)（Apache-2.0）、[OpenCV](https://github.com/opencv/opencv)（Apache-2.0）、[KaTeX](https://github.com/KaTeX/KaTeX)（MIT）
+- [slimt](https://github.com/jerinphilip/slimt)（GPL-2.0）、[Firefox Translations](https://github.com/mozilla/translations)（MPL-2.0）、[LCCC](https://github.com/thu-coai/CDial-GPT)（MIT）、[MathWriting](https://github.com/google-research/google-research/tree/master/mathwriting)（CC BY-NC-SA 4.0）
 
 </details>
 
-## 许可证
+---
 
-[GPLv3](LICENSE)。CyIME 自 2026-09-21 起基于 [Xime](https://github.com/ximeiorg/Xime)（GPL-3.0）独立开发，源文件中原有的版权声明照常保留。第三方组件、数据和模型按各自的许可证分发，见上面的鸣谢和 `app/src/main/assets/NOTICE.txt`。注意公式手写模型的训练数据 MathWriting 为 CC BY-NC-SA 4.0，不能用于商业用途。
+## 授權條款
 
-## 支持作者
-
-CyIME 输入法是我空闲时间制作的一款输入法, 遵循GPL协议, 所以此项目永久免费开源, 并且此项目的任何fork项目也同样必须开源.
-
-如果它帮到了你, 愿意的话可以请我喝杯咖啡, 用来支付agent开销 模型训练和个人测试的时间开销, 感谢支持, 不打赏也完全没关系, 欢迎反馈问题, 同样是很大的支持
-
-我的[爱发电](https://afdian.com/a/cyletix)账号已通过认证。你可以在爱发电支持我，也可以用支付宝或微信扫描对应的个人收款码。
-
-支付宝
-
-<img src="docs/images/alipay.jpg" alt="作者的支付宝个人收款码" width="240">
-
-微信支付
-
-<img src="docs/images/wechat-pay.png" alt="微信支付" width="240">
-
-海外也可以通过 [Ko-fi](https://ko-fi.com/cyletix) 支持我。
+本專案採用 **[GNU GPLv3](LICENSE)** 開源授權（衍生自 [CyIME](https://github.com/Cyletix/CyIME) 與 [Xime](https://github.com/ximeiorg/Xime)）。所有原始檔案版權聲明皆依授權保留；第三方元件與模型依各自授權條款釋出（請注意部分非商業授權模型如 `predictive-text-base` 與 MathWriting 訓練集不得用於商業用途）。

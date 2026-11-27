@@ -18,7 +18,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
@@ -55,6 +55,7 @@ import com.kingzcheung.xime.settings.BackgroundConfig
 import com.kingzcheung.xime.ui.theme.XimeTheme
 import com.kingzcheung.xime.settings.KeysConfigHelper
 import com.kingzcheung.xime.settings.KeyboardColorsConfig
+import com.kingzcheung.xime.ui.metro.metroTilt
 import com.kingzcheung.xime.ui.theme.KeyboardColorScheme
 import com.kingzcheung.xime.ui.theme.KeyboardThemes
 import com.kingzcheung.xime.ui.theme.keyboardBackground
@@ -69,54 +70,48 @@ fun SettingsSection(
     searchKey: String = title,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Column {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(bottom = 8.dp)
+    val metro = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current
+    Column(modifier = Modifier.fillMaxWidth()) {
+        com.kingzcheung.xime.ui.metro.MetroSectionHeader(
+            title = title,
+            modifier = Modifier.padding(bottom = 4.dp),
         )
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerLow,
-            shadowElevation = 0.dp
-        ) {
-            Column(Modifier.settingsSearchAnchor(searchKey)
-                .visualMaterial(VisualStyles.current, 12.dp, level = com.kingzcheung.xime.ui.theme.MaterialLevel.RAISED), content = content)
-        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .settingsSearchAnchor(searchKey)
+                .then(
+                    if (metro.era == com.kingzcheung.xime.ui.metro.MetroEra.LATE_W10M) {
+                        Modifier.border(1.dp, metro.divider, androidx.compose.ui.graphics.RectangleShape)
+                    } else Modifier
+                ),
+            content = content,
+        )
     }
 }
 
 /**
- * 列表页（词库、布局管理、已安装的方案）的一行：和 [SettingsSection] 同一种底色和圆角。每行单独放进 LazyColumn，
- * 组里第一行圆上边、最后一行圆下边，中间用和首页一样的细分隔线，几行连起来就是一张卡片，长列表也不用一次排完。
+ * 列表页（词库、布局管理、已安装的方案）的一行：Metro 0dp 直角平磚行，以細分隔線分隔。
  */
 @Composable
 internal fun SettingsGroupRow(index: Int, count: Int, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
-    val radius = 12.dp
-    val top = if (index == 0) radius else 0.dp
-    val bottom = if (index >= count - 1) radius else 0.dp
-    Column(modifier.fillMaxWidth()
-        .clip(RoundedCornerShape(topStart = top, topEnd = top, bottomStart = bottom, bottomEnd = bottom))
-        .background(MaterialTheme.colorScheme.surfaceContainerLow)) {
+    val metro = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current
+    Column(modifier.fillMaxWidth().background(metro.background)) {
         if (index > 0) SettingsRowDivider()
         content()
     }
 }
 
-/** 卡片里两行之间的分隔线，和设置首页相同。 */
+/** 卡片里两行之间的分隔线，Metro 1dp 細分隔線。 */
 @Composable
 internal fun SettingsRowDivider(modifier: Modifier = Modifier) {
-    HorizontalDivider(modifier.padding(start = 16.dp), thickness = 0.5.dp,
-        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+    com.kingzcheung.xime.ui.metro.MetroDivider(modifier = modifier)
 }
 
-/** 卡片上方的组名，和 [SettingsSection] 的标题同一个样子。 */
+/** 卡片上方的组名，Metro 強調色區塊標題。 */
 @Composable
 internal fun SettingsGroupTitle(title: String, modifier: Modifier = Modifier) {
-    Text(title, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary,
-        modifier = modifier.padding(top = 8.dp, bottom = 8.dp))
+    com.kingzcheung.xime.ui.metro.MetroSectionHeader(title = title, modifier = modifier)
 }
 
 /** 卡片下面的一句说明：小字、次要色。提醒色只留给真正的警告。[jumps] 里列出的「」指路点一下跳到那一项（见 [settingsJumpText]）。 */
@@ -132,12 +127,13 @@ internal fun SettingsListRow(title: String, detail: String, modifier: Modifier =
                              /** 灰字要提醒时换的颜色（如词库超出正常的代价）；不填是平常的灰字。 */
                              detailColor: Color = Color.Unspecified,
                              trailing: @Composable () -> Unit = {}) {
-    Row(modifier.fillMaxWidth().heightIn(min = 56.dp).padding(start = 16.dp, end = 4.dp),
+    val metro = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current
+    Row(modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f).padding(vertical = 10.dp)) {
-            Text(title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
-            if (detail.isNotEmpty()) Text(detail, style = MaterialTheme.typography.bodySmall,
-                color = detailColor.takeOrElse { MaterialTheme.colorScheme.onSurfaceVariant })
+            Text(title, style = MaterialTheme.typography.titleLarge, color = metro.onBackground)
+            if (detail.isNotEmpty()) Text(detail, style = MaterialTheme.typography.bodyMedium,
+                color = detailColor.takeOrElse { metro.onBackgroundMuted })
         }
         trailing()
     }
@@ -156,41 +152,43 @@ fun SettingsItem(
     /** 搜索定位和测试标签用的名字，见 [SettingsSection]。 */
     searchKey: String = title,
 ) {
+    val metro = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current
     Row(
         modifier = Modifier
             .settingsSearchAnchor(searchKey)
             .fillMaxWidth()
+            .metroTilt(4f, 0.98f)
             .clickable(onClick = onClick)
-            .padding(16.dp),
+            .padding(vertical = 12.dp, horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 图标圆角背景
         Box(
             modifier = Modifier
-                .size(40.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                .size(36.dp)
+                .background(metro.accent, androidx.compose.ui.graphics.RectangleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(22.dp)
+                tint = metro.onAccent,
+                modifier = Modifier.size(20.dp)
             )
         }
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(14.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium
+                style = MaterialTheme.typography.titleLarge,
+                color = metro.onBackground
             )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            if (subtitle.isNotEmpty()) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = metro.onBackgroundMuted
+                )
+            }
         }
         if (status != null) {
             Spacer(Modifier.width(12.dp))
@@ -198,10 +196,11 @@ fun SettingsItem(
                 maxLines = 1, modifier = Modifier.testTag("settings-status:$searchKey"))
         }
         if (showArrow) {
+            Spacer(Modifier.width(6.dp))
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = metro.accent
             )
         }
     }
@@ -212,11 +211,11 @@ enum class SettingsStatusTone { OK, WARNING, NEUTRAL }
 /** 绿色和提醒色按页面底色深浅取不同明度，浅色、深色与半透明玻璃底上都看得清。 */
 @Composable
 private fun SettingsStatusTone.color(): Color {
-    val dark = MaterialTheme.colorScheme.surface.luminance() < .5f
+    val metro = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current
     return when (this) {
-        SettingsStatusTone.OK -> if (dark) Color(0xFF81C995) else Color(0xFF1E8E3E)
-        SettingsStatusTone.WARNING -> MaterialTheme.colorScheme.error
-        SettingsStatusTone.NEUTRAL -> MaterialTheme.colorScheme.onSurfaceVariant
+        SettingsStatusTone.OK -> metro.accent
+        SettingsStatusTone.WARNING -> metro.error
+        SettingsStatusTone.NEUTRAL -> metro.onBackgroundMuted
     }
 }
 
@@ -241,45 +240,44 @@ fun SettingsToggleItem(
     extraCost: (@Composable () -> Unit)? = null,
 ) {
     val locked = lockMessage != null
+    val metro = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current
     Row(
         modifier = Modifier
             .settingsSearchAnchor(searchKey)
             .fillMaxWidth()
             .then(
                 if (locked) Modifier
-                else if (onClick != null) Modifier.clickable(onClick = onClick)
-                else Modifier.clickable { onCheckedChange(!checked) }
+                else if (onClick != null) Modifier.metroTilt(4f, 0.98f).clickable(onClick = onClick)
+                else Modifier.metroTilt(4f, 0.98f).clickable { onCheckedChange(!checked) }
             )
-            .padding(16.dp),
+            .padding(vertical = 12.dp, horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
-                .size(40.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                .size(36.dp)
+                .background(if (checked) metro.accent else metro.surface, androidx.compose.ui.graphics.RectangleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(22.dp)
+                tint = if (checked) metro.onAccent else metro.onBackgroundMuted,
+                modifier = Modifier.size(20.dp)
             )
         }
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(14.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
+                style = MaterialTheme.typography.titleLarge,
+                color = metro.onBackground
             )
             // 说明为空时不占一行（如「启用开屏广告」，用户 11-16 要求不写说明）。
             if (subtitle.isNotEmpty()) Text(
-                text = settingsJumpText(subtitle, subtitleJumps, MaterialTheme.colorScheme.primary),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = settingsJumpText(subtitle, subtitleJumps, metro.accent),
+                style = MaterialTheme.typography.bodyMedium,
+                color = metro.onBackgroundMuted
             )
             if (lockMessage != null) SettingsLockNote(lockMessage)
             costItem?.let { PerformanceCostNote(it) }
@@ -291,14 +289,15 @@ fun SettingsToggleItem(
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = metro.accent
             )
+            Spacer(Modifier.width(6.dp))
         }
-        Switch(
+        com.kingzcheung.xime.ui.metro.MetroToggleSwitch(
             checked = checked,
             onCheckedChange = onCheckedChange,
             enabled = !locked,
-            colors = settingsSwitchColors()
+            showStatusLabel = false,
         )
     }
 }
@@ -394,21 +393,11 @@ fun SchemaItem(
         }
 
         if (!isDownloaded) {
-            OutlinedButton(
+            com.kingzcheung.xime.ui.metro.MetroOutlinedButton(
+                text = if (isLoading) "下载中" else "下载",
                 onClick = onDownload,
                 enabled = !isLoading,
-                shape = RoundedCornerShape(50)
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(16.dp),
-                        strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                }
-                Text(if (isLoading) "下载中" else "下载")
-            }
+            )
         } else {
             if (isSelected) {
                 Icon(
@@ -418,21 +407,11 @@ fun SchemaItem(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
             }
-            OutlinedButton(
+            com.kingzcheung.xime.ui.metro.MetroOutlinedButton(
+                text = if (isLoading) "更新中" else "更新",
                 onClick = onUpdate,
                 enabled = !isLoading,
-                shape = RoundedCornerShape(50)
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(16.dp),
-                        strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                }
-                Text(if (isLoading) "更新中" else "更新")
-            }
+            )
         }
     }
 }
@@ -444,7 +423,7 @@ fun SchemaSelectDialog(
     onSchemaSelected: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
+    com.kingzcheung.xime.ui.metro.MetroAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("选择输入方案") },
         text = {
@@ -456,26 +435,14 @@ fun SchemaSelectDialog(
                             .clickable {
                                 if (currentSchema != schema.schemaId) {
                                     onSchemaSelected(schema.schemaId)
-                                    onDismiss()
-                                } else {
-                                    onDismiss()
                                 }
+                                onDismiss()
                             }
-                            .padding(vertical = 12.dp),
+                            .padding(vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        RadioButton(
-                            selected = schema.schemaId == currentSchema,
-                            onClick = {
-                                if (currentSchema != schema.schemaId) {
-                                    onSchemaSelected(schema.schemaId)
-                                    onDismiss()
-                                } else {
-                                    onDismiss()
-                                }
-                            }
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        com.kingzcheung.xime.ui.metro.MetroRadioIndicator(selected = schema.schemaId == currentSchema)
+                        Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(text = schema.name, fontWeight = FontWeight.Medium)
                             Text(
@@ -489,9 +456,7 @@ fun SchemaSelectDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("确定")
-            }
+            com.kingzcheung.xime.ui.metro.MetroSolidButton(text = "确定", onClick = onDismiss)
         }
     )
 }
@@ -525,13 +490,13 @@ fun ThemeCard(
                         Modifier.border(
                             width = 2.dp,
                             color = MaterialTheme.colorScheme.primary,
-                            shape = RoundedCornerShape(12.dp)
+                            shape = androidx.compose.ui.graphics.RectangleShape
                         )
                     } else {
                         Modifier
                     }
                 ),
-            shape = RoundedCornerShape(12.dp),
+            shape = androidx.compose.ui.graphics.RectangleShape,
             color = MaterialTheme.colorScheme.surfaceContainer,
             shadowElevation = 0.dp,
             onClick = onClick
@@ -547,7 +512,7 @@ fun ThemeCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f)
-                            .clip(RoundedCornerShape(6.dp))
+                            .clip(RectangleShape)
                     ) {
                         Row(modifier = Modifier.fillMaxSize()) {
                             // 左半浅色
@@ -555,7 +520,7 @@ fun ThemeCard(
                                 modifier = Modifier
                                     .weight(1f)
                                     .fillMaxHeight()
-                                    .clip(RoundedCornerShape(topStart = 6.dp, bottomStart = 6.dp))
+                                    .clip(RectangleShape)
                                     .background(Color(0xFFE8EAED))
                                     .padding(3.dp)
                             ) {
@@ -564,7 +529,7 @@ fun ThemeCard(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .height(8.dp)
-                                            .clip(RoundedCornerShape(2.dp))
+                                            .clip(RectangleShape)
                                             .background(Color(0xFFF8F9FA))
                                             .padding(horizontal = 3.dp),
                                         verticalAlignment = Alignment.CenterVertically
@@ -573,7 +538,7 @@ fun ThemeCard(
                                             modifier = Modifier
                                                 .width(12.dp)
                                                 .height(4.dp)
-                                                .clip(RoundedCornerShape(1.dp))
+                                                .clip(RectangleShape)
                                                 .background(accentColor ?: Color(0xFF1A73E8))
                                         )
                                     }
@@ -582,7 +547,7 @@ fun ThemeCard(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .weight(1f)
-                                            .clip(RoundedCornerShape(2.dp))
+                                            .clip(RectangleShape)
                                             .background(Color.White)
                                     )
                                 }
@@ -593,7 +558,7 @@ fun ThemeCard(
                                 modifier = Modifier
                                     .weight(1f)
                                     .fillMaxHeight()
-                                    .clip(RoundedCornerShape(topEnd = 6.dp, bottomEnd = 6.dp))
+                                    .clip(RectangleShape)
                                     .background(Color(0xFF202124))
                                     .padding(3.dp)
                             ) {
@@ -602,7 +567,7 @@ fun ThemeCard(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .height(8.dp)
-                                            .clip(RoundedCornerShape(2.dp))
+                                            .clip(RectangleShape)
                                             .background(Color(0xFF2D2D2D))
                                             .padding(horizontal = 3.dp),
                                         verticalAlignment = Alignment.CenterVertically
@@ -611,7 +576,7 @@ fun ThemeCard(
                                             modifier = Modifier
                                                 .width(12.dp)
                                                 .height(4.dp)
-                                                .clip(RoundedCornerShape(1.dp))
+                                                .clip(RectangleShape)
                                                 .background(Color(0xFF8AB4F8))
                                         )
                                     }
@@ -620,7 +585,7 @@ fun ThemeCard(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .weight(1f)
-                                            .clip(RoundedCornerShape(2.dp))
+                                            .clip(RectangleShape)
                                             .background(Color(0xFF35363A))
                                     )
                                 }
@@ -632,7 +597,7 @@ fun ThemeCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f)
-                            .clip(RoundedCornerShape(6.dp))
+                            .clip(RectangleShape)
                             .background(backgroundColor)
                             .padding(4.dp)
                     ) {
@@ -643,7 +608,7 @@ fun ThemeCard(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(12.dp)
-                                    .clip(RoundedCornerShape(3.dp))
+                                    .clip(RectangleShape)
                                     .background(candidateBarColor)
                                     .padding(horizontal = 4.dp),
                                 verticalAlignment = Alignment.CenterVertically,
@@ -652,7 +617,7 @@ fun ThemeCard(
                                     modifier = Modifier
                                         .width(16.dp)
                                         .height(6.dp)
-                                        .clip(RoundedCornerShape(2.dp))
+                                        .clip(RectangleShape)
                                         .background(
                                             accentColor ?: if (isDark) Color(0xFF8AB4F8) else Color(
                                                 0xFF1A73E8
@@ -680,7 +645,7 @@ fun ThemeCard(
                                             modifier = Modifier
                                                 .weight(if (isSpaceKey) 4f else 1f)
                                                 .fillMaxHeight()
-                                                .clip(RoundedCornerShape(2.dp))
+                                                .clip(RectangleShape)
                                                 .background(if (isSpecialKey) specialKeyColor else keyColor)
                                         )
                                     }
@@ -716,7 +681,7 @@ fun CodeDisplayCard(
                         Modifier.border(
                             width = 2.dp,
                             color = primary,
-                            shape = RoundedCornerShape(12.dp)
+                            shape = androidx.compose.ui.graphics.RectangleShape
                         )
                     } else {
                         Modifier
@@ -725,7 +690,7 @@ fun CodeDisplayCard(
         ) {
             Surface(
                 modifier = Modifier.fillMaxSize(),
-                shape = RoundedCornerShape(12.dp),
+                shape = androidx.compose.ui.graphics.RectangleShape,
                 color = MaterialTheme.colorScheme.surface,
                 shadowElevation = 0.dp,
                 onClick = onClick
@@ -739,7 +704,6 @@ fun CodeDisplayCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f)
-                            .clip(RoundedCornerShape(6.dp))
                             .background(MaterialTheme.colorScheme.surfaceVariant)
                             .padding(6.dp)
                     ) {
@@ -747,12 +711,11 @@ fun CodeDisplayCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(26.dp)
-                                .clip(RoundedCornerShape(4.dp))
                                 .background(MaterialTheme.colorScheme.surface)
                                 .border(
                                     0.5.dp,
                                     MaterialTheme.colorScheme.outlineVariant,
-                                    RoundedCornerShape(4.dp)
+                                    androidx.compose.ui.graphics.RectangleShape
                                 )
                                 .padding(horizontal = 8.dp),
                             contentAlignment = Alignment.CenterStart
@@ -779,7 +742,7 @@ fun CodeDisplayCard(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(4.dp))
+                                .clip(RectangleShape)
                                 .padding(horizontal = 6.dp, vertical = 4.dp)
                         ) {
                             Column(
@@ -801,7 +764,7 @@ fun CodeDisplayCard(
 
                                     Box(
                                         modifier = Modifier
-                                            .clip(RoundedCornerShape(6.dp))
+                                            .clip(RectangleShape)
                                             .background(selectedBg)
                                             .padding(horizontal = 4.dp, vertical = 2.dp)
                                     ) {
@@ -874,31 +837,23 @@ fun PreeditStyleCard(
     val right = align == prefs.PREEDIT_ALIGN_RIGHT
     // 贴在键盘上的靠边时，键盘那一角画成直角（实际键盘上那一角的圆角被补平）。
     // 整行是键盘自己多出来的一行（11-23），键盘照旧两角圆、整块加高，不另画一条。
-    val keyboardCorner = 6.dp
-    val keyboardShape = RoundedCornerShape(
-        topStart = if (!strip && !bubble && left) 0.dp else keyboardCorner,
-        topEnd = if (!strip && !bubble && right) 0.dp else keyboardCorner)
+    val keyboardShape = androidx.compose.ui.graphics.RectangleShape
     Column(modifier = modifier.testTag(testTag)) {
         Box(Modifier.fillMaxWidth().weight(1f)
-            .then(if (isSelected) Modifier.border(2.dp, primary, RoundedCornerShape(12.dp)) else Modifier)) {
-            Surface(onClick = onClick, modifier = Modifier.fillMaxSize(), shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surface,
+            .then(if (isSelected) Modifier.border(2.dp, primary, androidx.compose.ui.graphics.RectangleShape) else Modifier)) {
+            Surface(onClick = onClick, modifier = Modifier.fillMaxSize(), shape = androidx.compose.ui.graphics.RectangleShape, color = MaterialTheme.colorScheme.surface,
                 shadowElevation = 0.dp) {
-                Column(Modifier.fillMaxSize().padding(8.dp).clip(RoundedCornerShape(6.dp))
+                Column(Modifier.fillMaxSize().padding(8.dp)
                     .background(app)) {
                     // 应用的输入框
-                    Box(Modifier.padding(5.dp).fillMaxWidth().height(18.dp).clip(RoundedCornerShape(4.dp))
+                    Box(Modifier.padding(5.dp).fillMaxWidth().height(18.dp)
                         .background(MaterialTheme.colorScheme.surface)
-                        .border(0.5.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(4.dp)))
+                        .border(0.5.dp, MaterialTheme.colorScheme.outlineVariant, androidx.compose.ui.graphics.RectangleShape))
                     Spacer(Modifier.weight(1f))
                     // 键盘上方，按实际键盘的比例画（小签 26dp、方块 36dp、候选栏约 40dp）：
                     // 气泡隔开一点、圆角、按键色、带边框；小签贴着键盘、键盘同色、矮、只圆上两角（贴边那角直角）、宽度跟拼音走；
                     // 方块直角、高出小签一截、字大；顶上一行整行宽、和键盘连成一体。
-                    val tabShape = when {
-                        bubble -> RoundedCornerShape(4.dp)
-                        strip -> RoundedCornerShape(topStart = keyboardCorner, topEnd = keyboardCorner)
-                        block -> RoundedCornerShape(0.dp)
-                        else -> RoundedCornerShape(topStart = if (left) 0.dp else 5.dp, topEnd = if (right) 0.dp else 5.dp)
-                    }
+                    val tabShape = androidx.compose.ui.graphics.RectangleShape
                     val tabHeight = when {
                         bubble -> null
                         block -> 18.dp
@@ -917,11 +872,10 @@ fun PreeditStyleCard(
                         .then(if (tabHeight != null) Modifier.height(tabHeight) else Modifier)
                         .clip(tabShape)
                         .background(if (bubble) key else keyboard)
-                        .then(if (bubble) Modifier.border(0.5.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(4.dp))
+                        .then(if (bubble) Modifier.border(0.5.dp, MaterialTheme.colorScheme.outlineVariant, androidx.compose.ui.graphics.RectangleShape)
                             // 和键盘上一样沿上边和两侧描细线（底边接键盘），形状一眼看得出。
                             else Modifier.preeditTabOutline(onSurface.copy(alpha = com.kingzcheung.xime.ui.keyboard.PREEDIT_TAB_OUTLINE_ALPHA),
-                                if (strip) keyboardCorner else if (block || left) 0.dp else 5.dp,
-                                if (strip) keyboardCorner else if (block || right) 0.dp else 5.dp))
+                                0.dp, 0.dp))
                         .padding(horizontal = if (block) 7.dp else if (strip) 6.dp else 4.dp, vertical = if (bubble) 2.dp else 0.dp),
                         contentAlignment = when {
                             !strip || left -> Alignment.CenterStart
@@ -943,7 +897,7 @@ fun PreeditStyleCard(
                             Text("shu'ru'fa", fontSize = 9.sp, lineHeight = 11.sp, color = onSurface, maxLines = 1)
                         }
                         Row(Modifier.fillMaxWidth().height(18.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Box(Modifier.clip(RoundedCornerShape(4.dp)).background(primary.copy(alpha = 0.15f))
+                            Box(Modifier.clip(RectangleShape).background(primary.copy(alpha = 0.15f))
                                 .padding(horizontal = 3.dp)) {
                                 Text("输入法", fontSize = 11.sp, color = primary, fontWeight = FontWeight.Medium, maxLines = 1)
                             }
@@ -951,7 +905,7 @@ fun PreeditStyleCard(
                             Text("力学", fontSize = 11.sp, color = onSurface, maxLines = 1)
                         }
                         Row(Modifier.fillMaxWidth().padding(top = 2.dp), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                            repeat(6) { Box(Modifier.weight(1f).height(12.dp).clip(RoundedCornerShape(2.dp)).background(key)) }
+                            repeat(6) { Box(Modifier.weight(1f).height(12.dp).clip(RectangleShape).background(key)) }
                         }
                     }
                 }
@@ -1016,7 +970,6 @@ fun CommentDisplayCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .clip(RoundedCornerShape(12.dp))
                     .background(MaterialTheme.colorScheme.surface)
                     .clickable { onClick() }
                     .then(
@@ -1024,7 +977,7 @@ fun CommentDisplayCard(
                             Modifier.border(
                                 width = 2.dp,
                                 color = primary,
-                                shape = RoundedCornerShape(12.dp)
+                                shape = androidx.compose.ui.graphics.RectangleShape
                             )
                         } else {
                             Modifier
@@ -1040,7 +993,6 @@ fun CommentDisplayCard(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
                             .background(MaterialTheme.colorScheme.surfaceVariant)
                             .padding(horizontal = 8.dp, vertical = 8.dp),
                         contentAlignment = Alignment.CenterStart
@@ -1048,8 +1000,7 @@ fun CommentDisplayCard(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(primary.copy(alpha = 0.15f))
+                                    .background(primary.copy(alpha = 0.2f))
                                     .padding(horizontal = 6.dp, vertical = 3.dp)
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1174,13 +1125,13 @@ fun KeyboardThemeCard(
                         Modifier.border(
                             width = 2.dp,
                             color = selectionColor,
-                            shape = RoundedCornerShape(12.dp)
+                            shape = androidx.compose.ui.graphics.RectangleShape
                         )
                     } else {
                         Modifier
                     }
                 ),
-            shape = RoundedCornerShape(12.dp),
+            shape = androidx.compose.ui.graphics.RectangleShape,
             color = MaterialTheme.colorScheme.surfaceContainer,
             shadowElevation = 0.dp,
             onClick = onClick
@@ -1236,7 +1187,7 @@ fun KeyboardThemeCard(
             Box(
                 modifier = Modifier
                     .size(10.dp)
-                    .clip(RoundedCornerShape(2.dp))
+                    .clip(RectangleShape)
                     .background(swatchColor)
             )
             Spacer(modifier = Modifier.width(6.dp))
@@ -1265,11 +1216,7 @@ private fun ThemeHalfPreview(
     isLeft: Boolean,
     single: Boolean = false,
 ) {
-    val shape = when {
-        single -> RoundedCornerShape(8.dp)
-        isLeft -> RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp)
-        else -> RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp)
-    }
+    val shape = androidx.compose.ui.graphics.RectangleShape
     Box(
         modifier = modifier
             .clip(shape)
@@ -1291,7 +1238,6 @@ private fun ThemeHalfPreview(
                         modifier = Modifier
                             .width(16.dp)
                             .height(6.dp)
-                            .clip(RoundedCornerShape(2.dp))
                             .background(accentColor)
                     )
                 }
@@ -1314,7 +1260,6 @@ private fun ThemeHalfPreview(
                             modifier = Modifier
                                 .weight(if (isSpace) 3f else 1f)
                                 .fillMaxHeight()
-                                .clip(RoundedCornerShape(1.5.dp))
                                 .background(com.kingzcheung.xime.ui.keyboard.frostedKeyColor(when {
                                     !isLeft && rowIndex == 2 && keyIndex == 1 -> enterKeyColor
                                     isSpecial -> specialKeyColor
@@ -1338,7 +1283,6 @@ fun CandidateTextSizeCard(
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
             .background(MaterialTheme.colorScheme.surface)
     ) {
         Column(
@@ -1350,7 +1294,6 @@ fun CandidateTextSizeCard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant)
                     .padding(horizontal = 12.dp, vertical = 10.dp),
             ) {
@@ -1365,7 +1308,6 @@ fun CandidateTextSizeCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
                             .background(primary.copy(alpha = 0.2f))
                             .padding(horizontal = 6.dp, vertical = 2.dp)
                     ) {

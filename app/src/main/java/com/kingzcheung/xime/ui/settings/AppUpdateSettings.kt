@@ -32,6 +32,9 @@ import com.kingzcheung.xime.update.AppRelease
 import com.kingzcheung.xime.update.AppUpdateState
 import com.kingzcheung.xime.update.AppUpdater
 import com.kingzcheung.xime.update.ReleaseNotes
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
 
 private val editionName: String get() = if (BuildConfig.BUNDLED_MODELS) "完整版" else "轻量版"
 
@@ -147,18 +150,21 @@ internal fun AppUpdateSection() {
     }
 
     meteredConfirm?.let { release ->
-        AlertDialog(
+        MetroAlertDialog(
             onDismissRequest = { meteredConfirm = null },
             title = { Text("用移动数据下载？") },
             text = { Text("现在用的是移动数据，${release.version} $editionName 安装包约 ${formatModelMegabytes(release.asset?.sizeBytes ?: 0L)}。") },
             confirmButton = {
-                TextButton(onClick = {
-                    meteredConfirm = null
-                    AppUpdater.download(context, release)
-                }) { Text("下载") }
+                MetroSolidButton(
+                    text = "下载",
+                    onClick = {
+                        meteredConfirm = null
+                        AppUpdater.download(context, release)
+                    },
+                )
             },
             dismissButton = {
-                TextButton(onClick = { meteredConfirm = null }) { Text("等 Wi-Fi") }
+                MetroOutlinedButton(text = "等 Wi-Fi", onClick = { meteredConfirm = null })
             }
         )
     }

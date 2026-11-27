@@ -28,6 +28,7 @@ import com.kingzcheung.xime.settings.SchemaInfo
 import com.kingzcheung.xime.settings.SchemaManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.kingzcheung.xime.ui.metro.MetroRadioIndicator
 
 @Composable
 internal fun LanguageKeySwitchSettings(
@@ -116,7 +117,8 @@ internal fun LanguageKeySwitchSettings(
 private fun SwitchModeRow(tag: String, title: String, selected: Boolean, onSelect: () -> Unit) {
     Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("language-switch-mode:$tag")
         .selectable(selected, role = Role.RadioButton, onClick = onSelect), verticalAlignment = Alignment.CenterVertically) {
-        RadioButton(selected = selected, onClick = null)
+        MetroRadioIndicator(selected = selected)
+        Spacer(Modifier.width(12.dp))
         Text(title, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
     }
 }
@@ -131,7 +133,8 @@ private fun LanguagePairChoices(tag: String, languages: List<InputLanguage?>, se
                 .testTag("language-switch-pair-$tag:${language?.id ?: "current"}")
                 .selectable(selected == language, role = Role.RadioButton) { onSelect(language) },
                 verticalAlignment = Alignment.CenterVertically) {
-                RadioButton(selected = selected == language, onClick = null)
+                MetroRadioIndicator(selected = selected == language)
+                Spacer(Modifier.width(12.dp))
                 Text(language?.displayName ?: "当前语言", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
             }
         }

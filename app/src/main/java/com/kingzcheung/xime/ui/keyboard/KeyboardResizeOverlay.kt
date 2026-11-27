@@ -35,7 +35,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
+import com.kingzcheung.xime.ui.metro.MetroSlider
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -54,7 +55,7 @@ import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Text
+import com.kingzcheung.xime.ui.i18n.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -167,11 +168,8 @@ internal fun KeyboardResizeOverlay(
     val cornerGlass = LocalKeyboardInputPreferences.current.frostedGlass.enabled
     val opacityEditingState = LocalKeyboardResizeOpacityEditing.current ?: remember { mutableStateOf(false) }
     var editingOpacity by opacityEditingState
-    val opacityInteraction = remember { MutableInteractionSource() }
-    val draggingOpacity by opacityInteraction.collectIsDraggedAsState()
-    val pressingOpacity by opacityInteraction.collectIsPressedAsState()
-    // 按住滑条时撤去遮罩，直接预览实际透明度。
-    val adjustingOpacity = draggingOpacity || pressingOpacity
+    var draggingOpacity by remember { mutableStateOf(false) }
+    val adjustingOpacity = draggingOpacity
     // 调透明度不再进入单独的编辑态（返回/完成），外框和按钮留在原地；editingOpacity 只保留给旧调用方。
     val configuration = LocalConfiguration.current
     val footerDp = configuration.floatingFooterHeightDp
@@ -854,8 +852,8 @@ internal fun KeyboardResizeOverlay(
             (140f + 120f * density.fontScale).dp * controlScale
         // 按钮和键盘上的键同一个圆角；面板圆角 = 按键圆角 + 边距，和按钮同心；直角按键时面板也是直角。
         val panelRadius = if (keyRadius > 0.dp) keyRadius + panelInset else 0.dp
-        val toolShape = RoundedCornerShape(panelRadius)
-        val actionShape = RoundedCornerShape(keyRadius)
+        val toolShape = RectangleShape
+        val actionShape = RectangleShape
         Box(
             modifier = Modifier
                 .absoluteOffset { IntOffset(controls.left.roundToInt(), controls.top.roundToInt()) }
@@ -902,41 +900,15 @@ internal fun KeyboardResizeOverlay(
                         inactiveTrackColor = inactiveTrackColor,
                     )
                     CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides opacityHeight) {
-                        Slider(
+                        MetroSlider(
                             value = 1f - opacity,
                             onValueChange = {
                                 opacity = 1f - it
                                 currentOnPreviewOpacity(opacity)
                             },
                             valueRange = 0f..0.7f,
-                            interactionSource = opacityInteraction,
-                            colors = sliderColors,
-                            // 圆形滑块，自己画，按住、拖动都不变形。
-                            thumb = {
-                                Box(Modifier.size(thumbSize, opacityHeight), contentAlignment = Alignment.Center) {
-                                    Box(Modifier.size(thumbSize).clip(CircleShape).background(accentColor)
-                                        .testTag("keyboard-opacity-thumb"))
-                                }
-                            },
-                            track = { sliderState ->
-                                Spacer(Modifier.fillMaxWidth().height(trackHeight).drawBehind {
-                                    // Slider 在两端为滑块各留半个直径。把可见轨道补到整行宽，和首尾按钮平齐。
-                                    val halfThumb = thumbSize.toPx() / 2f
-                                    val left = -halfThumb
-                                    val fullWidth = size.width + 2f * halfThumb
-                                    val corner = CornerRadius(size.height / 2f)
-                                    drawRoundRect(inactiveTrackColor, Offset(left, 0f), Size(fullWidth, size.height), corner)
-                                    val progress = sliderState.coercedValueAsFraction
-                                    val rtl = layoutDirection == LayoutDirection.Rtl
-                                    val thumbX = size.width * (if (rtl) 1f - progress else progress)
-                                    if (progress > 0f) {
-                                        val activeWidth = size.width * progress + halfThumb
-                                        drawRoundRect(accentColor, Offset(if (rtl) thumbX else left, 0f),
-                                            Size(activeWidth, size.height), corner)
-                                    }
-                                    drawCircle(panelColor, 12.dp.toPx() * controlScale, Offset(thumbX, size.height / 2f))
-                                })
-                            },
+                            onDragStateChange = { draggingOpacity = it },
+                            thumbTag = "keyboard-opacity-thumb",
                             modifier = Modifier
                                 .weight(1f)
                                 .height(opacityHeight)
@@ -1145,7 +1117,7 @@ internal fun KeyboardResizeOverlay(
         @Composable
         fun EdgeHint(icon: ImageVector, label: String, modifier: Modifier = Modifier) {
             Row(
-                modifier.background(functionColor, RoundedCornerShape(6.dp))
+                modifier.background(functionColor, RectangleShape)
                     .padding(horizontal = 7.dp, vertical = 2.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -1164,7 +1136,7 @@ internal fun KeyboardResizeOverlay(
                 .testTag("keyboard-resize-padding-bar")
                 .semantics { contentDescription = "上下拖动调节底部留白" }, contentAlignment = Alignment.Center) {
                 // 起手被系统拦走时，仍可在键盘内部点按微调，和拖动应用同一套尺寸及安全下限。
-                Row(Modifier.background(functionColor, RoundedCornerShape(6.dp)), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.background(functionColor, RectangleShape), verticalAlignment = Alignment.CenterVertically) {
                     @Composable fun Step(icon: ImageVector, description: String, delta: Float) {
                         val padding = previewState.bottomPaddingDp
                         val enabled = if (delta < 0f) padding > 0 else

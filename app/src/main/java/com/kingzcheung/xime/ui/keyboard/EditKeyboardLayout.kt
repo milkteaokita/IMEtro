@@ -3,7 +3,7 @@ package com.kingzcheung.xime.ui.keyboard
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
@@ -368,7 +368,7 @@ internal fun EditorActionKey(
         .padding(if (plain) PaddingValues(0.dp) else scaledKeyVisualPadding(PaddingValues(2.dp)))
         .keyGlow(Modifier.then(if (visualShape != null) Modifier.clip(visualShape) else Modifier)
         .then(shadowModifier)
-        .clip(RoundedCornerShape(LocalKeyCornerRadius.current))
+        .clip(RectangleShape)
         .background(frostedKeyColor(
             if (plain && pressed) foreground.copy(alpha = 0.18f) else background, foreground, frostedGlass,
             legacyStateColor = if (pressed && !LocalKeyboardInputPreferences.current.keyGlowEnabled) foreground.copy(alpha = 0.18f) else background,

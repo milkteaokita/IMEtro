@@ -6,12 +6,13 @@ import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.staggeredgrid.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import com.kingzcheung.xime.ui.i18n.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -619,7 +620,7 @@ internal fun ClipboardBoardView(
                         }
                     }
                     if (content.pinsCollapsible) {
-                        Box(Modifier.heightIn(min = PanelCategoryHeight).clip(RoundedCornerShape(50))
+                        Box(Modifier.heightIn(min = PanelCategoryHeight).clip(RectangleShape)
                             .semantics { stateDescription = if (pinsActuallyExpanded) "已展开" else "已收起" }
                             .clickable(role = Role.Button,
                                 onClickLabel = if (pinsActuallyExpanded) "收起" else "展开全部 ${content.pinnedCount} 条固定内容") {
@@ -943,7 +944,7 @@ private fun CompactClipboardFilter(label: String, isSelected: Boolean, onClick: 
     val glass = LocalKeyboardInputPreferences.current.frostedGlass
     val bringIntoView = remember { BringIntoViewRequester() }
     LaunchedEffect(isSelected) { if (isSelected) bringIntoView.bringIntoView() }
-    Box(modifier.bringIntoViewRequester(bringIntoView).heightIn(min = PanelCategoryHeight).clip(RoundedCornerShape(6.dp))
+    Box(modifier.bringIntoViewRequester(bringIntoView).heightIn(min = PanelCategoryHeight).clip(RectangleShape)
         .background(if (isSelected) frostedKeyColor(colors.secondaryContainer, colors.onSurface, glass) else Color.Transparent)
         .semantics { selected = isSelected }
         .clickable(role = Role.Tab, onClick = onClick)
@@ -969,7 +970,7 @@ private fun ClipboardRecordCard(
     val colors = MaterialTheme.colorScheme
     val glass = LocalKeyboardInputPreferences.current.frostedGlass
     val highlighted = chosen || keyboardFocused
-    val shape = RoundedCornerShape(clipboardCardCorner(previewHeight == ClipboardPinnedRowHeight))
+    val shape = RectangleShape
     val oneLine = previewHeight == ClipboardPinnedRowHeight
     val liquid = com.kingzcheung.xime.ui.theme.LiquidGlass.surfacesOn()
     BoxWithConstraints(modifier.fillMaxWidth()
@@ -989,7 +990,7 @@ private fun ClipboardRecordCard(
             onClick = onClick, onLongClick = onLongClick,
             onLongClickLabel = if (selecting) "切换选择" else "更多操作")) {
         when (card) {
-            is ClipboardCard.Text -> Text(if (masked) com.kingzcheung.xime.clipboard.ClipboardLinkChoices.SENSITIVE_MASK
+            is ClipboardCard.Text -> androidx.compose.material3.Text(if (masked) com.kingzcheung.xime.clipboard.ClipboardLinkChoices.SENSITIVE_MASK
                 else clipboardPreviewText(card.item.text),
                 // A one-line record is as tall as a pinned row and its line sits in the middle; the old
                 // 48dp floor left a strip under the text (user 10-30). Longer text grows the card.
@@ -1056,7 +1057,7 @@ private fun ClipboardRecordCard(
 private fun CompactClipboardAction(icon: ImageVector, description: String, onClick: () -> Unit, tag: String,
     enabled: Boolean = true, label: String? = null, modifier: Modifier = Modifier) {
     val color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (enabled) 1f else .38f)
-    Row(modifier.heightIn(min = PanelCategoryHeight).widthIn(min = 28.dp).clip(RoundedCornerShape(6.dp))
+    Row(modifier.heightIn(min = PanelCategoryHeight).widthIn(min = 28.dp).clip(RectangleShape)
         .testTag(tag).clickable(enabled = enabled, role = Role.Button, onClick = onClick)
         .padding(horizontal = 4.dp), horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically) {
@@ -1093,7 +1094,7 @@ private fun ClipboardGroupSortList(cards: List<ClipboardCard>, chosenKeys: Set<S
             val card = rows[index]
             val chosen = card.key in chosenKeys
             val dragging = drag.dragging == card.key
-            val shape = RoundedCornerShape(12.dp)
+            val shape = RectangleShape
             Row(Modifier.fillMaxWidth().then(dragOrderItem(drag, card.key)).clip(shape)
                 .background(if (dragging) androidx.compose.ui.graphics.lerp(rowColor, colors.primary, .2f) else rowColor)
                 .border(if (dragging) 2.dp else 0.dp, if (dragging) colors.primary else Color.Transparent, shape)
@@ -1106,14 +1107,14 @@ private fun ClipboardGroupSortList(cards: List<ClipboardCard>, chosenKeys: Set<S
                     if (chosen) "已选" else "未选", Modifier.size(20.dp), tint = colors.onSurfaceVariant)
                 Spacer(Modifier.width(12.dp))
                 when (card) {
-                    is ClipboardCard.Text -> Text(
+                    is ClipboardCard.Text -> androidx.compose.material3.Text(
                         if (card.item.sensitive && card.key !in revealed) com.kingzcheung.xime.clipboard.ClipboardLinkChoices.SENSITIVE_MASK
                         else clipboardPreviewText(card.item.text).lineSequence().firstOrNull { it.isNotBlank() }?.trim().orEmpty(),
                         Modifier.weight(1f), color = colors.onSurface, fontSize = 15.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     is ClipboardCard.Image -> {
-                        AsyncImage(card.item.uri, card.item.label, Modifier.size(32.dp).clip(RoundedCornerShape(4.dp)),
+                        AsyncImage(card.item.uri, card.item.label, Modifier.size(32.dp).clip(RectangleShape),
                             contentScale = ContentScale.Crop)
-                        Text(card.item.label, Modifier.weight(1f).padding(start = 8.dp), color = colors.onSurface,
+                        androidx.compose.material3.Text(card.item.label, Modifier.weight(1f).padding(start = 8.dp), color = colors.onSurface,
                             fontSize = 15.sp, maxLines = 1)
                     }
                 }
@@ -1127,7 +1128,7 @@ private fun ClipboardGroupSortList(cards: List<ClipboardCard>, chosenKeys: Set<S
 @Composable
 private fun ClipboardSectionSelectAll(label: String, all: Boolean, tag: String, modifier: Modifier, onClick: () -> Unit) {
     val color = MaterialTheme.colorScheme.onSurfaceVariant
-    Row(modifier.fillMaxWidth().heightIn(min = 32.dp).clip(RoundedCornerShape(6.dp))
+    Row(modifier.fillMaxWidth().heightIn(min = 32.dp).clip(RectangleShape)
         .semantics { selected = all }
         .clickable(role = Role.Checkbox, onClickLabel = if (all) "取消这一栏的全选" else "全选这一栏", onClick = onClick)
         .testTag(tag).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -1139,7 +1140,7 @@ private fun ClipboardSectionSelectAll(label: String, all: Boolean, tag: String, 
 @Composable
 private fun ClipboardCardBadge(icon: ImageVector, description: String, modifier: Modifier, tag: String) {
     val colors = MaterialTheme.colorScheme
-    Box(modifier.testTag(tag).clip(RoundedCornerShape(4.dp))
+    Box(modifier.testTag(tag).clip(RectangleShape)
         .background(frostedKeyColor(clipboardCardColor(), colors.onSurface,
             LocalKeyboardInputPreferences.current.frostedGlass)).padding(2.dp)) {
         Icon(icon, description, Modifier.size(16.dp), tint = colors.onSurface)
@@ -1173,7 +1174,7 @@ private fun PinsFoldDivider(expanded: Boolean, hidden: Int, content: androidx.co
 private fun PinsFoldPill(label: String, expanded: Boolean, content: Color, modifier: Modifier = Modifier) {
     val line = content.copy(alpha = .22f)
     val tint = content.copy(alpha = .78f)
-    Row(modifier.clip(RoundedCornerShape(50)).border(.5.dp, line, RoundedCornerShape(50))
+    Row(modifier.clip(RectangleShape).border(.5.dp, line, RectangleShape)
         .padding(start = 10.dp, end = 6.dp, top = 1.dp, bottom = 1.dp),
         verticalAlignment = Alignment.CenterVertically) {
         Text(label, color = tint, style = MaterialTheme.typography.labelMedium, maxLines = 1)

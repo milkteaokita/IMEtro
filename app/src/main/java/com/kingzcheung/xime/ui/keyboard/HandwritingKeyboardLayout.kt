@@ -15,9 +15,9 @@ import androidx.compose.material.icons.filled.SpaceBar
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.material.icons.filled.CloseFullscreen
-import androidx.compose.material3.Text
+import com.kingzcheung.xime.ui.i18n.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material3.Surface
 import com.kingzcheung.xime.handwriting.SPenSounds
 import androidx.compose.material3.MaterialTheme
@@ -108,7 +108,7 @@ internal fun HandwritingLanguageHint(text: String, background: Color, foreground
     // 不用 Surface：它会挡住落笔；这里只是显示，笔从胶囊上也能写下去
     Text(text, color = foreground, fontSize = 13.sp,
         modifier = modifier.padding(start = 8.dp, top = 8.dp, end = 96.dp)
-            .background(background.copy(alpha = 1f), RoundedCornerShape(50))
+            .background(background.copy(alpha = 1f), RectangleShape)
             .padding(horizontal = 12.dp, vertical = 4.dp).testTag("handwriting-language"))
 }
 
@@ -401,12 +401,12 @@ fun HandwritingKeyboardLayout(
                 },
                 modifier = Modifier.align(Alignment.TopEnd).padding(8.dp).testTag("handwriting-formula-toggle")
                     .semantics { stateDescription = if (formulaMode) "公式模式已开" else "公式模式已关" },
-                shape = RoundedCornerShape(50),
+                shape = RectangleShape,
                 color = if (formulaMode) MaterialTheme.colorScheme.primary.copy(alpha = 1f) else specialKeyBackgroundColor.copy(alpha = 1f),
                 contentColor = if (formulaMode) {
                     if (MaterialTheme.colorScheme.primary.luminance() > 0.179f) Color.Black else Color.White
                 } else specialKeyTextColor,
-                shadowElevation = if (formulaMode) 2.dp else 0.dp,
+                shadowElevation = 0.dp,
             ) {
                 Text("公式", fontSize = 14.sp, modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp))
             }

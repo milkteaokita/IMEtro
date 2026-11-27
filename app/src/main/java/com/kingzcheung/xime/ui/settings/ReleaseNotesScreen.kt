@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
+import com.kingzcheung.xime.ui.metro.MetroSubPageHeader
+import com.kingzcheung.xime.ui.metro.LocalMetroUiState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
@@ -71,20 +73,14 @@ fun ReleaseNotesContent(onBack: () -> Unit) {
     }
     val releasesPage = AppUpdateCatalog.releasesPage(DownloadMirrors.prefersDomestic(context))
 
+    val metro = LocalMetroUiState.current
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = metro.background,
         topBar = {
-            TopAppBar(
-                title = { Text("更新内容") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                ),
+            MetroSubPageHeader(
+                parentTitle = "关于",
+                pageTitle = "更新内容",
+                onBack = onBack,
             )
         }
     ) { padding ->
@@ -130,7 +126,7 @@ private fun ReleaseNoteCard(note: ReleaseNote, current: String, initiallyExpande
     val newer = AppUpdateCatalog.isNewer(note.version, current)
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RectangleShape,
         color = MaterialTheme.colorScheme.surfaceContainerLow,
     ) {
         Column {

@@ -19,6 +19,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kingzcheung.xime.settings.MarketPluginItem
 import com.kingzcheung.xime.viewmodel.PluginMarketViewModel
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,7 +102,7 @@ private fun PluginMarketDialog(
 ) {
     val plugin = item.plugin
     val installed = item.installed && item.installedVersion == version
-    AlertDialog(
+    MetroAlertDialog(
         onDismissRequest = close, title = { Text(plugin.name.ifBlank { plugin.id }) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -122,11 +125,12 @@ private fun PluginMarketDialog(
             }
         },
         confirmButton = {
-            TextButton(
+            MetroSolidButton(
+                text = if (installed) "打开设置" else "安装此版本",
                 onClick = if (installed) onManage else onInstall,
                 enabled = installed || (!busy && item.compatible && plugin.versions.any { it.version == version }),
-            ) { Text(if (installed) "打开设置" else "安装此版本") }
+            )
         },
-        dismissButton = { TextButton(onClick = close) { Text("关闭") } },
+        dismissButton = { MetroOutlinedButton(text = "关闭", onClick = close) },
     )
 }

@@ -28,7 +28,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material.icons.filled.Language
@@ -533,7 +533,7 @@ private fun T9KeyboardContent(
                     // 键缝动效：左边这块面板不是键，按它不画；登记位置是为了线能绕着它走、半透明时光不从它底下透出来。
                     .then(keyGapLightSource(GapLightKind.NONE))
                     .then(candidateShadowModifier)
-                    .clip(RoundedCornerShape(LocalKeyCornerRadius.current))
+                    .clip(RectangleShape)
                     .background(frostedKeyColor(keyBackgroundColor, keyTextColor, frostedGlass))
             ) {
                 val showCandidates = controller.leftPanelState != T9InputController.LeftPanelState.IDLE
@@ -1165,7 +1165,7 @@ internal fun T9CandidateItem(
         if (isSelected) {
             Box(
                 modifier = modifierWithMeaning
-                    .clip(RoundedCornerShape(5.dp))
+                    .clip(RectangleShape)
                     .background(accentColor.copy(alpha = 0.2f))
                     .padding(horizontal = 3.dp, vertical = 1.dp)
             ) {
@@ -1328,7 +1328,7 @@ internal fun ResetKey(
     // 和字母键一样松手也给「按键抬起震动」（用户 11-23：九键抬起震动无效）。
     val currentOnRelease by rememberUpdatedState(keyReleaseOrShared(null, onPress != null))
     val density = LocalDensity.current
-    val shape = RoundedCornerShape(KeyShapes.current.radius(shadowShapeRadius))
+    val shape = RectangleShape
     val frostedGlass = LocalKeyboardInputPreferences.current.frostedGlass
     val shadowModifier = remember(shadowEnabled, shadowElevation, shadowShapeRadius, KeyShapes.current, density, backgroundColor, frostedGlass.enabled) {
         if (shadowEnabled && !frostedGlass.enabled) {

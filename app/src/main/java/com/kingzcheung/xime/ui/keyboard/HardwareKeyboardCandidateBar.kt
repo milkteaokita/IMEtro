@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -61,7 +61,7 @@ import kotlin.math.floor
 import com.kingzcheung.xime.service.HardwareCursorAnchor
 
 private const val MAX_VISIBLE_CANDIDATES = com.kingzcheung.xime.service.HARDWARE_PAGE_SIZE
-internal val HardwareCandidateCornerRadius = 8.dp
+internal val HardwareCandidateCornerRadius = 0.dp
 
 @Composable
 fun HardwareKeyboardCandidateBar(
@@ -243,7 +243,7 @@ fun HardwareKeyboardCandidateBar(
             .heightIn(max = maxCardHeight).onSizeChanged { cardSize = it },
             verticalArrangement = Arrangement.spacedBy(6.dp)) {
             if (displayText.isNotEmpty()) {
-                val shape = RoundedCornerShape(4.dp)
+                val shape = RectangleShape
                 // Let the displayed text and its real padding determine the width. A second
                 // text measurement can disagree with font resolution or pixel-rounded padding.
                 Box(Modifier.widthIn(min = minOf(24.dp, maxCardWidth), max = maxCardWidth)
@@ -257,7 +257,7 @@ fun HardwareKeyboardCandidateBar(
                 }
             }
             if (showCandidates) {
-                val shape = RoundedCornerShape(HardwareCandidateCornerRadius)
+                val shape = RectangleShape
                 Box(Modifier.width(contentWidth).clip(shape)
                     .then(surface?.invoke() ?: Modifier.background(cardBackgroundColor))
                     .testTag("hardware-candidate-card")
@@ -307,7 +307,7 @@ private fun HardwareCandidateGrid(
                 words.forEachIndexed { column, word ->
                     val index = row * 5 + column
                     val selected = index == highlightIndex
-                    Box(Modifier.weight(1f).heightIn(min = 44.dp).clip(RoundedCornerShape(6.dp))
+                    Box(Modifier.weight(1f).heightIn(min = 44.dp).clip(RectangleShape)
                         .background(if (selected) visuals.accentColor.copy(alpha = .18f) else Color.Transparent)
                         .clickable { onCandidateSelect?.invoke(index) }.testTag("hardware-grid-candidate:$index"),
                         contentAlignment = Alignment.Center) {

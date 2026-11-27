@@ -31,19 +31,12 @@ import com.kingzcheung.xime.R
 @Composable
 fun OtherSettingsContent(onBack: () -> Unit, onNavigateToRoute: (String) -> Unit) {
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.background,
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.item_other_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                ),
+            com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+                parentTitle = "系统",
+                pageTitle = stringResource(R.string.item_other_title),
+                onBack = onBack,
             )
         }
     ) { padding ->

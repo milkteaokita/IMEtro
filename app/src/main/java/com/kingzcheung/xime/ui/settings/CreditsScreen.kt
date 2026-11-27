@@ -36,7 +36,7 @@ data class CreditItem(
  * 完整清单（每个依赖、语料及其许可证）在 README 的「鸣谢」，两边改一处要同步另一处。
  */
 object Credits {
-    const val README_URL = "https://github.com/Cyletix/CyIME#%E9%B8%A3%E8%B0%A2" // README 的「鸣谢」一节
+    const val README_URL = "https://github.com/milkteaokita/IMEtro#%E8%87%B4%E8%AC%9D" // README 的「致謝」一节
 
     val groups: List<Pair<String, List<CreditItem>>> = listOf(
         "输入引擎" to listOf(
@@ -87,7 +87,8 @@ object Credits {
             CreditItem("小鹤双拼", "小鹤音形", "小鹤双拼键位", null, "https://flypy.cc/"),
         ),
         "开发基础" to listOf(
-            CreditItem("Xime", "", "CyIME 基于它开发", "GPL-3.0", "https://github.com/ximeiorg/Xime"),
+            CreditItem("CyIME", "Cyletix", "IMEtro 基于它开发", "GPL-3.0", "https://github.com/Cyletix/CyIME"),
+            CreditItem("Xime", "Kingz Cheung", "CyIME 基于它开发", "GPL-3.0", "https://github.com/ximeiorg/Xime"),
         ),
     )
 }
@@ -97,19 +98,12 @@ object Credits {
 fun CreditsContent(onBack: () -> Unit) {
     val uriHandler = LocalUriHandler.current
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.background,
         topBar = {
-            TopAppBar(
-                title = { Text("鸣谢") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                ),
+            com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+                parentTitle = "关于",
+                pageTitle = "鸣谢",
+                onBack = onBack,
             )
         }
     ) { padding ->

@@ -4,7 +4,7 @@ import com.kingzcheung.xime.ui.theme.KeyShapes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material.icons.filled.Language
@@ -300,7 +300,7 @@ internal fun KanaFlickButton(
             .pointerInput(Unit) { detectExclusiveKeyGestures { currentActions } }
             .padding(scaledKeyVisualPadding())
             .keyGlow(Modifier.then(shadow)
-            .clip(RoundedCornerShape(LocalKeyCornerRadius.current))
+            .clip(RectangleShape)
             .background(frostedKeyColor(
                 background, foreground, frostedGlass,
                 legacyStateColor = if (pressed) background.copy(alpha = 0.7f) else background,

@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -202,21 +202,21 @@ fun PluginConfigFormScreen(
         onDispose { if (!uninstalled) autoAuthorizeConfiguredHosts() }
     }
     var confirmUninstall by remember { mutableStateOf(false) }
-    if (confirmUninstall && installedInfo != null) AlertDialog(
+    if (confirmUninstall && installedInfo != null) com.kingzcheung.xime.ui.metro.MetroAlertDialog(
         onDismissRequest = { confirmUninstall = false },
         title = { Text("卸载插件") },
         text = { Text("确定要卸载「${installedInfo.name.ifEmpty { installedInfo.id }}」吗？插件文件和配置会删掉。") },
         confirmButton = {
-            TextButton(onClick = {
+            com.kingzcheung.xime.ui.metro.MetroSolidButton("卸载", onClick = {
                 confirmUninstall = false
                 uninstalled = true
                 toggleScope.launch {
                     uninstallPluginCompletely(context, pluginId)
                     onBack()
                 }
-            }) { Text("卸载", color = MaterialTheme.colorScheme.error) }
+            })
         },
-        dismissButton = { TextButton(onClick = { confirmUninstall = false }) { Text("取消") } },
+        dismissButton = { com.kingzcheung.xime.ui.metro.MetroOutlinedButton("取消", onClick = { confirmUninstall = false }) },
     )
 
     if (embedded) {
@@ -232,22 +232,12 @@ fun PluginConfigFormScreen(
         }
     } else {
         Scaffold(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.background,
             topBar = {
-                TopAppBar(
-                    title = { Text(pluginName) },
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "返回"
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        titleContentColor = MaterialTheme.colorScheme.onSurface
-                    ),
+                com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+                    parentTitle = "插件管理",
+                    pageTitle = pluginName,
+                    onBack = onBack,
                 )
             }
         ) { padding ->
@@ -390,7 +380,7 @@ private fun UiNodeEditor(
                 maxLines = 8,
                 supportingText = field.helpText?.let { { Text(it) } },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
+                shape = RectangleShape,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
                     unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
@@ -428,7 +418,7 @@ private fun UiNodeEditor(
                 },
                 supportingText = field.helpText?.let { { Text(it) } },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
+                shape = RectangleShape,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
                     unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
@@ -462,7 +452,7 @@ private fun UiNodeEditor(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 supportingText = field.helpText?.let { { Text(it) } },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
+                shape = RectangleShape,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
                     unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
@@ -489,13 +479,13 @@ private fun UiNodeEditor(
                         )
                     }
                 }
-                Switch(
+                com.kingzcheung.xime.ui.metro.MetroToggleSwitch(
                     checked = value == "true",
                     onCheckedChange = {
                         value = it.toString()
                         persist()
                     },
-                    colors = SwitchDefaults.colors()
+                    showStatusLabel = false,
                 )
             }
         }
@@ -520,7 +510,7 @@ private fun UiNodeEditor(
                     modifier = Modifier
                         .fillMaxWidth()
                         .menuAnchor(),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RectangleShape,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
                         unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)

@@ -43,6 +43,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import com.kingzcheung.xime.ui.i18n.Text
+import com.kingzcheung.xime.ui.metro.LocalMetroUiState
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroRadioIndicator
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
+import com.kingzcheung.xime.ui.metro.MetroSubPageHeader
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -145,48 +151,43 @@ fun RimeFileBrowserContent(onBack: () -> Unit) {
                 onBack = { viewingFile = null }
             )
         } else {
+        val metro = LocalMetroUiState.current
         Scaffold(
+            containerColor = metro.background,
             topBar = {
-                TopAppBar(
-                    title = {
-                        Column {
-                            Text("Rime 配置文件", maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            val rel = if (currentDir == rootDir) "" else
-                                currentDir.absolutePath.removePrefix(rootDir.absolutePath)
-                            if (rel.isNotEmpty()) {
-                                Text(rel, style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Column {
+                    MetroSubPageHeader(
+                        parentTitle = "方案",
+                        pageTitle = "Rime 配置文件",
+                        onBack = {
+                            if (currentDir == rootDir) onBack()
+                            else currentDir = currentDir.parentFile ?: rootDir
+                        },
+                        actions = {
+                            IconButton(onClick = { currentDir = rootDir }) {
+                                Icon(Icons.Default.Home, contentDescription = "根目录")
+                            }
+                            IconButton(onClick = { refresh() }) {
+                                Icon(Icons.Default.Refresh, contentDescription = "刷新")
+                            }
+                            IconButton(onClick = { showExportDialog = true }) {
+                                Icon(Icons.Default.IosShare, contentDescription = "导出")
                             }
                         }
-                    },
-                    navigationIcon = {
-                        if (currentDir == rootDir) {
-                            IconButton(onClick = onBack) {
-                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-                            }
-                        } else {
-                            IconButton(onClick = { currentDir = currentDir.parentFile ?: rootDir }) {
-                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "上级目录")
-                            }
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = { currentDir = rootDir }) {
-                            Icon(Icons.Default.Home, contentDescription = "根目录")
-                        }
-                        IconButton(onClick = { refresh() }) {
-                            Icon(Icons.Default.Refresh, contentDescription = "刷新")
-                        }
-                        IconButton(onClick = { showExportDialog = true }) {
-                            Icon(Icons.Default.IosShare, contentDescription = "导出")
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        titleContentColor = MaterialTheme.colorScheme.onSurface
                     )
-                )
+                    val rel = if (currentDir == rootDir) "" else
+                        currentDir.absolutePath.removePrefix(rootDir.absolutePath)
+                    if (rel.isNotEmpty()) {
+                        Text(
+                            rel,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = metro.onBackgroundMuted,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
+                        )
+                    }
+                }
             },
             snackbarHost = { SnackbarHost(snackbarHostState) }
         ) { innerPadding ->
@@ -233,25 +234,25 @@ fun RimeFileBrowserContent(onBack: () -> Unit) {
 
     showDeleteDialog?.let { file ->
         val isDir = file.isDirectory
-        AlertDialog(
+        MetroAlertDialog(
             onDismissRequest = { showDeleteDialog = null },
             title = { Text(if (isDir) "删除目录" else "删除文件") },
             text = { Text("确定删除「${file.name}」？${if (isDir) "\n目录内的所有内容将被删除。" else ""}") },
             confirmButton = {
-                TextButton(onClick = { deleteFile(file) }) {
-                    Text("删除", color = MaterialTheme.colorScheme.error)
-                }
+                MetroSolidButton(
+                    text = "删除",
+                    onClick = { deleteFile(file) },
+                    containerColor = MaterialTheme.colorScheme.error,
+                )
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteDialog = null }) {
-                    Text("取消")
-                }
+                MetroOutlinedButton(text = "取消", onClick = { showDeleteDialog = null })
             }
         )
     }
 
     if (showExportDialog) {
-        AlertDialog(
+        MetroAlertDialog(
             onDismissRequest = { showExportDialog = false },
             title = { Text("导出 Rime 配置") },
             text = {
@@ -263,14 +264,11 @@ fun RimeFileBrowserContent(onBack: () -> Unit) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { exportMode = mode }
-                                .padding(vertical = 4.dp),
+                                .padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            RadioButton(
-                                selected = exportMode == mode,
-                                onClick = { exportMode = mode }
-                            )
-                            Spacer(Modifier.width(8.dp))
+                            MetroRadioIndicator(selected = exportMode == mode)
+                            Spacer(Modifier.width(12.dp))
                             Text(mode.label, style = MaterialTheme.typography.bodyMedium)
                         }
                     }
@@ -286,7 +284,9 @@ fun RimeFileBrowserContent(onBack: () -> Unit) {
                 }
             },
             confirmButton = {
-                TextButton(
+                MetroSolidButton(
+                    text = if (exportInProgress) "导出中..." else "开始导出",
+                    enabled = !exportInProgress,
                     onClick = {
                         showExportDialog = false
                         exportInProgress = true
@@ -313,24 +313,20 @@ fun RimeFileBrowserContent(onBack: () -> Unit) {
                             )
                         }
                     },
-                    enabled = !exportInProgress
-                ) {
-                    Text(if (exportInProgress) "导出中..." else "开始导出")
-                }
+                )
             },
             dismissButton = {
-                TextButton(
+                MetroOutlinedButton(
+                    text = "取消",
+                    enabled = !exportInProgress,
                     onClick = { showExportDialog = false },
-                    enabled = !exportInProgress
-                ) {
-                    Text("取消")
-                }
+                )
             }
         )
     }
 
     if (exportInProgress) {
-        AlertDialog(
+        MetroAlertDialog(
             onDismissRequest = {},
             title = { Text("导出中") },
             text = { Text("正在打包 Rime 配置…") },
@@ -379,25 +375,25 @@ private fun YamlEditor(file: File, onDeleted: () -> Unit, onBack: () -> Unit) {
     }
 
     if (showDeleteConfirm) {
-        AlertDialog(
+        MetroAlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
             title = { Text("删除文件") },
             text = { Text("删除「${file.name}」？删除后不能恢复。") },
             confirmButton = {
-                TextButton(onClick = {
-                    showDeleteConfirm = false
-                    file.delete()
-                    reloadKeyboardConfig()
-                    com.kingzcheung.xime.ui.i18n.UiToast.makeText(context, "已删除: ${file.name}", Toast.LENGTH_SHORT).show()
-                    onDeleted()
-                }) {
-                    Text("删除", color = MaterialTheme.colorScheme.error)
-                }
+                MetroSolidButton(
+                    text = "删除",
+                    containerColor = MaterialTheme.colorScheme.error,
+                    onClick = {
+                        showDeleteConfirm = false
+                        file.delete()
+                        reloadKeyboardConfig()
+                        com.kingzcheung.xime.ui.i18n.UiToast.makeText(context, "已删除: ${file.name}", Toast.LENGTH_SHORT).show()
+                        onDeleted()
+                    }
+                )
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) {
-                    Text("取消")
-                }
+                MetroOutlinedButton(text = "取消", onClick = { showDeleteConfirm = false })
             }
         )
     }
@@ -423,57 +419,53 @@ private fun YamlEditor(file: File, onDeleted: () -> Unit, onBack: () -> Unit) {
         }
     }
 
+    val metro = LocalMetroUiState.current
     Scaffold(
+        containerColor = metro.background,
         topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(file.name, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        val sizeStr = formatSize(file.length())
-                        val dateStr = dateFormat.format(Date(file.lastModified()))
-                        val flag = if (isModified) " · 未保存" else ""
-                        Text("$sizeStr · $dateStr$flag",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = if (isModified) MaterialTheme.colorScheme.error
-                                    else MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-                    }
-                },
-                actions = {
-                    if (isEditing) {
-                        IconButton(onClick = { save() }) {
-                            Icon(Icons.Default.Check, contentDescription = "保存",
-                                tint = MaterialTheme.colorScheme.primary)
+            Column {
+                MetroSubPageHeader(
+                    parentTitle = "Rime 配置文件",
+                    pageTitle = file.name,
+                    onBack = onBack,
+                    actions = {
+                        if (isEditing) {
+                            IconButton(onClick = { save() }) {
+                                Icon(Icons.Default.Check, contentDescription = "保存",
+                                    tint = metro.accent)
+                            }
+                        }
+                        IconButton(onClick = {
+                            isEditing = !isEditing
+                            editor?.editable = isEditing
+                        }) {
+                            Icon(
+                                if (isEditing) Icons.Default.Visibility else Icons.Default.Edit,
+                                contentDescription = if (isEditing) "预览" else "编辑",
+                                tint = if (isEditing) metro.accent
+                                else metro.onBackgroundMuted
+                            )
+                        }
+                        IconButton(onClick = { showDeleteConfirm = true }) {
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = "删除",
+                                tint = MaterialTheme.colorScheme.error
+                            )
                         }
                     }
-                    IconButton(onClick = {
-                        isEditing = !isEditing
-                        editor?.editable = isEditing
-                    }) {
-                        Icon(
-                            if (isEditing) Icons.Default.Visibility else Icons.Default.Edit,
-                            contentDescription = if (isEditing) "预览" else "编辑",
-                            tint = if (isEditing) MaterialTheme.colorScheme.primary
-                                   else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    IconButton(onClick = { showDeleteConfirm = true }) {
-                        Icon(
-                            Icons.Default.Delete,
-                            contentDescription = "删除",
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
                 )
-            )
+                val sizeStr = formatSize(file.length())
+                val dateStr = dateFormat.format(Date(file.lastModified()))
+                val flag = if (isModified) " · 未保存" else ""
+                Text(
+                    "$sizeStr · $dateStr$flag",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isModified) MaterialTheme.colorScheme.error
+                    else metro.onBackgroundMuted,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
+                )
+            }
         }
     ) { innerPadding ->
         Box(

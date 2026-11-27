@@ -21,22 +21,24 @@ enum class KeyShape(val id: String, val title: String, private val maxRadius: In
     SHARP("sharp", "直角", 0);
 
     fun radius(configured: Int): Int {
+        if (this == SHARP) return 0
         val capped = maxRadius?.let { minOf(it, configured) } ?: configured
         return minRadius?.let { maxOf(it, capped) } ?: capped
     }
     fun radius(configured: Dp): Dp {
+        if (this == SHARP) return 0.dp
         val capped = maxRadius?.let { minOf(it.dp, configured) } ?: configured
         return minRadius?.let { maxOf(it.dp, capped) } ?: capped
     }
 
     companion object {
-        fun fromId(id: String?) = entries.firstOrNull { it.id == id } ?: ROUNDED
+        fun fromId(id: String?) = KeyShape.SHARP
     }
 }
 
 private const val ROUNDER_RADIUS = 12
 
 object KeyShapes {
-    var current by mutableStateOf(KeyShape.ROUNDED)
+    var current by mutableStateOf(KeyShape.SHARP)
         internal set
 }

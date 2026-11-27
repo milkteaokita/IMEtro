@@ -44,7 +44,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
@@ -245,7 +245,7 @@ private fun SaveDialog(controller: CaptionController, onDismiss: () -> Unit) {
     var history by remember { mutableStateOf(false) }
     var searching by remember { mutableStateOf(false) }
     Dialog(onDismissRequest = onDismiss) {
-        Surface(shape = RoundedCornerShape(28.dp), color = captionDialogColor(), contentColor = MaterialTheme.colorScheme.onSurface) {
+        Surface(shape = RectangleShape, color = captionDialogColor(), contentColor = MaterialTheme.colorScheme.onSurface) {
             Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("字幕记录", fontSize = 26.sp, fontWeight = FontWeight.Bold)
                 Text(if (where == null) "这次还没有字幕。" else "这次的字幕已保存在“$where”，边听边更新，一次只有这一个文件。" +
@@ -286,7 +286,7 @@ private fun SearchDialog(controller: CaptionController, onDismiss: () -> Unit) {
         hits = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { controller.search(query) }
     }
     Dialog(onDismissRequest = onDismiss, properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)) {
-        Surface(Modifier.fillMaxWidth(.94f).fillMaxHeight(.9f), shape = RoundedCornerShape(28.dp), color = captionDialogColor(),
+        Surface(Modifier.fillMaxWidth(.94f).fillMaxHeight(.9f), shape = RectangleShape, color = captionDialogColor(),
             contentColor = MaterialTheme.colorScheme.onSurface) {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("搜索字幕", fontSize = 26.sp, fontWeight = FontWeight.Bold)
@@ -297,7 +297,7 @@ private fun SearchDialog(controller: CaptionController, onDismiss: () -> Unit) {
                 LazyColumn(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(hits.size) { i ->
                         val (saved, line) = hits[i]
-                        Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp))
+                        Column(Modifier.fillMaxWidth().clip(RectangleShape)
                             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                             .combinedClickableNoRipple { if (saved != null) open = saved }.padding(12.dp)) {
                             Text(if (saved == null) "这次" else clock.format(Date(saved.modifiedMs)), fontSize = 14.sp,
@@ -340,7 +340,7 @@ private fun HistoryDialog(controller: CaptionController, onDismiss: () -> Unit) 
     var open by remember { mutableStateOf<SavedCaption?>(null) }
     val clock = remember { SimpleDateFormat("M月d日 HH:mm", Locale.getDefault()) }
     Dialog(onDismissRequest = onDismiss) {
-        Surface(shape = RoundedCornerShape(28.dp), color = captionDialogColor(), contentColor = MaterialTheme.colorScheme.onSurface) {
+        Surface(shape = RectangleShape, color = captionDialogColor(), contentColor = MaterialTheme.colorScheme.onSurface) {
             Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("以前的字幕", fontSize = 26.sp, fontWeight = FontWeight.Bold)
                 if (files.isEmpty()) Text("还没有保存过的字幕。", fontSize = 18.sp)
@@ -362,7 +362,7 @@ private fun SavedCaptionDialog(controller: CaptionController, saved: SavedCaptio
     val context = androidx.compose.ui.platform.LocalContext.current
     val text = remember(saved) { controller.readSaved(saved) }
     Dialog(onDismissRequest = onDismiss, properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)) {
-        Surface(Modifier.fillMaxWidth(.94f).fillMaxHeight(.9f), shape = RoundedCornerShape(28.dp), color = captionDialogColor(),
+        Surface(Modifier.fillMaxWidth(.94f).fillMaxHeight(.9f), shape = RectangleShape, color = captionDialogColor(),
             contentColor = MaterialTheme.colorScheme.onSurface) {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(saved.name.removeSuffix(".txt"), fontSize = 20.sp, fontWeight = FontWeight.Bold)
@@ -481,7 +481,7 @@ private fun LanguageDialog(current: CaptionLanguage, missing: (CaptionLanguage) 
 /** The language picker's card, on its own so it can be drawn without a dialog window. */
 @Composable
 internal fun LanguagePickerCard(current: CaptionLanguage, missing: (CaptionLanguage) -> String?, onPick: (CaptionLanguage) -> Unit, onDismiss: () -> Unit) {
-    Surface(shape = RoundedCornerShape(28.dp), color = captionDialogColor(), contentColor = MaterialTheme.colorScheme.onSurface) {
+    Surface(shape = RectangleShape, color = captionDialogColor(), contentColor = MaterialTheme.colorScheme.onSurface) {
         Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("字幕听哪种语言？", fontSize = 26.sp, fontWeight = FontWeight.Bold)
             for (language in CaptionLanguage.supported) {
@@ -513,7 +513,7 @@ private fun statusOf(controller: CaptionController) = when {
 @Composable
 internal fun ModelBanner(message: String, action: String, state: ModelDownloadState, onDismiss: (() -> Unit)? = null, onDownload: () -> Unit) {
     // Same container as the settings pages (surfaceContainerLow, 12 dp, visual material).
-    Surface(Modifier.fillMaxWidth().padding(vertical = 4.dp), shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surfaceContainerLow) {
+    Surface(Modifier.fillMaxWidth().padding(vertical = 4.dp), shape = RectangleShape, color = MaterialTheme.colorScheme.surfaceContainerLow) {
         BoxWithConstraints(Modifier.visualMaterial(VisualStyles.current, 12.dp, level = MaterialLevel.RAISED).padding(16.dp)) {
             // 横屏窄栏旁的字幕区也约 530 dp 宽：仍放一行，免得按钮被限高区裁掉。
             val narrow = maxWidth < 440.dp
@@ -621,7 +621,7 @@ private fun TurnRow(turn: Turn, fontSp: Int, onSpeakerTap: (SpeakerUi) -> Unit, 
     val speaker = turn.speaker
     val color = speaker?.let { speakerColor(it.colorIndex) } ?: Color.Gray
     val time = remember(turn.key) { SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(turn.segments.first().wallMs)) }
-    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).clip(RoundedCornerShape(14.dp)).background(color.copy(alpha = .10f))
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).clip(RectangleShape).background(color.copy(alpha = .10f))
         .combinedClickable(onClick = {}, onLongClick = { if (speaker != null) onLongPress(turn) })) {
         Box(Modifier.width(10.dp).fillMaxHeight().background(color))
         // Name column: the whole block is the tap target for "这是谁？".
@@ -702,7 +702,7 @@ private fun SpeakerMenu(speaker: SpeakerUi, controller: CaptionController, onDis
     val others = controller.speakers.filter { it.id != speaker.id && it.id != CaptionController.REPLY_SPEAKER }
     fun name(value: String) { controller.rename(speaker.id, value, remember); onDismiss() }
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        Surface(Modifier.fillMaxWidth(.9f).padding(16.dp), shape = RoundedCornerShape(28.dp), color = captionDialogColor(), contentColor = MaterialTheme.colorScheme.onSurface) {
+        Surface(Modifier.fillMaxWidth(.9f).padding(16.dp), shape = RectangleShape, color = captionDialogColor(), contentColor = MaterialTheme.colorScheme.onSurface) {
             // 横屏高度不够时整页可滚动，确认按钮永远够得着。
             Column(Modifier.verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("这是谁？", fontSize = 28.sp, fontWeight = FontWeight.Bold)
@@ -733,7 +733,11 @@ private fun SpeakerMenu(speaker: SpeakerUi, controller: CaptionController, onDis
                         Text("记住这个人的声音", fontSize = 20.sp, fontWeight = FontWeight.Medium)
                         Text("下次打开字幕自动认出来；声音特征只存在这部手机里", fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                    androidx.compose.material3.Switch(remember, { remember = it })
+                    com.kingzcheung.xime.ui.metro.MetroToggleSwitch(
+                        checked = remember,
+                        onCheckedChange = { remember = it },
+                        showStatusLabel = false,
+                    )
                 }
                 if (controller.isRemembered(speaker.id)) {
                     BigButton("忘掉这个人的声音", Modifier.fillMaxWidth(), outlined = true) { controller.forgetVoice(speaker.id); onDismiss() }
@@ -748,7 +752,7 @@ private fun SpeakerMenu(speaker: SpeakerUi, controller: CaptionController, onDis
 @Composable
 private fun ReassignDialog(turn: Turn, controller: CaptionController, onDismiss: () -> Unit) {
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        Surface(Modifier.fillMaxWidth(.9f).padding(16.dp), shape = RoundedCornerShape(28.dp), color = captionDialogColor(), contentColor = MaterialTheme.colorScheme.onSurface) {
+        Surface(Modifier.fillMaxWidth(.9f).padding(16.dp), shape = RectangleShape, color = captionDialogColor(), contentColor = MaterialTheme.colorScheme.onSurface) {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("这句话是谁说的？", fontSize = 28.sp, fontWeight = FontWeight.Bold)
                 androidx.compose.material3.Text(turn.text, fontSize = 22.sp, maxLines = 3, overflow = TextOverflow.Ellipsis)
@@ -766,7 +770,7 @@ private fun ReassignDialog(turn: Turn, controller: CaptionController, onDismiss:
 @Composable
 private fun BigChoiceDialog(title: String, yes: String, no: String, onYes: () -> Unit, onNo: () -> Unit) {
     Dialog(onDismissRequest = onNo) {
-        Surface(shape = RoundedCornerShape(28.dp), color = captionDialogColor(), contentColor = MaterialTheme.colorScheme.onSurface) {
+        Surface(shape = RectangleShape, color = captionDialogColor(), contentColor = MaterialTheme.colorScheme.onSurface) {
             Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(title, fontSize = 28.sp)
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -811,7 +815,7 @@ private fun ReplyStrip(controller: CaptionController, onShow: (String) -> Unit, 
                     val selected = index == group
                     Text(title, fontSize = 19.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                         color = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable { group = index }
+                        modifier = Modifier.clip(RectangleShape).clickable { group = index }
                             .padding(horizontal = 12.dp, vertical = 8.dp)
                             .drawWithContent {
                                 drawContent()
@@ -891,7 +895,7 @@ private fun ReplyDialog(controller: CaptionController, fontSp: Int, onDismiss: (
                         color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
 
                 }
-                BoxWithConstraints(Modifier.weight(1f).fillMaxWidth().clip(RoundedCornerShape(CaptionStyle.Corner))
+                BoxWithConstraints(Modifier.weight(1f).fillMaxWidth().clip(RectangleShape)
                     .clickable(enabled = text.isNotEmpty()) { controller.turnReplyCard(!controller.replyFlipped) }
                     .background(if (emergency) MaterialTheme.colorScheme.error.copy(alpha = .9f) else Color.Transparent),
                     contentAlignment = Alignment.Center) {
@@ -911,7 +915,7 @@ private fun ReplyDialog(controller: CaptionController, fontSp: Int, onDismiss: (
             CaptionPanel(Modifier.fillMaxWidth(), padding = 10.dp) {
                 androidx.compose.material3.TextField(text, { text = it }, Modifier.fillMaxWidth(), singleLine = true,
                     textStyle = androidx.compose.ui.text.TextStyle(fontSize = 22.sp),
-                    placeholder = { Text("自己写（可以用手写键盘）", fontSize = 19.sp) }, shape = RoundedCornerShape(CaptionStyle.Corner),
+                    placeholder = { Text("自己写（可以用手写键盘）", fontSize = 19.sp) }, shape = RectangleShape,
                     colors = androidx.compose.material3.TextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                         unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,

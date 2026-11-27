@@ -1,6 +1,8 @@
 package com.kingzcheung.xime.ui.settings
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,7 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -62,10 +64,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kingzcheung.xime.BuildConfig
+import com.kingzcheung.xime.R
 import com.kingzcheung.xime.settings.SettingsPreferences
 import com.kingzcheung.xime.ui.theme.MaterialLevel
 import com.kingzcheung.xime.ui.theme.VisualStyles
@@ -172,23 +178,14 @@ fun AboutContent(
     }
     var launchAdEgg by remember { mutableStateOf(SettingsPreferences.isLaunchAdEggEnabled(context)) }
     
+    val metro = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = metro.background,
         topBar = {
-            TopAppBar(
-                title = { Text("关于") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "返回"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                )
+            com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+                parentTitle = "系统",
+                pageTitle = "关于",
+                onBack = onBack,
             )
         }
     ) { paddingValues ->
@@ -203,7 +200,7 @@ fun AboutContent(
             // App 信息
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RectangleShape,
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
@@ -214,15 +211,30 @@ fun AboutContent(
                             .padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .background(Color.Black, RectangleShape)
+                                .border(1.dp, metro.divider, RectangleShape),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.cyime_mark_facet),
+                                contentDescription = "IMEtro",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Fit,
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = "CyIME",
+                            text = "IMEtro",
                             fontSize = 28.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Cyletix 开发的 Android 输入法。拼音、九键、双拼、五笔、仓颉、注音、日语、英文都能打；词库、手写、语音、拍照识字和实时字幕都在手机上运行，不联网也能全部使用。以 GNU GPLv3 开源，致谢与许可见下方。",
+                            text = "IMEtro 是基于 CyIME 打造的 Windows Phone Metro 风格 Android 输入法。拼音、九键、双拼、五笔、仓颉、注音、日语、英文都能打；词库、手写、语音、拍照识字和实时字幕都在手机上运行，不联网也能全部使用。以 GNU GPLv3 开源，致谢与许可见下方。",
                             fontSize = 13.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -265,16 +277,16 @@ fun AboutContent(
             
             // 作者与源代码使用同一种完整卡片。
                 AboutLinkCard(
-                    title = "Cyletix · 维护与开发",
-                    subtitle = "github.com/Cyletix",
+                    title = "milkteaokita · 维护与开发",
+                    subtitle = "github.com/milkteaokita",
                     icon = Icons.TwoTone.PersonOutline,
-                    onClick = { uriHandler.openUri("https://github.com/Cyletix") },
+                    onClick = { uriHandler.openUri("https://github.com/milkteaokita") },
                 )
                 AboutLinkCard(
-                    title = "CyIME 源代码",
-                    subtitle = "github.com/Cyletix/CyIME",
+                    title = "IMEtro 源代码",
+                    subtitle = "github.com/milkteaokita/IMEtro",
                     icon = Icons.TwoTone.Code,
-                    onClick = { uriHandler.openUri("https://github.com/Cyletix/CyIME") },
+                    onClick = { uriHandler.openUri("https://github.com/milkteaokita/IMEtro") },
                 )
 
                 AppUpdateSection()
@@ -326,7 +338,7 @@ fun AboutContent(
                         SettingsItem(
                             icon = Icons.TwoTone.Description,
                             title = "使用文档",
-                            onClick = { uriHandler.openUri("https://github.com/Cyletix/CyIME/blob/main/docs/usage.md") }
+                            onClick = { uriHandler.openUri("https://github.com/milkteaokita/IMEtro/blob/main/docs/usage.md") }
                         )
                         HorizontalDivider(
                             modifier = Modifier.padding(start = 56.dp),
@@ -378,13 +390,14 @@ fun AboutContent(
                                 title = "调试日志",
                                 onClick = {},
                                 trailing = {
-                                    Switch(
+                                    com.kingzcheung.xime.ui.metro.MetroToggleSwitch(
                                         checked = verboseLoggingEnabled,
                                         onCheckedChange = { enabled ->
                                             verboseLoggingEnabled = enabled
                                             SettingsPreferences.setVerboseLoggingEnabled(context, enabled)
                                             FileLogger.setVerboseLoggingEnabled(enabled)
-                                        }
+                                        },
+                                        showStatusLabel = false,
                                     )
                                 }
                             )
@@ -394,7 +407,7 @@ fun AboutContent(
             // 设备信息
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RectangleShape,
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
@@ -435,7 +448,7 @@ private fun SettingsItem(
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .clip(RoundedCornerShape(10.dp))
+                .clip(RectangleShape)
                 .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
             contentAlignment = Alignment.Center
         ) {
@@ -492,22 +505,12 @@ fun PrivacyPolicyContent(
     onBack: () -> Unit
 ) {
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.background,
         topBar = {
-            TopAppBar(
-                title = { Text("隐私策略") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "返回"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                )
+            com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+                parentTitle = "关于",
+                pageTitle = "隐私策略",
+                onBack = onBack,
             )
         }
     ) { paddingValues ->
@@ -522,7 +525,7 @@ fun PrivacyPolicyContent(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RectangleShape,
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
@@ -607,22 +610,12 @@ fun LicensesContent(
     val uriHandler = LocalUriHandler.current
     
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.background,
         topBar = {
-            TopAppBar(
-                title = { Text("开源许可证") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "返回"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                )
+            com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+                parentTitle = "关于",
+                pageTitle = "开源许可证",
+                onBack = onBack,
             )
         }
     ) { paddingValues ->
@@ -642,7 +635,7 @@ fun LicensesContent(
                         .clickable {
                             uriHandler.openUri(item.url)
                         },
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RectangleShape,
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
@@ -685,7 +678,7 @@ private fun AboutLinkCard(title: String, subtitle: String, icon: ImageVector, on
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RectangleShape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
@@ -696,7 +689,7 @@ private fun AboutLinkCard(title: String, subtitle: String, icon: ImageVector, on
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                modifier = Modifier.size(40.dp).clip(RoundedCornerShape(10.dp))
+                modifier = Modifier.size(40.dp).clip(RectangleShape)
                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
                 contentAlignment = Alignment.Center
             ) {

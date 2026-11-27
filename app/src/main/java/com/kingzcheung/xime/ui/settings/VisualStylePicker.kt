@@ -4,7 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
+import com.kingzcheung.xime.ui.metro.MetroSlider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import com.kingzcheung.xime.ui.i18n.Text
@@ -52,7 +53,7 @@ internal fun VisualStylePicker(selected: VisualStyle, onSelect: (VisualStyle) ->
                     val accent = keyboard?.accent ?: palette.primary
                     val key = keyboard?.key ?: palette.surfaceContainerHigh
                     val ink = keyboard?.text ?: palette.onSurface
-                    val shape = RoundedCornerShape(16.dp)
+                    val shape = RectangleShape
                     CompositionLocalProvider(LocalMaterialPalette provides MaterialPalette(surface, accent)) {
                     Column(Modifier.weight(1f).testTag("visual-style-${style.id}")
                         .semantics { this.selected = selected == style }
@@ -63,13 +64,13 @@ internal fun VisualStylePicker(selected: VisualStyle, onSelect: (VisualStyle) ->
                         verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text("拼音    你好", color = keyboard?.candidateText ?: ink, fontSize = 13.sp,
                             modifier = Modifier.fillMaxWidth().heightIn(min = 36.dp)
-                                .visualMaterial(style, 6.dp, level = MaterialLevel.BASE)
+                                .visualMaterial(style, 0.dp, level = MaterialLevel.BASE)
                                 .padding(horizontal = 7.dp, vertical = 6.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                             listOf("A", "S", "D").forEach { label ->
-                                Box(Modifier.weight(1f).height(42.dp).clip(RoundedCornerShape(keyRadius))
+                                Box(Modifier.weight(1f).height(42.dp).clip(RectangleShape)
                                     .background(key)
-                                    .visualMaterial(style, keyRadius), contentAlignment = Alignment.Center) {
+                                    .visualMaterial(style, 0.dp), contentAlignment = Alignment.Center) {
                                     Text(label, color = ink, fontSize = 16.sp)
                                 }
                             }
@@ -111,28 +112,32 @@ internal fun KeyShapePicker(selected: KeyShape, onSelect: (KeyShape) -> Unit) {
         val key = keyboard?.key ?: palette.surfaceContainerHigh
         val ink = keyboard?.text ?: palette.onSurface
         val radius = shown.radius(configured).dp
-        val cardShape = RoundedCornerShape(16.dp)
+        val cardShape = RectangleShape
         CompositionLocalProvider(LocalMaterialPalette provides MaterialPalette(surface, accent)) {
             Row(Modifier.fillMaxWidth().testTag("key-shape-preview").clip(cardShape).background(surface)
                 .visualEnvironment(style).border(1.dp, accent.copy(alpha = .24f), cardShape).padding(10.dp),
                 horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                 listOf("A", "S", "D", "F").forEach { label ->
-                    Box(Modifier.weight(1f).height(42.dp).clip(RoundedCornerShape(radius))
+                    Box(Modifier.weight(1f).height(42.dp).clip(RectangleShape)
                         .background(key)
-                        .visualMaterial(style, radius), contentAlignment = Alignment.Center) {
+                        .visualMaterial(style, 0.dp), contentAlignment = Alignment.Center) {
                         Text(label, color = ink, fontSize = 16.sp)
                     }
                 }
             }
         }
-        Slider(value = position, onValueChange = { position = it },
+        MetroSlider(
+            value = position,
+            onValueChange = { position = it },
             onValueChangeFinished = {
                 val chosen = stops[position.roundToInt().coerceIn(0, stops.lastIndex)]
                 if (chosen != selected) onSelect(chosen)
             },
-            valueRange = 0f..stops.lastIndex.toFloat(), steps = stops.size - 2,
+            valueRange = 0f..stops.lastIndex.toFloat(),
+            steps = stops.size - 2,
             modifier = Modifier.fillMaxWidth().testTag("key-shape-slider")
-                .semantics { stateDescription = shown.title })
+                .semantics { stateDescription = shown.title },
+        )
         // Stop names under the track: first and last at the ends, the two middle ones evenly between, like the ticks.
         Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
             stops.forEach { shape ->

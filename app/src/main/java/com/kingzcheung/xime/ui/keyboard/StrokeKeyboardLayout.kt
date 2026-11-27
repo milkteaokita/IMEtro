@@ -18,7 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -470,7 +470,7 @@ private fun StrokeKeyboardContent(
                     // 键缝动效：左栏不是键，按它不画；登记位置是为了线能绕着它走。
                     .then(keyGapLightSource(GapLightKind.NONE))
                     .then(symbolPanelShadowModifier)
-                    .clip(RoundedCornerShape(LocalKeyCornerRadius.current))
+                    .clip(RectangleShape)
                     .background(frostedKeyColor(keyBackgroundColor, keyTextColor, frostedGlass))
             ) {
                 // 和九键左栏一样：一屏四格，多出的上下滑，右缘有滚动条；末尾一格「编辑」打开「按键符号 → 笔画侧栏」（11-18 贡献者）。

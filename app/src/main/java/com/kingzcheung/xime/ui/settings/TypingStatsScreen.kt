@@ -18,7 +18,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
+import com.kingzcheung.xime.ui.metro.LocalMetroUiState
+import com.kingzcheung.xime.ui.metro.MetroSubPageHeader
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -77,11 +79,14 @@ fun TypingStatsScreen(onBack: () -> Unit) {
     LaunchedEffect(Unit) { data = withContext(Dispatchers.IO) { TypingStats.snapshot(context) } }
     val today = remember { TypingStats.today() }
 
-    Scaffold(modifier = Modifier.testTag("typing-stats"), containerColor = MaterialTheme.colorScheme.surface,
+    val metro = LocalMetroUiState.current
+    Scaffold(modifier = Modifier.testTag("typing-stats"), containerColor = metro.background,
         topBar = {
-            TopAppBar(title = { Text("打字统计") }, navigationIcon = {
-                IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回") }
-            }, colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface))
+            MetroSubPageHeader(
+                parentTitle = "智能",
+                pageTitle = "打字统计",
+                onBack = onBack,
+            )
         }) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -118,7 +123,7 @@ private fun TodayCard(stats: TypingStatsData, today: Int) {
                 Spacer(Modifier.weight(1f))
                 Text("${title.badge} ${title.name}", style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(bottom = 8.dp).clip(RoundedCornerShape(50))
+                    modifier = Modifier.padding(bottom = 8.dp).clip(RectangleShape)
                         .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
                         .padding(horizontal = 10.dp, vertical = 4.dp))
             }
@@ -139,7 +144,7 @@ private fun TodayCard(stats: TypingStatsData, today: Int) {
 
 @Composable
 private fun MiniStat(value: String, label: String, modifier: Modifier = Modifier) {
-    Column(modifier.clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+    Column(modifier.clip(RectangleShape).background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
         .padding(vertical = 8.dp, horizontal = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 1)
         Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
@@ -203,7 +208,7 @@ private fun DailyCard(stats: TypingStatsData, today: Int) {
 private fun Pill(text: String, selected: Boolean, onClick: () -> Unit) {
     Text(text, style = MaterialTheme.typography.labelLarge,
         color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier.clip(RoundedCornerShape(50))
+        modifier = Modifier.clip(RectangleShape)
             .background(if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
             .clickable(onClick = onClick).padding(horizontal = 12.dp, vertical = 5.dp))
 }
@@ -252,7 +257,7 @@ private fun EfficiencyCard(stats: TypingStatsData) {
             val sum = stats.sources.sum()
             if (sum > 0) {
                 Spacer(Modifier.height(10.dp))
-                Row(Modifier.fillMaxWidth().height(14.dp).clip(RoundedCornerShape(7.dp))) {
+                Row(Modifier.fillMaxWidth().height(14.dp).clip(RectangleShape)) {
                     stats.sources.forEachIndexed { i, v ->
                         if (v > 0) Box(Modifier.weight(v.toFloat()).fillMaxSize().background(colors[i]))
                     }
@@ -262,7 +267,7 @@ private fun EfficiencyCard(stats: TypingStatsData) {
                     TypingStatsData.Source.entries.forEachIndexed { i, source ->
                         val v = stats.sources[i]
                         if (v > 0) Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(Modifier.size(9.dp).clip(RoundedCornerShape(2.dp)).background(colors[i]))
+                            Box(Modifier.size(9.dp).clip(RectangleShape).background(colors[i]))
                             Text(" ${source.label} ${TypingStatsText.percent(v.toDouble() / sum)}",
                                 style = MaterialTheme.typography.labelMedium)
                         }
@@ -302,7 +307,7 @@ private fun ComboSpeedCard(stats: TypingStatsData) {
                         }
                         Text(TypingStatsText.comboDetail(c), style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
-                        Box(Modifier.padding(top = 4.dp).fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp))
+                        Box(Modifier.padding(top = 4.dp).fillMaxWidth().height(4.dp).clip(RectangleShape)
                             .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f))) {
                             Box(Modifier.fillMaxWidth((c.chars.toFloat() / max).coerceIn(0.02f, 1f)).fillMaxSize()
                                 .background(MaterialTheme.colorScheme.primary))
@@ -388,7 +393,7 @@ private fun WrongKeyHeatmap(wrong: LongArray) {
                 row.forEach { c ->
                     val v = wrong[c - 'a']
                     val strength = v.toFloat() / max
-                    Box(Modifier.size(28.dp).clip(RoundedCornerShape(6.dp))
+                    Box(Modifier.size(28.dp).clip(RectangleShape)
                         .background(if (v > 0) red.copy(alpha = 0.15f + 0.7f * strength) else keyBase),
                         contentAlignment = Alignment.Center) {
                         Text(c.toString(), style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center,

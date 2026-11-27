@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kingzcheung.xime.settings.PerformanceCosts
+import com.kingzcheung.xime.ui.metro.MetroToggleSwitch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -109,7 +110,12 @@ internal fun PerformanceCostTotalSection(
             CostDivider()
             SettingsListRow(item.title, if (enabled) PerformanceCosts.describe(cost, device, source.here).orEmpty() else "已关",
                 modifier = Modifier.testTag("perf-cost-row:${item.id}")) {
-                Switch(checked = enabled, onCheckedChange = { onToggle(item, it) }, modifier = Modifier.padding(end = 12.dp))
+                MetroToggleSwitch(
+                    checked = enabled,
+                    onCheckedChange = { onToggle(item, it) },
+                    showStatusLabel = false,
+                    modifier = Modifier.padding(end = 12.dp),
+                )
             }
         }
         fun groupCost(ids: List<PerformanceCosts.Item>) = PerformanceCosts.total(device, ids.mapTo(linkedSetOf()) { it.id }).let {
@@ -125,8 +131,12 @@ internal fun PerformanceCostTotalSection(
             val text = if (digitsOn.isEmpty()) "已关" else PerformanceCosts.describe(groupCost(digitsOn), device).orEmpty()
             CostDivider()
             SettingsListRow("九键按数字也模糊", text, modifier = Modifier.testTag("perf-cost-row:t9-fuzzy-digits")) {
-                Switch(checked = digitsOn.isNotEmpty(), onCheckedChange = { onToggle(fuzzy9.first(), it) },
-                    modifier = Modifier.padding(end = 12.dp))
+                MetroToggleSwitch(
+                    checked = digitsOn.isNotEmpty(),
+                    onCheckedChange = { onToggle(fuzzy9.first(), it) },
+                    showStatusLabel = false,
+                    modifier = Modifier.padding(end = 12.dp),
+                )
             }
         }
         device.t9Model?.takeIf { t9Model }?.let { PerformanceCosts.describe(it, device) }?.let { text ->

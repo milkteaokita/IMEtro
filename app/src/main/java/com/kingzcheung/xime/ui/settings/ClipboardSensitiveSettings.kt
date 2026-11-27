@@ -9,6 +9,9 @@ import com.kingzcheung.xime.ui.i18n.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.kingzcheung.xime.settings.SettingsPreferences
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
 
 /**
  * 「记录密码等敏感内容」(#95)：默认关。密码管理器复制的密码系统标成敏感，键盘一律不记；
@@ -27,16 +30,21 @@ internal fun ClipboardSensitiveSetting() {
             SettingsPreferences.setClipboardSensitiveCaptureEnabled(context, false)
         }
     }
-    if (confirming) AlertDialog(
+    if (confirming) MetroAlertDialog(
         onDismissRequest = { confirming = false },
         title = { Text("记录密码等敏感内容？") },
         text = { Text("密码会存在这台手机的剪贴板历史里，别人拿到手机解锁后长按就能看到。") },
-        confirmButton = { Button(onClick = {
-            confirming = false
-            enabled = true
-            SettingsPreferences.setClipboardSensitiveCaptureEnabled(context, true)
-        }) { Text("打开") } },
-        dismissButton = { OutlinedButton(onClick = { confirming = false }) { Text("取消") } },
+        confirmButton = {
+            MetroSolidButton(
+                text = "打开",
+                onClick = {
+                    confirming = false
+                    enabled = true
+                    SettingsPreferences.setClipboardSensitiveCaptureEnabled(context, true)
+                },
+            )
+        },
+        dismissButton = { MetroOutlinedButton(text = "取消", onClick = { confirming = false }) },
     )
 }
 

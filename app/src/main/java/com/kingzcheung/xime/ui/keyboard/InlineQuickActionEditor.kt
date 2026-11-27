@@ -9,12 +9,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.tween
-import androidx.compose.material3.Text
+import com.kingzcheung.xime.ui.i18n.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.AbsoluteAlignment
@@ -296,8 +296,8 @@ internal fun BoxScope.InlineQuickActionOverlay(
                 .align(AbsoluteAlignment.TopRight)
                 .absoluteOffset { IntOffset((anchor.x - rootWidth).roundToInt().coerceAtMost(-4),
                     (anchor.y + with(density) { 4.dp.toPx() }).roundToInt()) }
-                .zIndex(20f).shadow(4.dp, RoundedCornerShape(8.dp))
-                .clip(RoundedCornerShape(8.dp)).background(textColor.copy(alpha = .95f))
+                .zIndex(20f)
+                .clip(RectangleShape).background(textColor.copy(alpha = .95f))
                 .padding(horizontal = 10.dp, vertical = 5.dp).testTag("quick-actions-save-hint"))
     }
     val id = editor.dragging ?: return
@@ -310,11 +310,9 @@ internal fun BoxScope.InlineQuickActionOverlay(
         val position = editor.dragTopLeft()
         IntOffset(position.x.roundToInt(), position.y.roundToInt())
     }.size(width, height).zIndex(21f)
-        .shadow(6.dp, RoundedCornerShape(12.dp))
         .clearAndSetSemantics { testTag = "quick-action-drag-preview" }, contentAlignment = Alignment.Center) {
         if (editor.dragFromToolbar) {
-            // 和「排列」面板一样：拿起来的是按钮本身，圆角卡片加阴影，不画椭圆、圆圈描边（他 11-14 要求）。
-            Box(Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)).background(keyColor),
+            Box(Modifier.fillMaxSize().clip(RectangleShape).background(keyColor),
                 contentAlignment = Alignment.Center) {
                 ToolbarButtonIcon(action.item, tint = if (action.active) accentColor else textColor,
                     modifier = Modifier.size(22.dp), active = action.active)

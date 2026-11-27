@@ -98,12 +98,12 @@ fun BackupSettingsContent(onBack: () -> Unit) {
     }
 
     pendingImport?.let { bytes ->
-        AlertDialog(
+        com.kingzcheung.xime.ui.metro.MetroAlertDialog(
             onDismissRequest = { pendingImport = null },
             title = { Text("从备份恢复") },
             text = { Text("备份里的设置和词库会覆盖现在的，剪贴板记录会合并。") },
             confirmButton = {
-                TextButton(onClick = {
+                com.kingzcheung.xime.ui.metro.MetroSolidButton("覆盖并恢复", onClick = {
                     pendingImport = null
                     busyOp = "import"
                     message = null
@@ -115,29 +115,19 @@ fun BackupSettingsContent(onBack: () -> Unit) {
                             onFailure = { "恢复失败：${it.message ?: "未知错误"}" }
                         )
                     }
-                }) { Text("覆盖并恢复") }
+                })
             },
-            dismissButton = { TextButton(onClick = { pendingImport = null }) { Text("取消") } }
+            dismissButton = { com.kingzcheung.xime.ui.metro.MetroOutlinedButton("取消", onClick = { pendingImport = null }) }
         )
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.background,
         topBar = {
-            TopAppBar(
-                title = { Text("备份与恢复") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "返回"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                ),
+            com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+                parentTitle = "其他设置",
+                pageTitle = "备份与恢复",
+                onBack = onBack,
             )
         }
     ) { padding ->

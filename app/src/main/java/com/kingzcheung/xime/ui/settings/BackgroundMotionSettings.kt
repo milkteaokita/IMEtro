@@ -40,7 +40,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Animation
 import androidx.compose.material3.MaterialTheme
@@ -115,7 +115,7 @@ private fun MotionSpeedRow(selected: BackgroundMotionSpeed, onSelect: (Backgroun
             Surface(onClick = { onSelect(speed) },
                 modifier = Modifier.weight(1f).heightIn(min = 40.dp)
                     .testTag("background-motion-speed:${speed.name}").semantics { this.selected = chosen },
-                shape = RoundedCornerShape(10.dp),
+                shape = RectangleShape,
                 color = if (chosen) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
                 border = BorderStroke(if (chosen) 1.5.dp else 1.dp,
                     if (chosen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant)) {
@@ -183,8 +183,8 @@ internal fun BackgroundImageStrip(
                     }
                 }
                 if (slides.size < BackgroundMotionPreferences.MAX_SLIDES) {
-                    Box(Modifier.size(tileWidth, tileHeight).clip(RoundedCornerShape(8.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                    Box(Modifier.size(tileWidth, tileHeight).clip(RectangleShape)
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RectangleShape)
                         .clickable(onClick = onAdd).semantics { contentDescription = "加图片" }
                         .testTag("background-slides-add"), contentAlignment = Alignment.Center) {
                         Icon(Icons.Default.Add, null, tint = MaterialTheme.colorScheme.primary)
@@ -219,14 +219,14 @@ private fun SlideThumb(src: String, width: Dp, height: Dp, label: String? = null
             runCatching { CustomImageTheme.thumbnail(context, src, maxPx)?.asImageBitmap() }.getOrNull()
         }
     }
-    Box(Modifier.size(width, height).clip(RoundedCornerShape(8.dp))
+    Box(Modifier.size(width, height).clip(RectangleShape)
         .background(MaterialTheme.colorScheme.surfaceVariant)
         .then(if (onClick != null) Modifier.clickable(onClickLabel = clickLabel, onClick = onClick) else Modifier)
         .testTag("background-slide:$src")) {
         image?.let { Image(it, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
         if (label != null) Text(label, color = Color.White, style = MaterialTheme.typography.labelSmall,
             modifier = Modifier.align(Alignment.BottomStart).background(Color.Black.copy(alpha = .45f),
-                RoundedCornerShape(topEnd = 6.dp)).padding(horizontal = 4.dp))
+                RectangleShape).padding(horizontal = 4.dp))
         // 叉的点按范围 32dp：小图上也好点中，不会误点到图片本身。
         Box(Modifier.align(Alignment.TopEnd).size(32.dp).clickable(onClick = onRemove)
             .semantics { contentDescription = "删掉这张" }.testTag("background-slide-remove:$src"),
@@ -265,7 +265,7 @@ private fun MotionIllustration(effect: BackgroundMotionEffect, shotMs: Long) {
     val sky = MaterialTheme.colorScheme.primaryContainer
     val hill = MaterialTheme.colorScheme.primary
     val sun = MaterialTheme.colorScheme.tertiary
-    Box(Modifier.fillMaxSize().clip(RoundedCornerShape(4.dp)).drawBehind {
+    Box(Modifier.fillMaxSize().clip(RectangleShape).drawBehind {
         val frame = Rect(Offset.Zero, size)
         withBackgroundMotion(previewMotion(BackgroundMotionPath.at(effect, elapsed.longValue, shotMs)), frame) {
             drawRect(Brush.verticalGradient(listOf(sky, Color.White.copy(alpha = .6f).compositeOver(sky))))

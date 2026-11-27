@@ -38,11 +38,13 @@ fun HandwritingSettingsContent(
     onOpenContribute: () -> Unit = {},
     devTools: Boolean = com.kingzcheung.xime.BuildConfig.DEV_TOOLS || com.kingzcheung.xime.BuildConfig.DEBUG,
 ) {
-    Scaffold(modifier = Modifier.testTag("handwriting-settings"), containerColor = MaterialTheme.colorScheme.surface,
+    Scaffold(modifier = Modifier.testTag("handwriting-settings"), containerColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.background,
         topBar = {
-            TopAppBar(title = { Text("手写") }, navigationIcon = {
-                IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回") }
-            }, colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface))
+            com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+                parentTitle = "智能",
+                pageTitle = "手写",
+                onBack = onBack,
+            )
         }) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)) {

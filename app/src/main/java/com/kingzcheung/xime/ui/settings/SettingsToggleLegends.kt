@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material3.MaterialTheme
 import com.kingzcheung.xime.ui.i18n.Text
 import androidx.compose.runtime.Composable
@@ -50,7 +50,7 @@ private fun LegendCaption(text: String, active: Boolean) {
 /** 图例里的一条候选栏底。 */
 @Composable
 private fun LegendStrip(content: @Composable RowScope.() -> Unit) {
-    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(4.dp)).background(MaterialTheme.colorScheme.surface)
+    Row(Modifier.fillMaxWidth().clip(RectangleShape).background(MaterialTheme.colorScheme.surface)
         .padding(horizontal = 6.dp, vertical = 3.dp), verticalAlignment = Alignment.CenterVertically, content = content)
 }
 
@@ -58,7 +58,7 @@ private fun LegendStrip(content: @Composable RowScope.() -> Unit) {
 @Composable
 private fun LegendAdded(text: String) {
     val primary = MaterialTheme.colorScheme.primary
-    Text(text, Modifier.clip(RoundedCornerShape(4.dp)).background(primary.copy(alpha = 0.15f)).padding(horizontal = 4.dp),
+    Text(text, Modifier.clip(RectangleShape).background(primary.copy(alpha = 0.15f)).padding(horizontal = 4.dp),
         fontSize = 13.sp, color = primary, fontWeight = FontWeight.Medium, maxLines = 1)
 }
 
@@ -71,9 +71,9 @@ private fun LegendKey(main: String, top: String? = null, bottom: String? = null,
                       mainColor: Color? = null, accent: Color? = null) {
     val onSurface = MaterialTheme.colorScheme.onSurface
     val muted = onSurface.copy(alpha = 0.6f)
-    Box(Modifier.size(width = 44.dp, height = 50.dp).clip(RoundedCornerShape(7.dp))
+    Box(Modifier.size(width = 44.dp, height = 50.dp).clip(RectangleShape)
         .background(MaterialTheme.colorScheme.surface)
-        .border(0.5.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(7.dp))) {
+        .border(0.5.dp, MaterialTheme.colorScheme.outlineVariant, RectangleShape)) {
         Text(main, Modifier.align(Alignment.Center).padding(bottom = if (below != null) 12.dp else 0.dp),
             fontSize = if (main.length > 2) 14.sp else if (main.length > 1) 15.sp else if (below != null) 17.sp else 20.sp,
             color = mainColor ?: onSurface, maxLines = 1)

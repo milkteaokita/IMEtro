@@ -33,7 +33,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material.icons.filled.Language
@@ -135,20 +135,21 @@ private fun AppearancePreviewSheet(
         onDismissRequest = onDismiss,
         modifier = Modifier.windowInsetsPadding(SheetOuterInsets),
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = androidx.compose.ui.graphics.RectangleShape,
+        dragHandle = null,
+        containerColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.chrome,
         contentWindowInsets = sheetContentInsets,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 32.dp),
+                .padding(horizontal = 16.dp, vertical = 16.dp)
+                .padding(bottom = 16.dp),
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(bottom = 16.dp),
             )
@@ -162,24 +163,16 @@ private fun AppearancePreviewSheet(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                OutlinedButton(
+                com.kingzcheung.xime.ui.metro.MetroOutlinedButton(
+                    text = "取消",
                     onClick = onDismiss,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp),
-                    shape = RoundedCornerShape(24.dp),
-                ) {
-                    Text("取消", fontSize = 16.sp)
-                }
-                Button(
+                    modifier = Modifier.weight(1f),
+                )
+                com.kingzcheung.xime.ui.metro.MetroSolidButton(
+                    text = "应用",
                     onClick = onApply,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp),
-                    shape = RoundedCornerShape(24.dp),
-                ) {
-                    Text("应用", fontSize = 16.sp)
-                }
+                    modifier = Modifier.weight(1f),
+                )
             }
         }
     }
@@ -224,7 +217,7 @@ private fun ThemePreviewPager(
             val previewGlass = glass.forAppearance(preview.isDark).legibleForTheme(theme.id, preview.isDark)
             Box(
                 modifier = Modifier.fillMaxSize()
-                    .then(if (previewGlass.enabled) Modifier.clip(RoundedCornerShape(12.dp))
+                    .then(if (previewGlass.enabled) Modifier.clip(RectangleShape)
                         .background(glassPreviewHost(preview.isDark)) else Modifier),
                 contentAlignment = Alignment.Center,
             ) {
@@ -317,7 +310,7 @@ internal fun ThemeKeyboardPreview(
     ) {
         Box(
             modifier = modifier
-                .clip(RoundedCornerShape(12.dp))
+                .clip(androidx.compose.ui.graphics.RectangleShape)
                 .keyboardBackground(theme.keyboardBackground, isDark, bgColor, LocalKeyboardInputPreferences.current.frostedGlass),
         ) {
             Column(
@@ -482,7 +475,6 @@ private fun PreviewCandidate(
 ) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(5.dp))
             .background(if (isSelected) accent.copy(alpha = 0.2f) else Color.Transparent)
             .padding(horizontal = 6.dp, vertical = 4.dp),
     ) {
@@ -529,8 +521,6 @@ private fun RowScope.PreviewKey(
             .weight(weight)
             .fillMaxHeight()
             .fillMaxWidth()
-            .then(shadowModifier)
-            .clip(RoundedCornerShape(LocalKeyCornerRadius.current))
             .background(frostedKeyColor(color, textColor, glass)),
         contentAlignment = Alignment.Center,
     ) {

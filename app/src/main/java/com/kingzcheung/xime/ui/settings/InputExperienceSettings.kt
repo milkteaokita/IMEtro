@@ -29,6 +29,9 @@ import com.kingzcheung.xime.ui.keyboard.InputGestureLock
 import com.kingzcheung.xime.ui.keyboard.InputGestureLocks
 import com.kingzcheung.xime.ui.keyboard.KeyboardInputPreferences
 import com.kingzcheung.xime.settings.SettingsPreferences
+import com.kingzcheung.xime.ui.metro.MetroRadioIndicator
+import com.kingzcheung.xime.ui.metro.MetroSlider
+import com.kingzcheung.xime.ui.metro.MetroToggleSwitch
 
 /** Groups of [InputExperienceSettings]; the 布局与显示 sub-pages each show some of them. */
 internal enum class InputExperiencePart { SYMBOLS, DELETE, FLICK_DISC, KANA, CURSOR, EDGE, TIMING, HANDWRITING, KEY_TEXT }
@@ -79,8 +82,12 @@ internal fun InputExperienceSettings(
                         else "关着时不输入角标，键上也不显示",
                         style = MaterialTheme.typography.bodySmall)
                 }
-                Switch(checked = settings.cornerSymbolInput, colors = settingsSwitchColors(), modifier = Modifier.testTag("corner-symbol-input"),
-                    onCheckedChange = { settings = settings.copy(cornerSymbolInput = it); settings.save(context) })
+                MetroToggleSwitch(
+                    checked = settings.cornerSymbolInput,
+                    modifier = Modifier.testTag("corner-symbol-input"),
+                    onCheckedChange = { settings = settings.copy(cornerSymbolInput = it); settings.save(context) },
+                    showStatusLabel = false,
+                )
             }
             if (settings.cornerSymbolInput) {
             HorizontalDivider()
@@ -128,9 +135,14 @@ internal fun InputExperienceSettings(
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text("长按多久输入角标：${symbolLongPressLabel(settings.symbolLongPressSeconds)} 秒")
                         Text("所有键盘共用", style = MaterialTheme.typography.bodySmall)
-                        Slider(value = settings.symbolLongPressSeconds, modifier = Modifier.testTag("symbol-long-press-slider"),
+                        MetroSlider(
+                            value = settings.symbolLongPressSeconds,
+                            modifier = Modifier.testTag("symbol-long-press-slider"),
                             onValueChange = { settings = settings.copy(symbolLongPressSeconds = normalizeSymbolLongPressSeconds(it)) },
-                            onValueChangeFinished = { settings.save(context) }, valueRange = 0.1f..1f, steps = 17)
+                            onValueChangeFinished = { settings.save(context) },
+                            valueRange = 0.1f..1f,
+                            steps = 17,
+                        )
                     }
                 }
             }
@@ -140,10 +152,14 @@ internal fun InputExperienceSettings(
                     // 卡片图例已画出每个方向出什么，这里只写打开后的变化（11-01 统一用「上滑／下滑」，不再混用「上拉／下拉」）。
                     Text("上滑出上角标，下滑出下角标，删除键也反过来", style = MaterialTheme.typography.bodySmall)
                 }
-                Switch(checked = settings.reverseSymbolSwipe,
-                    modifier = Modifier.testTag("reverse-symbol-swipe"), onCheckedChange = {
+                MetroToggleSwitch(
+                    checked = settings.reverseSymbolSwipe,
+                    modifier = Modifier.testTag("reverse-symbol-swipe"),
+                    onCheckedChange = {
                         settings = settings.copy(reverseSymbolSwipe = it); settings.save(context)
-                    })
+                    },
+                    showStatusLabel = false,
+                )
             }
             }
             HorizontalDivider()
@@ -161,21 +177,28 @@ internal fun InputExperienceSettings(
                     Text("按住删除键左右滑动，连续删除光标前后的字",
                         style = MaterialTheme.typography.bodySmall)
                 }
-                Switch(checked = settings.swipeDistanceDelete, colors = settingsSwitchColors(),
-                    modifier = Modifier.testTag("swipe-distance-delete"), onCheckedChange = {
+                MetroToggleSwitch(
+                    checked = settings.swipeDistanceDelete,
+                    modifier = Modifier.testTag("swipe-distance-delete"),
+                    onCheckedChange = {
                         settings = settings.copy(swipeDistanceDelete = it); settings.save(context)
-                    })
+                    },
+                    showStatusLabel = false,
+                )
             }
             divider()
             // 长按删除速度（11-03 别人提的需求）：连删间隔和振动间隔一起换档，默认标准即原来的手感。
             Column(Modifier.settingsSearchAnchor("长按删除速度", bleed = 16.dp, bleedVertical = 6.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("长按删除速度：${settings.deleteRepeatSpeed.label}")
-                Slider(value = settings.deleteRepeatSpeed.ordinal.toFloat(), modifier = Modifier.testTag("delete-repeat-speed"),
+                MetroSlider(
+                    value = settings.deleteRepeatSpeed.ordinal.toFloat(),
+                    modifier = Modifier.testTag("delete-repeat-speed"),
                     onValueChange = { settings = settings.copy(deleteRepeatSpeed =
                         com.kingzcheung.xime.keyboard.DeleteRepeatSpeed.fromIndex(kotlin.math.round(it).toInt())) },
                     onValueChangeFinished = { settings.save(context) },
                     valueRange = 0f..com.kingzcheung.xime.keyboard.DeleteRepeatSpeed.entries.lastIndex.toFloat(),
-                    steps = com.kingzcheung.xime.keyboard.DeleteRepeatSpeed.entries.size - 2)
+                    steps = com.kingzcheung.xime.keyboard.DeleteRepeatSpeed.entries.size - 2,
+                )
                 Text("按住删除键时连续删除的快慢", style = MaterialTheme.typography.bodySmall)
             }
             divider()
@@ -185,20 +208,29 @@ internal fun InputExperienceSettings(
                     Text("删除键单独反向", style = MaterialTheme.typography.titleSmall)
                     Text("只反转删除键的上下滑，角标方向不变", style = MaterialTheme.typography.bodySmall)
                 }
-                Switch(checked = settings.reverseDeleteSwipe, colors = settingsSwitchColors(),
-                    modifier = Modifier.testTag("reverse-delete-swipe"), onCheckedChange = {
+                MetroToggleSwitch(
+                    checked = settings.reverseDeleteSwipe,
+                    modifier = Modifier.testTag("reverse-delete-swipe"),
+                    onCheckedChange = {
                         settings = settings.copy(reverseDeleteSwipe = it); settings.save(context)
-                    })
+                    },
+                    showStatusLabel = false,
+                )
             }
             divider()
             // 清空滑动距离（11-05 别人的评论：键盘矮时滑到屏幕边也不够 80dp）：只给 70%–120% 微调，默认 100% 不变。
             Column(Modifier.settingsSearchAnchor("清空滑动距离", bleed = 16.dp, bleedVertical = 6.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 val percent = com.kingzcheung.xime.ui.keyboard.normalizeClearSwipePercent(settings.clearSwipePercent).toInt()
                 Text("清空滑动距离：${if (percent == 100) "标准" else "$percent%"}")
-                Slider(value = percent.toFloat(), modifier = Modifier.testTag("clear-swipe-percent"),
+                MetroSlider(
+                    value = percent.toFloat(),
+                    modifier = Modifier.testTag("clear-swipe-percent"),
                     onValueChange = { settings = settings.copy(clearSwipePercent =
                         com.kingzcheung.xime.ui.keyboard.normalizeClearSwipePercent(it)) },
-                    onValueChangeFinished = { settings.save(context) }, valueRange = 70f..120f, steps = 4)
+                    onValueChangeFinished = { settings.save(context) },
+                    valueRange = 70f..120f,
+                    steps = 4,
+                )
                 Text("删除键滑动清空要滑多远", style = MaterialTheme.typography.bodySmall)
             }
             divider()
@@ -210,10 +242,14 @@ internal fun InputExperienceSettings(
                         Text("打字时滑动清空，输入框里的字也清掉",
                             style = MaterialTheme.typography.bodySmall)
                     }
-                    Switch(checked = settings.clearAllWhileComposing, colors = settingsSwitchColors(),
-                        modifier = Modifier.testTag("clear-all-while-composing"), onCheckedChange = {
+                    MetroToggleSwitch(
+                        checked = settings.clearAllWhileComposing,
+                        modifier = Modifier.testTag("clear-all-while-composing"),
+                        onCheckedChange = {
                             settings = settings.copy(clearAllWhileComposing = it); settings.save(context)
-                        })
+                        },
+                        showStatusLabel = false,
+                    )
                 }
                 ClearWhileComposingLegend(settings.clearAllWhileComposing, settings.deleteSwipeReversed)
             }
@@ -225,10 +261,14 @@ internal fun InputExperienceSettings(
                         Text("只清空光标前的内容", style = MaterialTheme.typography.titleSmall)
                         Text("清空时保留光标后面的字", style = MaterialTheme.typography.bodySmall)
                     }
-                    Switch(checked = settings.clearBeforeCursorOnly, colors = settingsSwitchColors(),
-                        modifier = Modifier.testTag("clear-before-cursor-only"), onCheckedChange = {
+                    MetroToggleSwitch(
+                        checked = settings.clearBeforeCursorOnly,
+                        modifier = Modifier.testTag("clear-before-cursor-only"),
+                        onCheckedChange = {
                             settings = settings.copy(clearBeforeCursorOnly = it); settings.save(context)
-                        })
+                        },
+                        showStatusLabel = false,
+                    )
                 }
                 ClearBeforeCursorLegend(settings.clearBeforeCursorOnly, settings.deleteSwipeReversed)
             }
@@ -248,10 +288,14 @@ internal fun InputExperienceSettings(
                         if (!predictionOn) Text("「智能联想」关着，这项不起作用。",
                             style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                    Switch(checked = deleteSkipsAssociation, colors = settingsSwitchColors(),
-                        modifier = Modifier.testTag("delete-skips-association"), onCheckedChange = {
+                    MetroToggleSwitch(
+                        checked = deleteSkipsAssociation,
+                        modifier = Modifier.testTag("delete-skips-association"),
+                        onCheckedChange = {
                             deleteSkipsAssociation = it; SettingsPreferences.setDeleteSkipsAssociation(context, it)
-                        })
+                        },
+                        showStatusLabel = false,
+                    )
                 }
                 DeleteSkipsAssociationLegend(deleteSkipsAssociation)
             }
@@ -265,10 +309,14 @@ internal fun InputExperienceSettings(
                             style = MaterialTheme.typography.bodySmall)
                         PerformanceCostNote(com.kingzcheung.xime.settings.PerformanceCosts.Item.DELETE_RECOVERY)
                     }
-                    Switch(checked = deleteRecovery, colors = settingsSwitchColors(),
-                        modifier = Modifier.testTag("delete-recovery"), onCheckedChange = {
+                    MetroToggleSwitch(
+                        checked = deleteRecovery,
+                        modifier = Modifier.testTag("delete-recovery"),
+                        onCheckedChange = {
                             deleteRecovery = it; SettingsPreferences.setDeleteRecovery(context, it)
-                        })
+                        },
+                        showStatusLabel = false,
+                    )
                 }
                 DeleteRecoveryLegend(deleteRecovery)
             }
@@ -281,10 +329,14 @@ internal fun InputExperienceSettings(
                     Text("拂动时在键上方显示方向圆盘",
                         style = MaterialTheme.typography.bodySmall)
                 }
-                Switch(checked = settings.flickDirectionDisc,
-                    modifier = Modifier.testTag("flick-direction-disc"), onCheckedChange = {
+                MetroToggleSwitch(
+                    checked = settings.flickDirectionDisc,
+                    modifier = Modifier.testTag("flick-direction-disc"),
+                    onCheckedChange = {
                         settings = settings.copy(flickDirectionDisc = it); settings.save(context)
-                    })
+                    },
+                    showStatusLabel = false,
+                )
             }
             }
             // 假名方向提示只对日语假名九键有用：没开日语不显示（用户 11-22）。
@@ -296,10 +348,14 @@ internal fun InputExperienceSettings(
                     Text("日语九键按键四周显示各方向的假名",
                         style = MaterialTheme.typography.bodySmall)
                 }
-                Switch(checked = settings.kanaDirectionHints,
-                    modifier = Modifier.testTag("kana-direction-hints"), onCheckedChange = {
+                MetroToggleSwitch(
+                    checked = settings.kanaDirectionHints,
+                    modifier = Modifier.testTag("kana-direction-hints"),
+                    onCheckedChange = {
                         settings = settings.copy(kanaDirectionHints = it); settings.save(context)
-                    })
+                    },
+                    showStatusLabel = false,
+                )
             }
             }
             if (InputExperiencePart.EDGE in parts) {
@@ -314,9 +370,13 @@ internal fun InputExperienceSettings(
                         else "需要 Android 10 及以上",
                         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Switch(checked = settings.edgeGestureExclusion, enabled = com.kingzcheung.xime.platform.AndroidPlatform.gestureExclusion,
-                    colors = settingsSwitchColors(), modifier = Modifier.testTag("edge-gesture-exclusion-switch"),
-                    onCheckedChange = { settings = settings.copy(edgeGestureExclusion = it); settings.save(context) })
+                MetroToggleSwitch(
+                    checked = settings.edgeGestureExclusion,
+                    enabled = com.kingzcheung.xime.platform.AndroidPlatform.gestureExclusion,
+                    modifier = Modifier.testTag("edge-gesture-exclusion-switch"),
+                    onCheckedChange = { settings = settings.copy(edgeGestureExclusion = it); settings.save(context) },
+                    showStatusLabel = false,
+                )
             }
             }
             if (InputExperiencePart.CURSOR in parts) {
@@ -352,9 +412,13 @@ internal fun InputExperienceSettings(
                             Text("说话时上滑松手，不上屏", style = MaterialTheme.typography.bodySmall)
                             if (swipeCancelLock != null) SettingsLockNote(swipeCancelLock.message)
                         }
-                        Switch(checked = settings.voiceSwipeCancel, enabled = swipeCancelLock == null,
-                            colors = settingsSwitchColors(), modifier = Modifier.testTag("voice-swipe-cancel"),
-                            onCheckedChange = { settings = settings.copy(voiceSwipeCancel = it); settings.save(context) })
+                        MetroToggleSwitch(
+                            checked = settings.voiceSwipeCancel,
+                            enabled = swipeCancelLock == null,
+                            modifier = Modifier.testTag("voice-swipe-cancel"),
+                            onCheckedChange = { settings = settings.copy(voiceSwipeCancel = it); settings.save(context) },
+                            showStatusLabel = false,
+                        )
                     }
                 }
             }
@@ -370,10 +434,15 @@ internal fun InputExperienceSettings(
                             Text("在键盘上左右滑动移动光标", style = MaterialTheme.typography.bodySmall)
                             if (lock != null) SettingsLockNote(lock)
                         }
-                        Switch(checked = on, enabled = lock == null, colors = settingsSwitchColors(),
-                            modifier = Modifier.testTag("keyboard-swipe-cursor"), onCheckedChange = {
+                        MetroToggleSwitch(
+                            checked = on,
+                            enabled = lock == null,
+                            modifier = Modifier.testTag("keyboard-swipe-cursor"),
+                            onCheckedChange = {
                                 settings = com.kingzcheung.xime.ui.keyboard.CursorChoices.withKeyboardSwipe(settings, it); settings.save(context)
-                            })
+                            },
+                            showStatusLabel = false,
+                        )
                     }
                     KeyboardSwipeCursorLegend(on)
                 }
@@ -386,8 +455,12 @@ internal fun InputExperienceSettings(
                     SettingsJumpText("在「键盘尺寸与位置」里拖出底部留白后，在留白处左右滑动移动光标",
                         jumps = listOf("键盘尺寸与位置"), style = MaterialTheme.typography.bodySmall)
                 }
-                Switch(checked = settings.bottomLiftCursor, modifier = Modifier.testTag("bottom-lift-cursor-switch"),
-                    onCheckedChange = { settings = settings.copy(bottomLiftCursor = it); settings.save(context) })
+                MetroToggleSwitch(
+                    checked = settings.bottomLiftCursor,
+                    modifier = Modifier.testTag("bottom-lift-cursor-switch"),
+                    onCheckedChange = { settings = settings.copy(bottomLiftCursor = it); settings.save(context) },
+                    showStatusLabel = false,
+                )
             }
             if (settings.cursorGesture != CursorGestureMode.NONE || settings.bottomLiftCursor) {
                 // 只在总开关打开时显示：「按键效果」里关了振动或按键音，这里的开关不起作用。
@@ -398,9 +471,14 @@ internal fun InputExperienceSettings(
                             Text(title, style = MaterialTheme.typography.titleSmall)
                             Text(description, style = MaterialTheme.typography.bodySmall)
                         }
-                        Switch(checked = checked, modifier = Modifier.testTag(tag), onCheckedChange = {
-                            settings = update(it); settings.save(context)
-                        })
+                        MetroToggleSwitch(
+                            checked = checked,
+                            modifier = Modifier.testTag(tag),
+                            onCheckedChange = {
+                                settings = update(it); settings.save(context)
+                            },
+                            showStatusLabel = false,
+                        )
                     }
                 }
                 if (SettingsPreferences.getHapticMode(context) != "disabled") cursorStepSwitch("移动光标时振动",
@@ -418,9 +496,14 @@ internal fun InputExperienceSettings(
                 }
                 Column(Modifier.settingsSearchAnchor("长按空格多久开始", bleed = 16.dp, bleedVertical = 6.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("长按空格多久开始$actionText：${"%.1f".format(settings.cursorHoldSeconds)} 秒")
-                    Slider(value = settings.cursorHoldSeconds, modifier = Modifier.testTag("cursor-hold-slider"),
+                    MetroSlider(
+                        value = settings.cursorHoldSeconds,
+                        modifier = Modifier.testTag("cursor-hold-slider"),
                         onValueChange = { settings = settings.copy(cursorHoldSeconds = normalizeCursorHoldSeconds(it)) },
-                        onValueChangeFinished = { settings.save(context) }, valueRange = 0.1f..1f, steps = 8)
+                        onValueChangeFinished = { settings.save(context) },
+                        valueRange = 0.1f..1f,
+                        steps = 8,
+                    )
                 }
             }
             spaceHoldSlider()
@@ -429,14 +512,24 @@ internal fun InputExperienceSettings(
                 Column(Modifier.settingsSearchAnchor("从中间滑到边缘走几行", bleed = 16.dp, bleedVertical = 6.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("从中间滑到屏幕边缘走：${"%.2f".format(settings.cursorSwipeLines).trimEnd('0').trimEnd('.')} 行")
                     Text("按输入框宽度算", style = MaterialTheme.typography.bodySmall)
-                    Slider(value = settings.cursorSwipeLines, onValueChange = { settings = settings.copy(cursorSwipeLines = normalizeCursorSwipeLines(it)) },
-                        onValueChangeFinished = { settings.save(context) }, valueRange = 0.5f..3f, steps = 9)
+                    MetroSlider(
+                        value = settings.cursorSwipeLines,
+                        onValueChange = { settings = settings.copy(cursorSwipeLines = normalizeCursorSwipeLines(it)) },
+                        onValueChangeFinished = { settings.save(context) },
+                        valueRange = 0.5f..3f,
+                        steps = 9,
+                    )
                 }
                 Column(Modifier.settingsSearchAnchor("光标每移动一字所需距离", bleed = 16.dp, bleedVertical = 6.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("光标移动一字的距离：${settings.cursorStepDp.toInt()} 档(约 ${"%.1f".format(cursorDistanceMillimeters(settings.cursorStepDp))} 毫米)")
                     Text("越小越灵敏", style = MaterialTheme.typography.bodySmall)
-                    Slider(value = settings.cursorStepDp, onValueChange = { settings = settings.copy(cursorStepDp = it) },
-                        onValueChangeFinished = { settings.save(context) }, valueRange = 6f..24f, steps = 17)
+                    MetroSlider(
+                        value = settings.cursorStepDp,
+                        onValueChange = { settings = settings.copy(cursorStepDp = it) },
+                        onValueChangeFinished = { settings.save(context) },
+                        valueRange = 6f..24f,
+                        steps = 17,
+                    )
                 }
             }
             // 长按语言键切换输入法（GitHub #60 #68，默认关）：打开后长按弹系统的输入法选择框，语言靠点按语言键轮换。
@@ -446,32 +539,51 @@ internal fun InputExperienceSettings(
                     Text("长按语言键弹出系统的输入法列表", style = MaterialTheme.typography.bodySmall)
                     PerformanceCostNote(com.kingzcheung.xime.settings.PerformanceCosts.Item.LANGUAGE_KEY_IME_PICKER)
                 }
-                Switch(checked = settings.languageKeyImePicker, colors = settingsSwitchColors(),
-                    modifier = Modifier.testTag("language-key-ime-picker"), onCheckedChange = {
+                MetroToggleSwitch(
+                    checked = settings.languageKeyImePicker,
+                    modifier = Modifier.testTag("language-key-ime-picker"),
+                    onCheckedChange = {
                         settings = settings.copy(languageKeyImePicker = it); settings.save(context)
-                    })
+                    },
+                    showStatusLabel = false,
+                )
             }
             Column(Modifier.settingsSearchAnchor("长按语言键弹出列表", bleed = 16.dp, bleedVertical = 6.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 // 开着「长按语言键切换输入法」时长按弹的是系统输入法框，不是列表；时长照样管它，标题跟着说实话。
                 Text("${if (settings.languageKeyImePicker) "长按语言键弹出输入法列表" else "长按语言键弹出列表"}：${"%.2f".format(settings.languageMenuHoldSeconds)} 秒")
-                Slider(value = settings.languageMenuHoldSeconds, modifier = Modifier.testTag("language-menu-hold-slider"),
+                MetroSlider(
+                    value = settings.languageMenuHoldSeconds,
+                    modifier = Modifier.testTag("language-menu-hold-slider"),
                     onValueChange = { settings = settings.copy(languageMenuHoldSeconds = normalizeLanguageMenuHoldSeconds(it)) },
-                    onValueChangeFinished = { settings.save(context) }, valueRange = 0.05f..1f, steps = 18)
+                    onValueChangeFinished = { settings.save(context) },
+                    valueRange = 0.05f..1f,
+                    steps = 18,
+                )
             }
             // #426：打拼音时手指一偏就滑出符号，可以调远一点。
             Column(Modifier.settingsSearchAnchor("上下滑输入符号的距离", bleed = 16.dp, bleedVertical = 6.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("上下滑输入符号的距离：${settings.symbolSwipeDp.toInt()} dp")
                 Text("越大越不容易误触", style = MaterialTheme.typography.bodySmall)
-                Slider(value = settings.symbolSwipeDp, modifier = Modifier.testTag("symbol-swipe-distance-slider"),
+                MetroSlider(
+                    value = settings.symbolSwipeDp,
+                    modifier = Modifier.testTag("symbol-swipe-distance-slider"),
                     onValueChange = { settings = settings.copy(symbolSwipeDp = com.kingzcheung.xime.ui.keyboard.normalizeSymbolSwipeDistance(it)) },
-                    onValueChangeFinished = { settings.save(context) }, valueRange = 30f..90f, steps = 14)
+                    onValueChangeFinished = { settings.save(context) },
+                    valueRange = 30f..90f,
+                    steps = 14,
+                )
             }
             Column(Modifier.settingsSearchAnchor("符号键变 Ctrl 的时长", bleed = 16.dp, bleedVertical = 6.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("符号键变 Ctrl 的时长：${"%.1f".format(settings.symbolKeyHoldSeconds)} 秒")
                 Text("按住 !@# 超过这个时间变成 Ctrl", style = MaterialTheme.typography.bodySmall)
-                Slider(value = settings.symbolKeyHoldSeconds, modifier = Modifier.testTag("symbol-key-hold-slider"),
+                MetroSlider(
+                    value = settings.symbolKeyHoldSeconds,
+                    modifier = Modifier.testTag("symbol-key-hold-slider"),
                     onValueChange = { settings = settings.copy(symbolKeyHoldSeconds = normalizeSymbolKeyHoldSeconds(it)) },
-                    onValueChangeFinished = { settings.save(context) }, valueRange = 0.1f..2f, steps = 18)
+                    onValueChangeFinished = { settings.save(context) },
+                    valueRange = 0.1f..2f,
+                    steps = 18,
+                )
             }
             }
             if (InputExperiencePart.HANDWRITING in parts) {
@@ -479,9 +591,14 @@ internal fun InputExperienceSettings(
             Column(Modifier.settingsSearchAnchor("手写停顿识别", bleed = 16.dp, bleedVertical = 6.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("手写停顿识别：${"%.1f".format(settings.handwritingPauseSeconds)} 秒")
                 Text("停笔这么久后开始识别", style = MaterialTheme.typography.bodySmall)
-                Slider(value = settings.handwritingPauseSeconds, modifier = Modifier.testTag("handwriting-pause-slider"),
+                MetroSlider(
+                    value = settings.handwritingPauseSeconds,
+                    modifier = Modifier.testTag("handwriting-pause-slider"),
                     onValueChange = { settings = settings.copy(handwritingPauseSeconds = normalizeHandwritingPause(it)) },
-                    onValueChangeFinished = { settings.save(context) }, valueRange = 0.1f..2.5f, steps = 23)
+                    onValueChangeFinished = { settings.save(context) },
+                    valueRange = 0.1f..2.5f,
+                    steps = 23,
+                )
             }
             Row(Modifier.settingsSearchAnchor("手写边写边识别", bleed = 16.dp, bleedVertical = 6.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
@@ -490,10 +607,14 @@ internal fun InputExperienceSettings(
                         style = MaterialTheme.typography.bodySmall)
                     PerformanceCostNote(com.kingzcheung.xime.settings.PerformanceCosts.Item.HANDWRITING_LIVE)
                 }
-                Switch(checked = settings.handwritingRecognizeWhileWriting, colors = settingsSwitchColors(),
-                    modifier = Modifier.testTag("handwriting-recognize-while-writing"), onCheckedChange = {
+                MetroToggleSwitch(
+                    checked = settings.handwritingRecognizeWhileWriting,
+                    modifier = Modifier.testTag("handwriting-recognize-while-writing"),
+                    onCheckedChange = {
                         settings = settings.copy(handwritingRecognizeWhileWriting = it); settings.save(context)
-                    })
+                    },
+                    showStatusLabel = false,
+                )
             }
             Column(Modifier.settingsSearchAnchor("手写公式两边的标记", bleed = 16.dp, bleedVertical = 6.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("手写公式两边的标记", style = MaterialTheme.typography.titleSmall)
@@ -505,10 +626,10 @@ internal fun InputExperienceSettings(
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 FormulaDelimiter.entries.forEach { option ->
                     Row(Modifier.fillMaxWidth().clickable { settings = settings.copy(formulaDelimiter = option); settings.save(context) }
-                        .padding(vertical = 4.dp).testTag("formula-delimiter:${option.name}"),
+                        .padding(vertical = 8.dp).testTag("formula-delimiter:${option.name}"),
                         verticalAlignment = Alignment.CenterVertically) {
-                        RadioButton(selected = settings.formulaDelimiter == option,
-                            onClick = { settings = settings.copy(formulaDelimiter = option); settings.save(context) })
+                        MetroRadioIndicator(selected = settings.formulaDelimiter == option)
+                        Spacer(Modifier.width(12.dp))
                         Text(option.label)
                     }
                 }
@@ -519,8 +640,13 @@ internal fun InputExperienceSettings(
             Column(Modifier.settingsSearchAnchor("按键字号", bleed = 16.dp, bleedVertical = 6.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("按键字号：${(settings.keyTextScale * 100).toInt()}%")
                 Text("a b c  A B C  拼音", fontSize = (16f * settings.keyTextScale).sp)
-                Slider(value = settings.keyTextScale, onValueChange = { settings = settings.copy(keyTextScale = it) },
-                    onValueChangeFinished = { settings.save(context) }, valueRange = 0.8f..1.6f, steps = 15)
+                MetroSlider(
+                    value = settings.keyTextScale,
+                    onValueChange = { settings = settings.copy(keyTextScale = it) },
+                    onValueChangeFinished = { settings.save(context) },
+                    valueRange = 0.8f..1.6f,
+                    steps = 15,
+                )
             }
             divider()
             // 原「字母键显示大写」「中文键盘字母显示大写」两个互锁开关合成三选一（11-01），存的值不变，见 KeyLabelCaseChoice。

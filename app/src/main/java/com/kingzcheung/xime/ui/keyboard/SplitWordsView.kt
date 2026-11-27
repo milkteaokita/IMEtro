@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
@@ -29,7 +29,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import com.kingzcheung.xime.ui.i18n.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
@@ -108,7 +108,7 @@ fun SplitWordsView(
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RectangleShape)
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                     .clickable { onBack() },
                 contentAlignment = Alignment.Center
@@ -176,7 +176,7 @@ fun SplitWordsView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RectangleShape)
                     .background(MaterialTheme.colorScheme.surface)
             ) {
                 Column(
@@ -252,12 +252,12 @@ fun SplitWordsView(
                                 Box(
                                     modifier = Modifier
                                         .onGloballyPositioned { chipBounds[index] = it.boundsInRoot() }
-                                        .clip(RoundedCornerShape(8.dp))
+                                        .clip(RectangleShape)
                                         .background(if (isSelected) accentColor else chipBgColor)
                                         .padding(horizontal = 12.dp, vertical = 10.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text(
+                                    androidx.compose.material3.Text(
                                         text = splitPartLabel(part),
                                         color = if (isSelected) MaterialTheme.colorScheme.onPrimary else textColor,
                                         fontSize = 17.sp,

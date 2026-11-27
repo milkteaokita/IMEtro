@@ -1,27 +1,38 @@
 package com.kingzcheung.xime.ui.theme
 
 import android.content.SharedPreferences
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
-import androidx.core.graphics.ColorUtils
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
+import androidx.core.graphics.ColorUtils
 import com.kingzcheung.xime.settings.KeysConfigHelper
 import com.kingzcheung.xime.settings.SettingsPreferences
+import com.kingzcheung.xime.ui.metro.LocalMetroUiState
+import com.kingzcheung.xime.ui.metro.MetroEra
+import com.kingzcheung.xime.ui.metro.MetroUiState
+import com.kingzcheung.xime.ui.metro.NoRippleIndication
+import com.kingzcheung.xime.ui.metro.metroComposeTypography
 
 private fun hclColor(hue: Float, chroma: Float, lightness: Float): Color {
     val s = (chroma / 100f).coerceIn(0f, 1f)
@@ -135,12 +146,21 @@ fun XimeTheme(
     val context = LocalContext.current
     var currentThemeId by remember { mutableStateOf(themeId ?: SettingsPreferences.getKeyboardTheme(context)) }
     var configDarkThemeId by remember { mutableStateOf(KeysConfigHelper.loadThemeIdForMode(context, true)) }
+    var localEra by remember { mutableStateOf(SettingsPreferences.getMetroEra(context)) }
+    var localAnimScale by remember { mutableFloatStateOf(SettingsPreferences.getMetroAnimationScale(context)) }
 
     DisposableEffect(context, themeId) {
         val prefs = SettingsPreferences.getPrefsPublic(context)
         val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key == "keyboard_theme" && themeId == null) {
-                currentThemeId = SettingsPreferences.getKeyboardTheme(context)
+            when (key) {
+                null -> {
+                    if (themeId == null) currentThemeId = SettingsPreferences.getKeyboardTheme(context)
+                    localEra = SettingsPreferences.getMetroEra(context)
+                    localAnimScale = SettingsPreferences.getMetroAnimationScale(context)
+                }
+                "keyboard_theme" -> if (themeId == null) currentThemeId = SettingsPreferences.getKeyboardTheme(context)
+                SettingsPreferences.KEY_METRO_ERA -> localEra = SettingsPreferences.getMetroEra(context)
+                SettingsPreferences.KEY_METRO_ANIMATION_SCALE -> localAnimScale = SettingsPreferences.getMetroAnimationScale(context)
             }
         }
         prefs.registerOnSharedPreferenceChangeListener(listener)
@@ -154,26 +174,71 @@ fun XimeTheme(
     } else {
         currentThemeId
     }
-    val scheme = KeyboardThemes.getRenderingScheme(effectiveThemeId)
-    // 莫奈取色也走完整主题这条路：设置页颜色和键盘取自同一组壁纸色，不再另用系统 Material 动态色。
-    val colorScheme = run {
-        val surface = if (darkTheme) scheme.surfaceDark else scheme.surfaceLight
-        // Complete palettes own their surface colors; material effects do not override them.
-        // Derive Material contrast from that actual surface, not the system appearance flag.
-        val materialDark = if (scheme.useThemeColors) surface.luminance() < 0.5f else darkTheme
-        val seed = if (materialDark) scheme.primaryDark else scheme.primaryLight
-        val container = if (materialDark) scheme.primaryContainerDark else scheme.primaryContainerLight
-        val generated = generateColorScheme(seed, container, materialDark)
-        if (scheme.useThemeColors) {
-            val foreground = if (darkTheme) scheme.keyTextColorDark else scheme.keyTextColorLight
-            val mutedForeground = if (darkTheme) scheme.candidateTextColorDark else scheme.candidateTextColorLight
-            generated.copy(background = surface, surface = surface,
-                onBackground = foreground, onSurface = foreground, onSurfaceVariant = mutedForeground)
-        } else generated
-    }
+    val synced = MetroThemeSync.syncedState
+    val useLauncherSync = effectiveThemeId == MetroKeyboardThemes.SYNC_ID && synced.fromLauncher
+    val effectiveDark = if (useLauncherSync) synced.darkMode else darkTheme
+    val effectiveEra = if (useLauncherSync) MetroEra.fromName(synced.eraName) else localEra
+    val effectiveAnimScale = if (useLauncherSync) synced.animationScale else localAnimScale
+    val effectiveFontScale = if (useLauncherSync) synced.fontScale else 1.0f
+    val (accentColor, accentName) = MetroKeyboardThemes.resolveAccentForTheme(effectiveThemeId, synced)
+
+    val metroState = MetroUiState(
+        darkMode = effectiveDark,
+        accent = accentColor,
+        accentName = accentName,
+        era = effectiveEra,
+        animationScale = effectiveAnimScale,
+        fontScale = effectiveFontScale,
+        syncedFromLauncher = useLauncherSync,
+    )
+
+    val generated = generateColorScheme(metroState.accent, metroState.chrome, effectiveDark)
+    val colorScheme = generated.copy(
+        primary = metroState.accent,
+        onPrimary = metroState.onAccent,
+        primaryContainer = metroState.surface,
+        onPrimaryContainer = metroState.onBackground,
+        secondary = metroState.accent,
+        onSecondary = metroState.onAccent,
+        secondaryContainer = metroState.chrome,
+        onSecondaryContainer = metroState.onBackground,
+        tertiary = metroState.accent,
+        onTertiary = metroState.onAccent,
+        tertiaryContainer = metroState.surface,
+        onTertiaryContainer = metroState.onBackground,
+        background = metroState.background,
+        surface = metroState.background,
+        surfaceDim = metroState.background,
+        surfaceBright = metroState.surface,
+        surfaceContainerLowest = metroState.background,
+        surfaceContainerLow = metroState.surface,
+        surfaceContainer = metroState.surface,
+        surfaceContainerHigh = metroState.chrome,
+        surfaceContainerHighest = metroState.chrome,
+        surfaceVariant = metroState.surface,
+        onBackground = metroState.onBackground,
+        onSurface = metroState.onBackground,
+        onSurfaceVariant = metroState.onBackgroundMuted,
+        outline = metroState.divider,
+        outlineVariant = metroState.divider,
+        error = metroState.error,
+        onError = Color.White,
+        surfaceTint = Color.Transparent,
+    )
+    val sharp = RoundedCornerShape(0.dp)
+    val metroShapes = Shapes(
+        extraSmall = sharp,
+        small = sharp,
+        medium = sharp,
+        large = sharp,
+        extraLarge = sharp,
+    )
 
     CompositionLocalProvider(
-        LocalKeyboardPalette provides resolveKeyboardPalette(effectiveThemeId, darkTheme),
+        LocalMetroThemeActive provides true,
+        LocalMetroUiState provides metroState,
+        LocalIndication provides NoRippleIndication,
+        LocalKeyboardPalette provides resolveKeyboardPalette(effectiveThemeId, effectiveDark),
         LocalDensity provides Density(
             density = LocalDensity.current.density,
             fontScale = 1.0f
@@ -181,6 +246,8 @@ fun XimeTheme(
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
+            typography = metroComposeTypography(metroState.fontScale),
+            shapes = metroShapes,
             content = content
         )
     }

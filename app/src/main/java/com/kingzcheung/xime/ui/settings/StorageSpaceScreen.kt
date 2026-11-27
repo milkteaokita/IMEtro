@@ -18,7 +18,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
+import com.kingzcheung.xime.ui.metro.LocalMetroUiState
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
+import com.kingzcheung.xime.ui.metro.MetroSubPageHeader
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -99,41 +104,33 @@ fun StorageSpaceScreen(
     }
 
     pendingClear?.let { target ->
-        AlertDialog(
+        MetroAlertDialog(
             onDismissRequest = { pendingClear = null },
             title = { Text("清理${target.title}") },
             text = { Text(clearConfirmText(target.id)) },
             confirmButton = {
-                TextButton(
+                MetroSolidButton(
+                    text = "清理",
                     onClick = {
                         viewModel.clear(target.id, target.title)
                         pendingClear = null
                     }
-                ) { Text("清理") }
+                )
             },
             dismissButton = {
-                TextButton(onClick = { pendingClear = null }) { Text("取消") }
+                MetroOutlinedButton(text = "取消", onClick = { pendingClear = null })
             }
         )
     }
 
+    val metro = LocalMetroUiState.current
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = metro.background,
         topBar = {
-            TopAppBar(
-                title = { Text("存储空间") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "返回"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                )
+            MetroSubPageHeader(
+                parentTitle = "关于",
+                pageTitle = "存储空间",
+                onBack = onBack,
             )
         }
     ) { paddingValues ->
@@ -210,7 +207,7 @@ fun StorageSpaceScreen(
                             ) {
                                 Box(
                                     modifier = Modifier.size(40.dp)
-                                        .clip(RoundedCornerShape(10.dp))
+                                        .clip(RectangleShape)
                                         .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
                                     contentAlignment = Alignment.Center
                                 ) {

@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kingzcheung.xime.ui.caption.CaptionLauncherIcon
+import com.kingzcheung.xime.ui.metro.MetroToggleSwitch
 
 /**
  * 「字幕」插件页里的字幕设置（11-05 从 语音转文本 › 字幕 整组搬来，一项没删）：
@@ -43,12 +44,13 @@ internal fun CaptionSettingsSection() {
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.weight(1f)
                 )
-                Switch(
+                MetroToggleSwitch(
                     checked = captionIcon,
                     onCheckedChange = {
                         captionIcon = it
                         CaptionLauncherIcon.setEnabled(context, it)
                     },
+                    showStatusLabel = false,
                 )
             }
             Text(
@@ -66,12 +68,13 @@ internal fun CaptionSettingsSection() {
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.weight(1f)
                 )
-                Switch(
+                MetroToggleSwitch(
                     checked = captionAutoSave,
                     onCheckedChange = {
                         captionAutoSave = it
                         com.kingzcheung.xime.ui.caption.CaptionAutoSave.setOn(context, it)
                     },
+                    showStatusLabel = false,
                 )
             }
             Text(
@@ -89,12 +92,13 @@ internal fun CaptionSettingsSection() {
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.weight(1f)
                 )
-                Switch(
+                MetroToggleSwitch(
                     checked = keepThreeDays,
                     onCheckedChange = {
                         keepThreeDays = it
                         com.kingzcheung.xime.ui.caption.CaptionAutoSave.setKeepsThreeDays(context, it)
                     },
+                    showStatusLabel = false,
                 )
             }
             Text(
@@ -113,12 +117,13 @@ internal fun CaptionSettingsSection() {
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.weight(1f)
                 )
-                Switch(
+                MetroToggleSwitch(
                     checked = nameAlert,
                     onCheckedChange = {
                         nameAlert = it
                         com.kingzcheung.xime.ui.caption.CaptionNameAlert.setOn(context, it)
                     },
+                    showStatusLabel = false,
                 )
             }
             Text(
@@ -147,7 +152,7 @@ internal fun CaptionSettingsSection() {
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.weight(1f)
                 )
-                Switch(
+                MetroToggleSwitch(
                     checked = captionFloat,
                     onCheckedChange = {
                         captionFloat = it
@@ -158,6 +163,7 @@ internal fun CaptionSettingsSection() {
                                 .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK))
                         }
                     },
+                    showStatusLabel = false,
                 )
             }
             Text(

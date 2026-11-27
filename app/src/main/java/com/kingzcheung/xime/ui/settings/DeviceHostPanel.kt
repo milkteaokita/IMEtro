@@ -21,6 +21,10 @@ import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.kingzcheung.xime.clipboard.sync.DeviceHost
 import com.kingzcheung.xime.clipboard.sync.HostedDevice
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
+import com.kingzcheung.xime.ui.metro.MetroToggleSwitch
 import kotlinx.coroutines.delay
 
 /** Lets another CyIME phone or tablet scan this device and sync clipboards without a computer. */
@@ -50,13 +54,11 @@ internal fun DeviceHostPanelContent(
                     Text("同一 Wi-Fi 下的手机、平板直接同步复制的文字",
                         style = MaterialTheme.typography.bodySmall)
                 }
-                Switch(checked = enabled, onCheckedChange = onEnabled, modifier = Modifier.testTag("device-host-switch"))
+                MetroToggleSwitch(checked = enabled, onCheckedChange = onEnabled, showStatusLabel = false, modifier = Modifier.testTag("device-host-switch"))
             }
             if (enabled) {
                 if (status.isNotEmpty()) Text(status, style = MaterialTheme.typography.bodyMedium)
-                Button(onClick = onShowCode, modifier = Modifier.fillMaxWidth().testTag("device-host-show-code")) {
-                    Text("显示连接二维码")
-                }
+                MetroSolidButton(text = "显示连接二维码", onClick = onShowCode, modifier = Modifier.fillMaxWidth().testTag("device-host-show-code"))
                 Text("在另一台设备上点“扫码添加另一台设备”，扫这个二维码。",
                     style = MaterialTheme.typography.bodyMedium)
                 devices.forEach { device ->
@@ -75,7 +77,7 @@ internal fun DeviceHostPanelContent(
             onCloseCode()
         }
         val bitmap = remember(offer) { qrBitmap(offer) }
-        AlertDialog(onDismissRequest = onCloseCode, confirmButton = { TextButton(onClick = onCloseCode) { Text("关闭") } },
+        MetroAlertDialog(onDismissRequest = onCloseCode, confirmButton = { MetroOutlinedButton(text = "关闭", onClick = onCloseCode) },
             title = { Text("扫码连接 $name") },
             text = {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {

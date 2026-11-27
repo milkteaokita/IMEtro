@@ -43,6 +43,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import com.kingzcheung.xime.ui.i18n.Text
+import com.kingzcheung.xime.ui.metro.MetroRadioIndicator
+import com.kingzcheung.xime.ui.metro.MetroSlider
+import com.kingzcheung.xime.ui.metro.MetroToggleSwitch
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -254,12 +257,13 @@ private fun LayoutDisplayPage(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        Switch(
+                        MetroToggleSwitch(
                             checked = autoNumberKeyboard,
                             onCheckedChange = { newValue ->
                                 autoNumberKeyboard = newValue
                                 SettingsPreferences.setAutoNumberKeyboardEnabled(context, newValue)
-                            }
+                            },
+                            showStatusLabel = false,
                         )
                     }
                     HorizontalDivider(Modifier.padding(horizontal = 16.dp))
@@ -452,12 +456,12 @@ private fun LayoutDisplayPage(
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
-                                    Slider(
+                                    MetroSlider(
                                         value = bubbleOpacity,
                                         onValueChange = { bubbleOpacity = SettingsPreferences.normalizePreeditBubbleOpacity(it) },
                                         onValueChangeFinished = { SettingsPreferences.setPreeditBubbleOpacity(context, bubbleOpacity) },
                                         valueRange = 0.2f..1f,
-                                        steps = 15
+                                        steps = 15,
                                     )
                                 }
                             }
@@ -526,7 +530,7 @@ private fun LayoutDisplayPage(
                             modifier = Modifier.fillMaxWidth()
                         )
                         Spacer(modifier = Modifier.height(12.dp))
-                        Slider(
+                        MetroSlider(
                             value = candidateTextSize,
                             onValueChange = { candidateTextSize = it },
                             onValueChangeFinished = {
@@ -536,7 +540,7 @@ private fun LayoutDisplayPage(
                             valueRange = com.kingzcheung.xime.ui.keyboard.CANDIDATE_TEXT_SIZE_MIN_SP.toFloat()..
                                 com.kingzcheung.xime.ui.keyboard.CANDIDATE_TEXT_SIZE_MAX_SP.toFloat(),
                             steps = com.kingzcheung.xime.ui.keyboard.CANDIDATE_TEXT_SIZE_MAX_SP -
-                                com.kingzcheung.xime.ui.keyboard.CANDIDATE_TEXT_SIZE_MIN_SP - 1
+                                com.kingzcheung.xime.ui.keyboard.CANDIDATE_TEXT_SIZE_MIN_SP - 1,
                         )
                         SliderScaleMarks(
                             range = com.kingzcheung.xime.ui.keyboard.CANDIDATE_TEXT_SIZE_MIN_SP.toFloat()..
@@ -590,7 +594,7 @@ private fun LayoutDisplayPage(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         Spacer(Modifier.width(12.dp))
-                        Switch(checked = wideCandidateSpacing, onCheckedChange = null)
+                        MetroToggleSwitch(checked = wideCandidateSpacing, onCheckedChange = null, showStatusLabel = false)
                     }
                     CandidateSpacingLegend(wideCandidateSpacing)
                     HorizontalDivider(
@@ -627,7 +631,7 @@ private fun LayoutDisplayPage(
                             )
                         }
                         Spacer(modifier = Modifier.height(8.dp))
-                        Slider(
+                        MetroSlider(
                             value = pageSizeSlider,
                             onValueChange = { pageSizeSlider = it },
                             onValueChangeFinished = {
@@ -864,7 +868,7 @@ private fun FixedBottomCalibrationSettings() {
             SettingsPreferences.KeyboardBottomPosition.entries.forEach { option ->
                 Row(Modifier.fillMaxWidth().clickable { SettingsPreferences.setKeyboardBottomPosition(context, option) }
                     .testTag("bottom-position:${option.name}").padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(selected = bottomPosition == option, onClick = null)
+                    MetroRadioIndicator(selected = bottomPosition == option)
                     Spacer(Modifier.width(12.dp))
                     Column(Modifier.weight(1f)) {
                         Text(option.label, style = MaterialTheme.typography.bodyLarge)
@@ -954,7 +958,7 @@ internal fun KeyboardAppearanceSettings() {
                             )
                             PerformanceCostNote(com.kingzcheung.xime.settings.PerformanceCosts.Item.DOUBLE_PINYIN_KEY_HINTS)
                         }
-                        Switch(checked = keyPrefs.doublePinyinKeyHints, onCheckedChange = null)
+                        MetroToggleSwitch(checked = keyPrefs.doublePinyinKeyHints, onCheckedChange = null, showStatusLabel = false)
                     }
                     HorizontalDivider(
                         modifier = Modifier.padding(start = 16.dp),
@@ -973,7 +977,7 @@ internal fun KeyboardAppearanceSettings() {
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Medium
                         )
-                        Slider(
+                        MetroSlider(
                             value = cornerOpacity,
                             onValueChange = { cornerOpacity = com.kingzcheung.xime.ui.keyboard.normalizeCornerHintOpacity(it) },
                             onValueChangeFinished = {
@@ -982,7 +986,7 @@ internal fun KeyboardAppearanceSettings() {
                             },
                             valueRange = 0.1f..1f,
                             steps = 17,
-                            modifier = Modifier.testTag("corner-hint-opacity")
+                            modifier = Modifier.testTag("corner-hint-opacity"),
                         )
                         // 图例：上面三个开关和这里的不透明度一起实时变化；怎么输入角标在「按键与手势」。
                         KeyFaceHintsLegend(keyPrefs.swipeUpHints, keyPrefs.swipeDownHints, keyPrefs.doublePinyinKeyHints, cornerOpacity)
@@ -1018,7 +1022,7 @@ internal fun KeyboardAppearanceSettings() {
                             )
                             PerformanceCostNote(com.kingzcheung.xime.settings.PerformanceCosts.Item.HIDE_FUNCTION_KEY_HINTS)
                         }
-                        Switch(checked = keyPrefs.hideFunctionKeyHints, onCheckedChange = null)
+                        MetroToggleSwitch(checked = keyPrefs.hideFunctionKeyHints, onCheckedChange = null, showStatusLabel = false)
                     }
                     HorizontalDivider(
                         modifier = Modifier.padding(start = 16.dp),
@@ -1048,7 +1052,7 @@ internal fun KeyboardAppearanceSettings() {
                             )
                             PerformanceCostNote(com.kingzcheung.xime.settings.PerformanceCosts.Item.PRESS_BUBBLE)
                         }
-                        Switch(checked = showPressBubble, onCheckedChange = null)
+                        MetroToggleSwitch(checked = showPressBubble, onCheckedChange = null, showStatusLabel = false)
                     }
                 })
                 SettingsSection(title = "键盘顶部样式", content = {
@@ -1101,7 +1105,7 @@ internal fun KeyboardAppearanceSettings() {
                             )
                         }
                         Spacer(Modifier.width(12.dp))
-                        Switch(checked = rounded, onCheckedChange = null)
+                        MetroToggleSwitch(checked = rounded, onCheckedChange = null, showStatusLabel = false)
                     }
                 })
     }
@@ -1142,7 +1146,7 @@ private fun CandidateSwitchRow(
             if (lockMessage != null) SettingsLockNote(lockMessage)
         }
         Spacer(Modifier.width(12.dp))
-        Switch(checked = checked, onCheckedChange = null, enabled = !locked, colors = settingsSwitchColors())
+        MetroToggleSwitch(checked = checked, onCheckedChange = null, enabled = !locked, showStatusLabel = false)
     }
 }
 

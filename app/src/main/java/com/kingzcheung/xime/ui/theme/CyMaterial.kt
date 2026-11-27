@@ -32,6 +32,7 @@ internal val LocalMaterialPalette = staticCompositionLocalOf<MaterialPalette?> {
 internal fun Modifier.materialSurface(style: VisualStyle, radius: Dp, level: MaterialLevel, bottomRadius: Dp = radius): Modifier {
     if (style == VisualStyle.ORIGINAL) return this
     return composed {
+        if (LocalMetroThemeActive.current) return@composed this
         val colors = MaterialTheme.colorScheme
         val palette = LocalMaterialPalette.current ?: MaterialPalette(colors.surface, colors.primary)
         val dark = palette.surface.luminance() < .5f

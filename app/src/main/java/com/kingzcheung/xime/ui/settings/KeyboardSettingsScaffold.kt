@@ -199,13 +199,21 @@ internal fun KeyboardSettingsScaffold(
         else if (imeBottom == 0) previewOwnsIme = false
     }
     Box(modifier) {
-    Scaffold(modifier = Modifier.fillMaxSize(), containerColor = MaterialTheme.colorScheme.surface, topBar = {
-        TopAppBar(title = { Text(title) }, navigationIcon = {
-            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回") }
-        }, actions = {
-            actions()
-            if (visible) TextButton(onClick = { autoShow = false; editor?.hidePreview() }) { Text("收起键盘") }
-        }, colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface))
+    Scaffold(modifier = Modifier.fillMaxSize(), containerColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.background, topBar = {
+        com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+            parentTitle = "设置",
+            pageTitle = title,
+            onBack = onBack,
+            actions = {
+                actions()
+                if (visible) com.kingzcheung.xime.ui.metro.MetroOutlinedButton(
+                    text = "收起键盘",
+                    onClick = { autoShow = false; editor?.hidePreview() },
+                    borderColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.accent,
+                    textColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.accent,
+                )
+            }
+        )
     }) { padding ->
         // 预览键盘显示时页面不再整体顶到键盘上方（原来两侧镂空处只剩一块纯色底，11-01 平板截图）：
         // 列表铺到键盘后面，末尾留出键盘那段。真实输入框弹出的键盘照旧把页面顶上去。
@@ -224,20 +232,18 @@ internal fun KeyboardSettingsScaffold(
                 if (editPanel == null) content(Modifier.fillMaxSize())
                 else Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = listEndInset)) {
                     content(Modifier.fillMaxWidth())
-                    if (selected) OutlinedButton(
+                    if (selected) com.kingzcheung.xime.ui.metro.MetroOutlinedButton(
+                        text = if (editPanel == KeyboardPanelLaunch.Panel.RESIZE) "调整尺寸" else "编辑排列",
                         onClick = { autoShow = true; editor?.showPreview(editPanel) },
                         modifier = Modifier.padding(start = 24.dp, top = 8.dp),
-                    ) { Text(if (editPanel == KeyboardPanelLaunch.Panel.RESIZE) "调整尺寸" else "编辑排列") }
+                    )
                 }
               }
               if (floatingButton) {
-                FilledTonalButton(
+                com.kingzcheung.xime.ui.metro.MetroSolidButton(
+                    text = if (selected) "显示键盘" else if (enabled) "选择 IMEtro" else "启用 IMEtro",
                     modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = SHOW_KEYBOARD_BUTTON_MARGIN)
-                        .fillMaxWidth(0.54f).widthIn(max = 280.dp).heightIn(min = 48.dp).testTag("show-keyboard-button"),
-                    colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                        contentColor = MaterialTheme.colorScheme.onSurface),
-                    // 浮在列表上面：带一点阴影，和后面滚过的设置分得开。
-                    elevation = ButtonDefaults.filledTonalButtonElevation(defaultElevation = 3.dp, pressedElevation = 3.dp),
+                        .widthIn(min = 128.dp, max = 240.dp).heightIn(min = 48.dp).testTag("show-keyboard-button"),
                     onClick = {
                         // 已选中 CyIME：直接打开试打框，键盘弹出就能打字。
                         when {
@@ -247,7 +253,7 @@ internal fun KeyboardSettingsScaffold(
                         }
                         autoShow = true
                     },
-                ) { Text(if (selected) "显示键盘" else if (enabled) "选择 CyIME" else "启用 CyIME") }
+                )
               }
             }
         }

@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -86,8 +86,8 @@ internal fun NewSegmentPull(modifier: Modifier, onNewSegment: () -> Unit, conten
         val progress = (pulled / limit).coerceIn(0f, 1f)
         AnimatedVisibility(progress > SHOW_FROM, enter = fadeIn() + slideInVertically { it }, exit = fadeOut() + slideOutVertically { it },
             modifier = Modifier.align(Alignment.BottomCenter).padding(12.dp)) {
-            Surface(shape = RoundedCornerShape(20.dp), color = captionDialogColor(), contentColor = MaterialTheme.colorScheme.onSurface,
-                shadowElevation = 6.dp) {
+            Surface(shape = RectangleShape, color = captionDialogColor(), contentColor = MaterialTheme.colorScheme.onSurface,
+                shadowElevation = 0.dp) {
                 Column(Modifier.padding(horizontal = 20.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(10.dp),
                     horizontalAlignment = Alignment.CenterHorizontally) {
                     val ready = progress >= 1f

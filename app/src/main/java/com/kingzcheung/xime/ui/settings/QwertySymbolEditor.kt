@@ -9,7 +9,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroRadioIndicator
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
+import com.kingzcheung.xime.ui.metro.MetroToggleSwitch
 import androidx.compose.material3.*
 import com.kingzcheung.xime.ui.i18n.Text
 import androidx.compose.runtime.*
@@ -265,7 +270,7 @@ internal fun QwertySymbolEditor(onBack: () -> Unit, initialTarget: String? = nul
             // 开着数字行时把数字行也画出来（只看不改，键和顺序在「数字行」页改），对照着排第一排。
             if (merged == null && variant.numberRow) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                 inputSettings.numberRowKeys().forEach { key ->
-                    Surface(Modifier.weight(1f).height(32.dp), shape = RoundedCornerShape(8.dp),
+                    Surface(Modifier.weight(1f).height(32.dp), shape = RectangleShape,
                         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)) {
                         Box(contentAlignment = Alignment.Center) {
                             Text(key, style = MaterialTheme.typography.labelMedium, maxLines = 1,
@@ -284,7 +289,7 @@ internal fun QwertySymbolEditor(onBack: () -> Unit, initialTarget: String? = nul
                             else null to null
                         Surface(modifier = Modifier.weight(width(key).toFloat()).height(64.dp).testTag("symbol-editor-key:$key")
                             .clickable(enabled = loaded && !busy) { editing = key; message = "" },
-                            shape = RoundedCornerShape(8.dp),
+                            shape = RectangleShape,
                             color = if (editing == key) MaterialTheme.colorScheme.secondaryContainer
                                 else MaterialTheme.colorScheme.surfaceVariant) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally,
@@ -344,57 +349,75 @@ internal fun QwertySymbolEditor(onBack: () -> Unit, initialTarget: String? = nul
     if (copying) {
         // 先选一套，再点「覆盖」才执行（用户 11-16：点了之后会怎么样不清楚）。
         var source by remember { mutableStateOf<CornerVariant?>(null) }
-        AlertDialog(onDismissRequest = { copying = false }, modifier = Modifier.testTag("symbol-copy-dialog"),
+        MetroAlertDialog(onDismissRequest = { copying = false }, modifier = Modifier.testTag("symbol-copy-dialog"),
             title = { Text("从另一套复制") },
             text = {
                 Column {
                     Text("选一套复制到「${variant.label}」，这一套的符号会被覆盖。", style = MaterialTheme.typography.bodySmall)
                     CornerVariant.entries.filter { it != variant }.forEach { other ->
                         Row(Modifier.fillMaxWidth().testTag("symbol-copy:${other.id}").clickable { source = other }
-                            .padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                            RadioButton(selected = source == other, onClick = null)
-                            Text(other.label, Modifier.padding(start = 8.dp), style = MaterialTheme.typography.bodyLarge)
+                            .padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            MetroRadioIndicator(selected = source == other)
+                            Text(other.label, Modifier.padding(start = 12.dp), style = MaterialTheme.typography.bodyLarge)
                         }
                     }
                 }
             },
-            confirmButton = { TextButton(enabled = source != null, modifier = Modifier.testTag("symbol-copy-confirm"), onClick = {
-                val other = source ?: return@TextButton
-                copying = false
-                val en = english
-                scope.launch {
-                    val (copied, copiedFollows) = withContext(Dispatchers.IO) {
-                        KeysConfigHelper.qwertySymbolEditorValues(context, en, other) to
-                            QwertySwipeSymbols.follows(en, other, QwertySwipeSymbols.loadFollows(context, en, other))
-                    }
-                    persist(copied, swipes, "已把「${other.label}」这一套复制到「${variant.label}」",
-                        QwertySwipeSymbols.slotIds.associateWith { it in copiedFollows })
-                }
-            }) { Text("覆盖现在这一套") } },
-            dismissButton = { TextButton(onClick = { copying = false }) { Text("取消") } })
+            confirmButton = {
+                MetroSolidButton(
+                    text = "覆盖现在这一套",
+                    enabled = source != null,
+                    modifier = Modifier.testTag("symbol-copy-confirm"),
+                    onClick = {
+                        val other = source ?: return@MetroSolidButton
+                        copying = false
+                        val en = english
+                        scope.launch {
+                            val (copied, copiedFollows) = withContext(Dispatchers.IO) {
+                                KeysConfigHelper.qwertySymbolEditorValues(context, en, other) to
+                                    QwertySwipeSymbols.follows(en, other, QwertySwipeSymbols.loadFollows(context, en, other))
+                            }
+                            persist(copied, swipes, "已把「${other.label}」这一套复制到「${variant.label}」",
+                                QwertySwipeSymbols.slotIds.associateWith { it in copiedFollows })
+                        }
+                    },
+                )
+            },
+            dismissButton = { MetroOutlinedButton(text = "取消", onClick = { copying = false }) })
     }
-    if (confirmReset) AlertDialog(onDismissRequest = { confirmReset = false },
+    if (confirmReset) MetroAlertDialog(onDismissRequest = { confirmReset = false },
         title = { Text("「$tabName」恢复默认？") },
-        confirmButton = { TextButton(onClick = {
-            confirmReset = false
-            if (side != null) sideReset?.invoke() else resetLetters()
-        }) { Text("恢复") } },
-        dismissButton = { TextButton(onClick = { confirmReset = false }) { Text("取消") } })
+        confirmButton = {
+            MetroSolidButton(
+                text = "恢复",
+                onClick = {
+                    confirmReset = false
+                    if (side != null) sideReset?.invoke() else resetLetters()
+                },
+            )
+        },
+        dismissButton = { MetroOutlinedButton(text = "取消", onClick = { confirmReset = false }) })
     if (savingVersion) {
         var name by rememberSaveable { mutableStateOf("") }
-        AlertDialog(onDismissRequest = { savingVersion = false }, title = { Text("存为版本") },
+        MetroAlertDialog(onDismissRequest = { savingVersion = false }, title = { Text("存为版本") },
             text = { OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("名称") },
                 singleLine = true, modifier = Modifier.testTag("symbol-version-name")) },
-            confirmButton = { TextButton(enabled = QwertySwipeSymbols.versionName(name).isNotEmpty(), onClick = {
-                val clean = QwertySwipeSymbols.versionName(name)
-                savingVersion = false
-                runCatching { QwertySwipeSymbols.saveVersion(context, clean, values, english) }
-                    .onSuccess { versions = QwertySwipeSymbols.versions(context, english); message = "已存为「$clean」" }
-                    .onFailure { message = "保存失败：${it.message}" }
-            }) { Text("保存") } },
-            dismissButton = { TextButton(onClick = { savingVersion = false }) { Text("取消") } })
+            confirmButton = {
+                MetroSolidButton(
+                    text = "保存",
+                    enabled = QwertySwipeSymbols.versionName(name).isNotEmpty(),
+                    onClick = {
+                        val clean = QwertySwipeSymbols.versionName(name)
+                        savingVersion = false
+                        runCatching { QwertySwipeSymbols.saveVersion(context, clean, values, english) }
+                            .onSuccess { versions = QwertySwipeSymbols.versions(context, english); message = "已存为「$clean」" }
+                            .onFailure { message = "保存失败：${it.message}" }
+                    },
+                )
+            },
+            dismissButton = { MetroOutlinedButton(text = "取消", onClick = { savingVersion = false }) })
     }
-    if (choosingVersion) AlertDialog(onDismissRequest = { choosingVersion = false }, title = { Text("载入版本") },
+    if (choosingVersion) MetroAlertDialog(onDismissRequest = { choosingVersion = false }, title = { Text("载入版本") },
         text = {
             Column {
                 versions.keys.forEach { name ->
@@ -413,7 +436,7 @@ internal fun QwertySymbolEditor(onBack: () -> Unit, initialTarget: String? = nul
                 }
             }
         },
-        confirmButton = { TextButton(onClick = { choosingVersion = false }) { Text("关闭") } })
+        confirmButton = { MetroOutlinedButton(text = "关闭", onClick = { choosingVersion = false }) })
 }
 
 /** [merged] 里表示内置中文 14 键；其他值是自建布局 id。 */
@@ -443,7 +466,7 @@ private fun KeySymbolDialog(key: String, up: String, down: String, topGesture: S
     val changed = upText != up || downText != down || swipeDraft != swipes ||
         (followUp != null && upFollows != (followUp == true)) || (followDown != null && downFollows != (followDown == true))
     var leaving by remember(key) { mutableStateOf(false) }
-    AlertDialog(onDismissRequest = { if (changed) leaving = true else onDismiss() }, modifier = Modifier.testTag("symbol-editor-dialog"),
+    MetroAlertDialog(onDismissRequest = { if (changed) leaving = true else onDismiss() }, modifier = Modifier.testTag("symbol-editor-dialog"),
         title = { Text(key.uppercase()) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -464,8 +487,8 @@ private fun KeySymbolDialog(key: String, up: String, down: String, topGesture: S
                 }
             }
         },
-        confirmButton = { TextButton(onClick = { finish() }) { Text("完成") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } })
+        confirmButton = { MetroSolidButton(text = "完成", onClick = { finish() }) },
+        dismissButton = { MetroOutlinedButton(text = "取消", onClick = onDismiss) })
     if (leaving) UnsavedChangesDialog(onSave = { leaving = false; finish() }, onDiscard = { leaving = false; onDismiss() },
         onKeepEditing = { leaving = false })
 }
@@ -476,14 +499,14 @@ private fun KeySymbolDialog(key: String, up: String, down: String, topGesture: S
  */
 @Composable
 internal fun UnsavedChangesDialog(onSave: () -> Unit, onDiscard: () -> Unit, onKeepEditing: () -> Unit) {
-    AlertDialog(onDismissRequest = onKeepEditing, modifier = Modifier.testTag("symbol-unsaved-dialog"),
+    MetroAlertDialog(onDismissRequest = onKeepEditing, modifier = Modifier.testTag("symbol-unsaved-dialog"),
         title = { Text("改的还没保存") },
         text = { Text("要保存这次的修改吗？") },
-        confirmButton = { TextButton(onClick = onSave, modifier = Modifier.testTag("symbol-unsaved-save")) { Text("保存") } },
+        confirmButton = { MetroSolidButton(text = "保存", onClick = onSave, modifier = Modifier.testTag("symbol-unsaved-save")) },
         dismissButton = {
-            Row {
-                TextButton(onClick = onDiscard, modifier = Modifier.testTag("symbol-unsaved-discard")) { Text("不保存") }
-                TextButton(onClick = onKeepEditing, modifier = Modifier.testTag("symbol-unsaved-keep")) { Text("接着改") }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                MetroOutlinedButton(text = "不保存", onClick = onDiscard, modifier = Modifier.testTag("symbol-unsaved-discard"))
+                MetroOutlinedButton(text = "接着改", onClick = onKeepEditing, modifier = Modifier.testTag("symbol-unsaved-keep"))
             }
         })
 }
@@ -499,7 +522,7 @@ private fun SymbolSwitchRow(title: String, description: String, checked: Boolean
             Text(title, style = MaterialTheme.typography.titleSmall)
             Text(description, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Switch(checked = checked, onCheckedChange = null, enabled = enabled, colors = settingsSwitchColors())
+        MetroToggleSwitch(checked = checked, onCheckedChange = null, enabled = enabled, showStatusLabel = false)
     }
 }
 
@@ -542,7 +565,7 @@ private fun SymbolRowsDialog(values: Map<String, String>, variant: CornerVariant
                 .forEachIndexed { column, cell -> put("$direction.${row[column]}", cell) }
         }
     })
-    AlertDialog(onDismissRequest = { if (drafts.toMap() != initial) leaving = true else onDismiss() },
+    MetroAlertDialog(onDismissRequest = { if (drafts.toMap() != initial) leaving = true else onDismiss() },
         modifier = Modifier.testTag("symbol-rows-dialog"),
         title = { Text("整排输入") },
         text = {
@@ -559,8 +582,8 @@ private fun SymbolRowsDialog(values: Map<String, String>, variant: CornerVariant
                 }
             }
         },
-        confirmButton = { TextButton(onClick = { finish() }) { Text("完成") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } })
+        confirmButton = { MetroSolidButton(text = "完成", onClick = { finish() }) },
+        dismissButton = { MetroOutlinedButton(text = "取消", onClick = onDismiss) })
     if (leaving) UnsavedChangesDialog(onSave = { leaving = false; finish() }, onDiscard = { leaving = false; onDismiss() },
         onKeepEditing = { leaving = false })
 }

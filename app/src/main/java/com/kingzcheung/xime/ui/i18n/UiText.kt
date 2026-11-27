@@ -23,12 +23,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
+import com.kingzcheung.xime.settings.AppLanguage
 
 /**
- * 当前界面用的英文表；中文界面（和键盘本身）是 null，文字照原样显示。
- * 由 [ProvideUiTranslations] 在设置等界面的根上给出，键盘不经过它，所以键上的中文不受影响。
+ * 当前界面用的英文表；非英文界面是 null。
  */
 val LocalUiTranslations = staticCompositionLocalOf<UiTranslations?> { null }
+
+/** 当前界面是否显示台湾繁体中文。 */
+val LocalTraditionalUi = staticCompositionLocalOf { false }
 
 object UiTexts {
     const val ASSET = "i18n/en.tsv"
@@ -41,12 +44,23 @@ object UiTexts {
         }.getOrElse { UiTranslations.EMPTY }.also { loaded = it }
     }
 
-    /** 界面语言是英文时的表，否则 null（简体、繁体、日语界面不换：它们走各自的 strings.xml）。 */
+    /** 界面语言是英文时的表，否则 null。 */
     fun forConfiguration(context: Context, configuration: Configuration = context.resources.configuration): UiTranslations? =
         if (configuration.locales[0]?.language == "en") english(context) else null
 
-    /** 不在 Compose 里的文字（Toast 等）用：英文界面换成英文，其余原样。 */
-    fun text(context: Context, zh: String): String = forConfiguration(context)?.translate(zh) ?: zh
+    /** 当前配置是否为繁體中文介面。 */
+    fun isTraditional(configuration: Configuration): Boolean =
+        AppLanguage.fromTag(configuration.locales[0]?.toLanguageTag()) == AppLanguage.TRADITIONAL_CHINESE
+
+    /** 不在 Compose 里的文字（Toast 等）用：英文界面换成英文，繁体界面转繁体，其余原样。 */
+    fun text(context: Context, zh: String): String {
+        val config = context.resources.configuration
+        return when {
+            config.locales[0]?.language == "en" -> english(context).translate(zh)
+            isTraditional(config) -> TraditionalUiConverter.convert(zh)
+            else -> zh
+        }
+    }
 }
 
 /**
@@ -60,26 +74,42 @@ object UiToast {
     fun makeText(context: Context, resId: Int, duration: Int): Toast = Toast.makeText(context, resId, duration)
 }
 
-/** 设置、字幕等界面的根上包一层：英文界面时其中的 [Text] 显示英文。 */
+/** 设置、字幕与键盘界面根上包一层：英文界面时其中的 [Text] 显示英文，繁体中文界面时转为繁体中文。 */
 @Composable
 fun ProvideUiTranslations(content: @Composable () -> Unit) {
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
     val table = remember(configuration.locales) { UiTexts.forConfiguration(context, configuration) }
-    CompositionLocalProvider(LocalUiTranslations provides table, content = content)
+    val traditional = remember(configuration.locales) { UiTexts.isTraditional(configuration) }
+    CompositionLocalProvider(
+        LocalUiTranslations provides table,
+        LocalTraditionalUi provides traditional,
+        content = content,
+    )
 }
 
 /** 显示用户自己的内容（词条、剪贴板记录、字幕原文）时包一层，里面的字一律不换。 */
 @Composable
 fun UntranslatedContent(content: @Composable () -> Unit) {
-    CompositionLocalProvider(LocalUiTranslations provides null, content = content)
+    CompositionLocalProvider(
+        LocalUiTranslations provides null,
+        LocalTraditionalUi provides false,
+        content = content,
+    )
 }
 
 /** [text] 在当前界面语言下的样子。 */
 @Composable
 fun tr(text: String): String {
     val table = LocalUiTranslations.current
-    return remember(table, text) { table?.translate(text) ?: text }
+    val traditional = LocalTraditionalUi.current
+    return remember(table, traditional, text) {
+        when {
+            table != null -> table.translate(text)
+            traditional -> TraditionalUiConverter.convert(text)
+            else -> text
+        }
+    }
 }
 
 /**

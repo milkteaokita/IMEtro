@@ -2,10 +2,11 @@ package com.kingzcheung.xime.ui.menubar
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
+import com.kingzcheung.xime.ui.i18n.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,7 +31,7 @@ internal fun ClipboardImageFailureNotice(
 ) {
     val colors = MaterialTheme.colorScheme
     Box(Modifier.fillMaxWidth()) {
-        Row(Modifier.widthIn(max = 480.dp).clip(RoundedCornerShape(8.dp))
+        Row(Modifier.widthIn(max = 480.dp).clip(RectangleShape)
             .keyboardPanelBackground(colors.surfaceContainerHigh)
             .padding(start = 8.dp, end = 2.dp, top = 2.dp, bottom = 2.dp)
             .testTag("images-paste-notice"), verticalAlignment = Alignment.CenterVertically) {
@@ -58,7 +59,7 @@ internal fun ClipboardImageFailureNotice(
 internal fun ClipboardIncognitoNotice(onIncognitoOff: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     Box(Modifier.fillMaxWidth()) {
-        Row(Modifier.widthIn(max = 480.dp).clip(RoundedCornerShape(8.dp))
+        Row(Modifier.widthIn(max = 480.dp).clip(RectangleShape)
             .keyboardPanelBackground(colors.surfaceContainerHigh)
             .padding(horizontal = 8.dp, vertical = 2.dp)
             .testTag("clipboard-incognito"), verticalAlignment = Alignment.CenterVertically) {
@@ -82,7 +83,7 @@ internal fun ClipboardIncognitoNotice(onIncognitoOff: () -> Unit) {
 internal fun ClipboardScreenshotAccessNotice(onAllow: () -> Unit, onHide: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     Box(Modifier.fillMaxWidth()) {
-        Row(Modifier.widthIn(max = 480.dp).clip(RoundedCornerShape(8.dp))
+        Row(Modifier.widthIn(max = 480.dp).clip(RectangleShape)
             .keyboardPanelBackground(colors.surfaceContainerHigh)
             .padding(start = 8.dp, end = 2.dp, top = 2.dp, bottom = 2.dp)
             .testTag("clipboard-screenshot-access"), verticalAlignment = Alignment.CenterVertically) {
@@ -103,6 +104,6 @@ internal fun ClipboardScreenshotAccessNotice(onAllow: () -> Unit, onHide: () -> 
 @Composable
 private fun NoticeAction(label: String, tag: String, onClick: () -> Unit) {
     Text(label, color = MaterialTheme.colorScheme.primary, fontSize = 12.sp, lineHeight = 18.sp,
-        maxLines = 1, modifier = Modifier.clip(RoundedCornerShape(4.dp)).testTag(tag)
+        maxLines = 1, modifier = Modifier.clip(RectangleShape).testTag(tag)
             .clickable(role = Role.Button, onClick = onClick).padding(horizontal = 2.dp, vertical = 5.dp))
 }

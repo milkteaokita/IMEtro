@@ -94,19 +94,12 @@ fun ClipboardGroupSettingsContent(onBack: () -> Unit) {
     val dragOrder = rememberDragOrder(tabs.keys.toList(), store::setTabOrder)
     val rows = dragOrder.order.mapNotNull(tabs::get)
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.background,
         topBar = {
-            TopAppBar(
-                title = { Text("剪贴板分组") },
-                navigationIcon = {
-                    IconButton(onClick = leave) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                ),
+            com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+                parentTitle = "剪贴板",
+                pageTitle = "剪贴板分组",
+                onBack = leave,
             )
         }
     ) { padding ->
@@ -161,71 +154,61 @@ fun ClipboardGroupSettingsContent(onBack: () -> Unit) {
     }
     deleting?.let { group ->
         val count = state.count(group.id)
-        AlertDialog(
+        com.kingzcheung.xime.ui.metro.MetroAlertDialog(
             onDismissRequest = { deleting = null },
             title = { Text("删除分组「${group.name}」？") },
             text = { Text(if (count == 0) "分组里没有记录。" else "里面的 $count 条记录不会删除，仍在「全部」里。") },
             confirmButton = {
-                TextButton(onClick = { store.delete(group.id); deleting = null }, Modifier.testTag("clipboard-group-delete-confirm")) {
-                    Text("删除", color = MaterialTheme.colorScheme.error)
-                }
+                com.kingzcheung.xime.ui.metro.MetroSolidButton("删除", onClick = { store.delete(group.id); deleting = null },
+                    modifier = Modifier.testTag("clipboard-group-delete-confirm"))
             },
-            dismissButton = { TextButton(onClick = { deleting = null }) { Text("取消") } },
+            dismissButton = { com.kingzcheung.xime.ui.metro.MetroOutlinedButton("取消", onClick = { deleting = null }) },
         )
     }
 }
 
-/** 整张卡片共用原来的底色和材质；拖动及滚动时不在每行重复画玻璃高光和边框。 */
 @Composable
 private fun ClipboardGroupBackground(list: LazyListState) {
+    val metro = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current
     Spacer(Modifier.layout { measurable, constraints ->
         val info = list.layoutInfo
         val visible = info.visibleItemsInfo
-        val radius = 12.dp.roundToPx()
-        val top = visible.firstOrNull { it.key == "heading" }?.let { it.offset + it.size } ?: -radius
+        val top = visible.firstOrNull { it.key == "heading" }?.let { it.offset + it.size } ?: 0
         val bottom = visible.firstOrNull { it.key == "add" }?.let { it.offset + it.size }
-            ?: visible.firstOrNull { it.key == "note" }?.offset ?: (constraints.maxHeight + radius)
+            ?: visible.firstOrNull { it.key == "note" }?.offset ?: constraints.maxHeight
         val card = measurable.measure(Constraints.fixed(constraints.maxWidth, (bottom - top).coerceAtLeast(0)))
         layout(constraints.maxWidth, constraints.maxHeight) { if (visible.isNotEmpty()) card.place(0, top) }
-    }.clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceContainerLow)
-        .visualMaterial(VisualStyles.current, 12.dp, MaterialLevel.RAISED))
+    }.background(metro.background))
 }
 
 @Composable
 private fun ClipboardSettingsRow(first: Boolean, last: Boolean, modifier: Modifier = Modifier,
     lifted: Boolean = false, content: @Composable () -> Unit) {
-    val top = if (first || lifted) 12.dp else 0.dp
-    val bottom = if (last || lifted) 12.dp else 0.dp
-    Box(modifier.fillMaxWidth().clip(RoundedCornerShape(top, top, bottom, bottom))
-        .then(if (lifted) Modifier.background(MaterialTheme.colorScheme.surfaceContainerHigh) else Modifier)) { content() }
+    Box(modifier.fillMaxWidth()
+        .then(if (lifted) Modifier.background(com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.chrome) else Modifier)) { content() }
 }
 
-/**
- * One of the user's groups, laid out like the category rows above it (icon tile, name, a grey line),
- * with rename and delete where the categories have their switch. Tapping the row renames.
- */
 @Composable
 private fun ClipboardGroupRow(name: String, detail: String, modifier: Modifier = Modifier,
                               onRename: () -> Unit, onDelete: () -> Unit) {
-    Row(modifier.fillMaxWidth().clickable(onClick = onRename).padding(start = 16.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
+    val metro = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current
+    Row(modifier.fillMaxWidth().clickable(onClick = onRename).padding(start = 4.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
         verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.size(40.dp).clip(RoundedCornerShape(10.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)), contentAlignment = Alignment.Center) {
-            Icon(Icons.TwoTone.Folder, contentDescription = null, tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(22.dp))
+        Box(Modifier.size(36.dp).background(metro.accent), contentAlignment = Alignment.Center) {
+            Icon(Icons.TwoTone.Folder, contentDescription = null, tint = metro.onAccent,
+                modifier = Modifier.size(20.dp))
         }
-        Spacer(Modifier.width(16.dp))
+        Spacer(Modifier.width(14.dp))
         Column(Modifier.weight(1f)) {
-            Text(name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface)
-            Text(detail, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(name, style = MaterialTheme.typography.titleLarge, color = metro.onBackground)
+            Text(detail, style = MaterialTheme.typography.bodyMedium, color = metro.onBackgroundMuted)
         }
         Spacer(Modifier.width(12.dp))
         IconButton(onClick = onRename) {
-            Icon(Icons.Default.Edit, contentDescription = "改名", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Icon(Icons.Default.Edit, contentDescription = "改名", tint = metro.onBackgroundMuted)
         }
         IconButton(onClick = onDelete) {
-            Icon(Icons.Default.DeleteOutline, contentDescription = "删除", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Icon(Icons.Default.DeleteOutline, contentDescription = "删除", tint = metro.onBackgroundMuted)
         }
     }
 }
@@ -238,7 +221,7 @@ private fun ClipboardGroupNameDialog(group: ClipboardGroup, groups: List<Clipboa
     var error by remember(group.id) { mutableStateOf<String?>(null) }
     // A name that only repeats the current one, or is still empty, is not an error worth showing yet.
     val problem = if (name.isBlank() || name.trim() == group.name) null else clipboardGroupNameError(name, groups, group.id.ifEmpty { null })
-    AlertDialog(
+    com.kingzcheung.xime.ui.metro.MetroAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (group.id.isEmpty()) "新建分组" else "改名") },
         text = {
@@ -248,10 +231,10 @@ private fun ClipboardGroupNameDialog(group: ClipboardGroup, groups: List<Clipboa
                 modifier = Modifier.fillMaxWidth().testTag("clipboard-group-name"))
         },
         confirmButton = {
-            TextButton(onClick = { error = save(name) }, enabled = name.isNotBlank() && problem == null,
-                modifier = Modifier.testTag("clipboard-group-name-save")) { Text("确定") }
+            com.kingzcheung.xime.ui.metro.MetroSolidButton("确定", onClick = { error = save(name) }, enabled = name.isNotBlank() && problem == null,
+                modifier = Modifier.testTag("clipboard-group-name-save"))
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
+        dismissButton = { com.kingzcheung.xime.ui.metro.MetroOutlinedButton("取消", onClick = onDismiss) },
     )
 }
 

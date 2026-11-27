@@ -3,47 +3,62 @@ package com.kingzcheung.xime.ui.settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.twotone.Apps
-import androidx.compose.material.icons.twotone.AutoAwesome
-import androidx.compose.material.icons.twotone.Opacity
-import androidx.compose.material.icons.twotone.BlurOn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Image
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import com.kingzcheung.xime.ui.i18n.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.kingzcheung.xime.ui.metro.LocalMetroUiState
+import com.kingzcheung.xime.ui.metro.MetroAccent
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroDivider
+import com.kingzcheung.xime.ui.metro.MetroEra
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroSectionHeader
+import com.kingzcheung.xime.ui.metro.MetroSlider
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
+import com.kingzcheung.xime.ui.metro.metroTilt
 import com.kingzcheung.xime.ui.theme.KeyboardColorScheme
+import com.kingzcheung.xime.ui.theme.MetroKeyboardThemes
+import com.kingzcheung.xime.ui.theme.MetroThemeSync
 import com.kingzcheung.xime.viewmodel.ThemeSettingsViewModel
 import androidx.compose.ui.platform.LocalContext
 import com.kingzcheung.xime.settings.SettingsPreferences
 import com.kingzcheung.xime.settings.FrostedGlassPreferences
 import com.kingzcheung.xime.settings.FrostedGlassProfiles
 import com.kingzcheung.xime.ui.keyboard.rememberKeyboardInputPreferences
-import com.kingzcheung.xime.ui.theme.VisualStyles
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -84,9 +99,10 @@ private fun ThemeSettingsPage(
     }
     
     var previewTheme by remember { mutableStateOf<KeyboardColorScheme?>(null) }
-    var showGlassSettings by remember { mutableStateOf(false) }
-    // 背景图片和配色分开（11-09 用户：「这是两个系统」）：开着图片时，配色列表里选中的是图片下面那套配色，
-    // 换配色只换底，图片留着；「我的图片」不再作为一张配色卡出现，改由「背景图片」里的开关打开、关闭。
+    val metro = LocalMetroUiState.current
+    var selectedEra by remember { mutableStateOf(SettingsPreferences.getMetroEra(context)) }
+    var animScale by remember { mutableFloatStateOf(SettingsPreferences.getMetroAnimationScale(context)) }
+    val synced = MetroThemeSync.syncedState
     val imageOn = uiState.colorTheme == com.kingzcheung.xime.ui.theme.CustomImageTheme.ID
     val schemeId = if (imageOn) com.kingzcheung.xime.ui.theme.CustomImageTheme.baseFor(context, uiState.colorTheme)
         else com.kingzcheung.xime.ui.theme.KeyboardThemes.getThemeById(uiState.colorTheme).id
@@ -99,25 +115,82 @@ private fun ThemeSettingsPage(
             viewModel.setColorTheme(com.kingzcheung.xime.ui.theme.CustomImageTheme.ID)
         } else viewModel.setColorTheme(theme.id)
     }
-    KeyboardSettingsScaffold("主题与外观", onBack, preview = previewTheme == null && !showGlassSettings) { modifier ->
+    KeyboardSettingsScaffold("主题与外观", onBack, preview = previewTheme == null) { modifier ->
         val listState = rememberSettingsSearchListState()
         LazyColumn(
             state = listState,
             modifier = modifier.settingsGutterScroll(listState)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = keyboardPreviewContentPadding()
         ) {
             item {
-                Text(
-                    text = "显示模式",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
+                MetroSectionHeader("Metro 时代风格")
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    MetroEra.entries.forEach { era ->
+                        val active = (if (metro.syncedFromLauncher) metro.era else selectedEra) == era
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(if (active) metro.accent else metro.surface, RectangleShape)
+                                .metroTilt(4f, 0.98f)
+                                .clickable {
+                                    selectedEra = era
+                                    changeAppearance(context, onThemeChanged) {
+                                        SettingsPreferences.setMetroEra(context, era)
+                                    }
+                                }
+                                .padding(horizontal = 14.dp, vertical = 12.dp)
+                        ) {
+                            Text(
+                                text = if (active) "✓ ${era.title}" else era.title,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (active) metro.onAccent else metro.onBackground,
+                            )
+                            Text(
+                                text = era.description,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = if (active) metro.onAccent.copy(alpha = 0.9f) else metro.onBackgroundMuted,
+                            )
+                        }
+                    }
+                }
             }
-            
+
             item {
+                val syncActive = schemeId == MetroKeyboardThemes.SYNC_ID
+                MetroSectionHeader("Metro OS 联动")
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(if (syncActive) metro.accent else metro.surface, RectangleShape)
+                        .metroTilt(4f, 0.98f)
+                        .clickable {
+                            val syncScheme = com.kingzcheung.xime.ui.theme.KeyboardThemes.getThemeById(MetroKeyboardThemes.SYNC_ID)
+                            changeAppearance(context, onThemeChanged) { applyScheme(syncScheme) }
+                        }
+                        .padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            text = if (syncActive) "✓ 跟随 Metro Home 强调色与深浅模式" else "切换到 Metro OS 联动主题",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = if (syncActive) metro.onAccent else metro.onBackground,
+                        )
+                        Text(
+                            text = if (synced.fromLauncher) "已连线 Metro Launcher：${synced.accentName}" else "未检测到 Metro Launcher，将使用默认 Zune 桃红",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (syncActive) metro.onAccent.copy(alpha = 0.85f) else metro.onBackgroundMuted,
+                        )
+                    }
+                }
+            }
+
+            item {
+                MetroSectionHeader("显示模式")
                 val currentTheme = uiState.colorThemes.firstOrNull { it.id == uiState.colorTheme }
                     ?: com.kingzcheung.xime.ui.theme.KeyboardThemes.getThemeById(uiState.colorTheme)
                 Row(
@@ -139,7 +212,7 @@ private fun ThemeSettingsPage(
                         theme = currentTheme,
                         glass = glass,
                         previewAspectRatio = 1.3f,
-                        title = "浅色",
+                        title = "纯白浅色",
                         isSelected = uiState.darkMode == 0,
                         previewDark = false,
                         onClick = {
@@ -151,7 +224,7 @@ private fun ThemeSettingsPage(
                         theme = currentTheme,
                         glass = glass,
                         previewAspectRatio = 1.3f,
-                        title = "深色",
+                        title = "OLED 纯黑",
                         isSelected = uiState.darkMode == 1,
                         previewDark = true,
                         onClick = {
@@ -161,94 +234,84 @@ private fun ThemeSettingsPage(
                     )
                 }
             }
-            
+
             item {
-                SettingsSection(title = "材质效果") {
-                    SettingsToggleItem(icon = Icons.TwoTone.BlurOn, title = "玻璃效果",
-                        subtitle = "键盘变成半透明玻璃，换主题时保留", checked = glass.dark.enabled,
-                        onCheckedChange = { enabled ->
-                            changeAppearance(context, onThemeChanged) {
-                                FrostedGlassPreferences.saveProfiles(context, glass.withEnabled(enabled))
-                                // 液态玻璃建在玻璃上：关玻璃时一起关。
-                                if (!enabled) SettingsPreferences.setGlassLiquid(context, false)
+                MetroSectionHeader("强调色：${metro.accentName}")
+                Column(
+                    modifier = Modifier.settingsSearchAnchor("配色方案", bleed = 6.dp, bleedVertical = 4.dp).fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    MetroAccent.entries.chunked(7).forEach { rowAccents ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            rowAccents.forEach { accent ->
+                                val selected = schemeId == accent.id
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(42.dp)
+                                        .then(
+                                            if (selected) Modifier.border(3.dp, metro.onBackground, RectangleShape).padding(3.dp)
+                                            else Modifier
+                                        )
+                                        .background(accent.color, RectangleShape)
+                                        .metroTilt(6f, 0.92f)
+                                        .clickable {
+                                            val scheme = com.kingzcheung.xime.ui.theme.KeyboardThemes.getThemeById(accent.id)
+                                            changeAppearance(context, onThemeChanged) { applyScheme(scheme) }
+                                        }
+                                )
                             }
-                        }, costItem = com.kingzcheung.xime.settings.PerformanceCosts.Item.GLASS)
-                    // 液态玻璃不用先开玻璃：打开它就把玻璃一起打开。
-                    SettingsToggleItem(icon = Icons.TwoTone.AutoAwesome, title = "液态玻璃",
-                        subtitle = "按键加亮边，按住时变亮",
-                        checked = glass.dark.enabled && com.kingzcheung.xime.ui.theme.LiquidGlass.enabled(context),
-                        onCheckedChange = { enabled ->
-                            changeAppearance(context, onThemeChanged) {
-                                if (enabled && !glass.dark.enabled) FrostedGlassPreferences.saveProfiles(context, glass.withEnabled(true))
-                                SettingsPreferences.setGlassLiquid(context, enabled)
-                            }
-                        }, costItem = com.kingzcheung.xime.settings.PerformanceCosts.Item.LIQUID_GLASS)
-                    // 11-15「有用户想加强液态玻璃的效果」：三档，标准就是原来的样子、是默认。液态玻璃开着才显示。
-                    if (glass.dark.enabled && com.kingzcheung.xime.ui.theme.LiquidGlass.enabled(context)) {
-                        LiquidGlassStrengthChoice(com.kingzcheung.xime.ui.theme.LiquidGlass.strength(context)) { level ->
-                            changeAppearance(context, onThemeChanged) { SettingsPreferences.setGlassLiquidStrength(context, level.id) }
                         }
                     }
-                    if (glass.dark.enabled) {
-                        SettingsItem(icon = Icons.TwoTone.Opacity, title = "透明度与模糊",
-                            subtitle = "浅色、深色分开设置", showArrow = true,
-                            onClick = { showGlassSettings = true })
-                        // 「柔化顶部边缘」11-01 并进本页下面的「键盘顶部样式」（圆角／直角／柔化三选一）。
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                        horizontalArrangement = Arrangement.End,
+                    ) {
+                        MetroOutlinedButton(
+                            text = "预览键盘配色",
+                            onClick = {
+                                previewTheme = uiState.colorThemes.firstOrNull { it.id == schemeId }
+                                    ?: com.kingzcheung.xime.ui.theme.KeyboardThemes.getThemeById(schemeId)
+                            },
+                        )
                     }
                 }
             }
 
             item {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "配色方案",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.settingsSearchAnchor("配色方案", bleed = 6.dp, bleedVertical = 4.dp).fillMaxWidth().padding(bottom = 6.dp)
-                )
-            }
-            
-            item {
-                val shownTheme = schemes.firstOrNull { it.id == schemeId }
-                    ?: com.kingzcheung.xime.ui.theme.KeyboardThemes.getThemeById(schemeId)
-                Text(
-                    // 莫奈取色按每台设备的壁纸取色，不能说各设备相同。
-                    text = if (shownTheme.isDynamic) "${shownTheme.name}跟随系统壁纸取色。点击可预览。"
-                        else "${shownTheme.name}在各设备上颜色相同。点击可预览。",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 6.dp)
-                )
-            }
-            
-            schemes.chunked(3).forEach { rowThemes ->
-                item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        rowThemes.forEach { theme ->
-                            KeyboardThemeCard(
-                                theme = theme,
-                                glass = glass,
-                                isSelected = schemeId == theme.id,
-                                onClick = {
-                                    previewTheme = theme
-                                },
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                        repeat(3 - rowThemes.size) {
-                            Spacer(modifier = Modifier.weight(1f))
-                        }
-                    }
+                MetroDivider()
+                MetroSectionHeader("动效与交互")
+                val effectiveAnim = if (metro.syncedFromLauncher) metro.animationScale else animScale
+                val animDesc = when {
+                    effectiveAnim <= 0.05f -> "关闭 (0x)"
+                    effectiveAnim < 0.8f -> "俐落快速 (0.65x)"
+                    effectiveAnim > 1.2f -> "慢速电影感 (1.4x)"
+                    else -> "经典流畅 Turnstile (1.0x)"
                 }
-                
-                item {
-                    Spacer(modifier = Modifier.height(1.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .metroTilt(4f, 0.98f)
+                        .clickable {
+                            val next = when {
+                                animScale <= 0.05f -> 1.0f
+                                animScale < 0.8f -> 0.0f
+                                animScale <= 1.15f -> 1.4f
+                                else -> 0.65f
+                            }
+                            animScale = next
+                            SettingsPreferences.setMetroAnimationScale(context, next)
+                        }
+                        .padding(vertical = 10.dp)
+                ) {
+                    Text("Turnstile 与 Tilt 动画节奏", style = MaterialTheme.typography.titleLarge, color = metro.onBackground)
+                    Text(animDesc, style = MaterialTheme.typography.bodyMedium, color = metro.accent)
                 }
             }
-            
+
             item {
                 // 动态背景只对图片背景起作用：当前主题有背景图（我的图片、大漠流金等）时才放出来。
                 val imageTheme = (uiState.colorThemes.firstOrNull { it.id == uiState.colorTheme }
@@ -257,7 +320,6 @@ private fun ThemeSettingsPage(
                 CustomImageThemeSection(currentThemeId = uiState.colorTheme, imageTheme = imageTheme, onUseImage = { on ->
                     changeAppearance(context, onThemeChanged) {
                         if (on) {
-                            // 打开图片：现在的配色能垫在图片下面就用它做底，否则沿用上次的底。
                             schemes.firstOrNull { it.id == schemeId }
                                 ?.takeIf(com.kingzcheung.xime.ui.theme.CustomImageTheme::canUnderlay)
                                 ?.let { com.kingzcheung.xime.ui.theme.CustomImageTheme.setBase(context, it.id) }
@@ -273,7 +335,6 @@ private fun ThemeSettingsPage(
                     }
                 }, onDeleted = { baseThemeId ->
                     viewModel.refreshThemes()
-                    // 正在用「我的图片」时换回选图时沿用的主题。
                     if (uiState.colorTheme == com.kingzcheung.xime.ui.theme.CustomImageTheme.ID) {
                         changeAppearance(context, onThemeChanged) { viewModel.setColorTheme(baseThemeId) }
                     } else onThemeChanged()
@@ -283,17 +344,6 @@ private fun ThemeSettingsPage(
                 })
             }
 
-            // 视觉样式只有一组卡片，直接放在本页；按键显示（字号、角标、气泡、底部）也属于外观。
-            item {
-                VisualStylePicker(VisualStyles.current) { style ->
-                    changeAppearance(context, onThemeChanged) { SettingsPreferences.setVisualStyle(context, style) }
-                }
-            }
-            item {
-                KeyShapePicker(com.kingzcheung.xime.ui.theme.KeyShapes.current) { shape ->
-                    changeAppearance(context, onThemeChanged) { SettingsPreferences.setKeyShape(context, shape) }
-                }
-            }
             item { KeyboardAppearanceSettings() }
             item {
                 SettingsSection(title = "桌面图标") {
@@ -316,19 +366,6 @@ private fun ThemeSettingsPage(
                 onDismiss = { previewTheme = null },
             )
         }
-        if (showGlassSettings) {
-            FrostedGlassSettingsSheet(
-                theme = uiState.colorThemes.firstOrNull { it.id == uiState.colorTheme }
-                    ?: com.kingzcheung.xime.ui.theme.KeyboardThemes.getThemeById(uiState.colorTheme),
-                onApply = { draftGlass ->
-                    changeAppearance(context, onThemeChanged) {
-                        FrostedGlassPreferences.saveProfiles(context, draftGlass)
-                        showGlassSettings = false
-                    }
-                },
-                onDismiss = { showGlassSettings = false },
-            )
-        }
     }
 }
 
@@ -346,7 +383,7 @@ private fun CustomImageVeilSlider(dark: Boolean, onChanged: () -> Unit) {
         verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
         Text(if (dark) "深色" else "浅色", style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.width(40.dp))
-        androidx.compose.material3.Slider(
+        MetroSlider(
             value = veil,
             onValueChange = { veil = kotlin.math.round(it * 20f) / 20f },
             onValueChangeFinished = {
@@ -527,12 +564,12 @@ private fun CustomImageThemeSection(currentThemeId: String, imageTheme: Boolean,
         )
     }
     if (confirmDelete) {
-        AlertDialog(
+        MetroAlertDialog(
             onDismissRequest = { confirmDelete = false },
             title = { Text("删除图片") },
             text = { Text("这是最后一张，删掉后就没有背景图片了。") },
             confirmButton = {
-                TextButton(onClick = {
+                MetroSolidButton(text = "删除", onClick = {
                     confirmDelete = false
                     scope.launch {
                         val deleted = withContext(Dispatchers.IO) {
@@ -547,9 +584,9 @@ private fun CustomImageThemeSection(currentThemeId: String, imageTheme: Boolean,
                             com.kingzcheung.xime.ui.i18n.UiToast.makeText(context, "没有删除成功，请重试", android.widget.Toast.LENGTH_LONG).show()
                         }
                     }
-                }) { Text("删除") }
+                })
             },
-            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("取消") } },
+            dismissButton = { MetroOutlinedButton(text = "取消", onClick = { confirmDelete = false }) },
         )
     }
 }

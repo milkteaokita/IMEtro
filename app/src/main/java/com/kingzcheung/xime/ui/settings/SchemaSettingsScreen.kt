@@ -26,7 +26,14 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
+import com.kingzcheung.xime.ui.metro.LocalMetroUiState
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroCheckbox
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
+import com.kingzcheung.xime.ui.metro.MetroSubPageHeader
+import com.kingzcheung.xime.ui.metro.MetroToggleSwitch
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -138,11 +145,10 @@ fun SchemaSettingsContent(
 
     // 导入前说清楚认哪些文件、导入后去哪里；看过可勾「不再显示」，以后点「导入方案」直接选文件。
     if (showImportWarning) {
-        AlertDialog(
+        MetroAlertDialog(
             onDismissRequest = {
                 showImportWarning = false
             },
-            containerColor = MaterialTheme.colorScheme.surface,
             title = {
                 Text("导入方案", fontWeight = FontWeight.SemiBold)
             },
@@ -179,25 +185,24 @@ fun SchemaSettingsContent(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.clickable { dontShowImportWarning = !dontShowImportWarning }
                     ) {
-                        Checkbox(checked = dontShowImportWarning, onCheckedChange = { dontShowImportWarning = it })
-                        Spacer(modifier = Modifier.width(4.dp))
+                        MetroCheckbox(checked = dontShowImportWarning, onCheckedChange = { dontShowImportWarning = it })
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text("不再显示", style = MaterialTheme.typography.bodySmall)
                     }
                 }
             },
             confirmButton = {
-                TextButton(
+                MetroSolidButton(
+                    text = "选择文件",
                     onClick = {
                         if (dontShowImportWarning) SettingsPreferences.setSchemaImportWarningDismissed(context, true)
                         showImportWarning = false
                         pendingImportAction()
                     }
-                ) { Text("选择文件") }
+                )
             },
             dismissButton = {
-                TextButton(onClick = { showImportWarning = false }) {
-                    Text("取消")
-                }
+                MetroOutlinedButton(text = "取消", onClick = { showImportWarning = false })
             }
         )
     }
@@ -235,52 +240,52 @@ fun SchemaSettingsContent(
     }
 
     uiState.importReport?.let { report ->
-        AlertDialog(
+        MetroAlertDialog(
             onDismissRequest = viewModel::clearImportReport,
             title = { Text("方案导入结果") },
             text = { Text(report, Modifier.verticalScroll(rememberScrollState())) },
-            confirmButton = { TextButton(onClick = viewModel::clearImportReport) { Text("知道了") } },
+            confirmButton = { MetroSolidButton(text = "知道了", onClick = viewModel::clearImportReport) },
         )
     }
 
     if (localUiState.conflictPackageId != null) {
-        AlertDialog(
+        MetroAlertDialog(
             onDismissRequest = { localViewModel.cancelConflictInstall() },
             title = { Text("更新共用文件") },
             text = {
                 Text("以下 ${localUiState.conflictingFiles.size} 个同名文件会先备份再更新：\n${localUiState.conflictingFiles.joinToString("、") { it.fileName }}\n卸载新方案时会恢复原文件。")
             },
             confirmButton = {
-                TextButton(onClick = { localViewModel.confirmInstallWithReplace() }) {
-                    Text("备份并更新")
-                }
+                MetroSolidButton(
+                    text = "备份并更新",
+                    onClick = { localViewModel.confirmInstallWithReplace() },
+                )
             },
             dismissButton = {
-                TextButton(onClick = { localViewModel.cancelConflictInstall() }) {
-                    Text("取消")
-                }
+                MetroOutlinedButton(
+                    text = "取消",
+                    onClick = { localViewModel.cancelConflictInstall() },
+                )
             },
         )
     }
 
+    val metro = LocalMetroUiState.current
     Scaffold(
+        containerColor = metro.background,
         topBar = {
-            TopAppBar(
-                title = { Text("已安装的方案") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-                    }
-                },
+            MetroSubPageHeader(
+                parentTitle = "语言与方案",
+                pageTitle = "已安装的方案",
+                onBack = onBack,
                 actions = {
-                    TextButton(onClick = { requireImportWarning { importLauncher.launch(arrayOf("*/*")) } }) {
-                        Text("导入方案", style = MaterialTheme.typography.labelMedium)
-                    }
+                    MetroOutlinedButton(
+                        text = "导入方案",
+                        onClick = { requireImportWarning { importLauncher.launch(arrayOf("*/*")) } },
+                        borderColor = metro.accent,
+                        textColor = metro.accent,
+                    )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                ),
             )
         }
     ) { paddingValues ->
@@ -514,7 +519,7 @@ internal fun SchemaToggleItem(
             .testTag("schema-card:${schema.schemaId}")
             .then(reorderModifier)
             .then(if (isBuiltIn) Modifier else Modifier.clickable { if (enabled && isCompiled) onSelect() }),
-        shape = RoundedCornerShape(topStart = top, topEnd = top, bottomStart = bottom, bottomEnd = bottom),
+        shape = RectangleShape,
         colors = CardDefaults.cardColors(
             containerColor = if (isDragging)
                 MaterialTheme.colorScheme.secondaryContainer
@@ -611,11 +616,11 @@ internal fun SchemaToggleItem(
                 )
             }
 
-            Switch(
+            MetroToggleSwitch(
                 checked = enabled,
                 enabled = !isBuiltIn,
                 onCheckedChange = { if (!isBuiltIn) onToggle() },
-                colors = settingsSwitchColors(),
+                showStatusLabel = false,
                 modifier = Modifier.testTag("schema-toggle:${schema.schemaId}")
             )
         }

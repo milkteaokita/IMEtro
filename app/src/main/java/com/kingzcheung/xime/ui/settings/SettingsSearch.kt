@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.IntSize
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -58,6 +59,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.kingzcheung.xime.ui.metro.metroTilt
 
 /**
  * 设置搜索的一条索引：[title] 是页面上的原名，[path] 是去那里的路径，[target] 是导航路由，
@@ -663,32 +665,40 @@ internal fun searchTextFor(
 internal fun SettingsSearchField(query: String, onQueryChange: (String) -> Unit, modifier: Modifier = Modifier) {
     var field by remember { mutableStateOf(TextFieldValue(query, TextRange(query.length))) }
     val english = com.kingzcheung.xime.ui.i18n.LocalUiTranslations.current
+    val metro = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current
     // 外面改了搜索词（点清除、返回时恢复）才同步回输入框；拼音还在拼时 query 不变，不打断输入法。
     LaunchedEffect(query) {
         if (searchTextFor(field.text, field.composition, english) != query) field = TextFieldValue(query, TextRange(query.length))
     }
     Row(
-        modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp))
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
-            .padding(start = 16.dp, end = 4.dp),
+        modifier.fillMaxWidth()
+            .background(metro.surface, androidx.compose.ui.graphics.RectangleShape)
+            .border(
+                width = 2.dp,
+                color = if (field.text.isNotEmpty()) metro.accent else metro.divider,
+                shape = androidx.compose.ui.graphics.RectangleShape,
+            )
+            .padding(start = 14.dp, end = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(Icons.Default.Search, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
-        Spacer(Modifier.width(12.dp))
-        Box(Modifier.weight(1f).padding(vertical = 14.dp)) {
+        Icon(Icons.Default.Search, null, tint = if (field.text.isNotEmpty()) metro.accent else metro.onBackgroundMuted, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(10.dp))
+        Box(Modifier.weight(1f).padding(vertical = 12.dp)) {
             BasicTextField(value = field, onValueChange = {
                     field = it
                     val next = searchTextFor(it.text, it.composition, english)
                     if (next != query) onQueryChange(next)
                 }, singleLine = true,
-                textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = metro.onBackground),
+                cursorBrush = SolidColor(metro.accent),
                 modifier = Modifier.fillMaxWidth().testTag("settings-search"))
-            if (field.text.isEmpty()) Text("搜索设置，如“拂动”“长按”“字号”", style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
+            if (field.text.isEmpty()) Text("搜索设置，如“拂动”“长按”“字号”", style = MaterialTheme.typography.bodyMedium,
+                color = metro.onBackgroundSubtle)
         }
-        if (field.text.isNotEmpty()) IconButton(onClick = { field = TextFieldValue(""); onQueryChange("") }) { Icon(Icons.Default.Close, "清除搜索") }
-        else Spacer(Modifier.size(48.dp))
+        if (field.text.isNotEmpty()) IconButton(onClick = { field = TextFieldValue(""); onQueryChange("") }) {
+            Icon(Icons.Default.Close, "清除搜索", tint = metro.onBackground)
+        }
+        else Spacer(Modifier.size(44.dp))
     }
 }
 
@@ -696,21 +706,25 @@ internal fun SettingsSearchField(query: String, onQueryChange: (String) -> Unit,
 internal fun SettingsSearchResults(query: String, onOpen: (SettingsSearchEntry) -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val english = com.kingzcheung.xime.ui.i18n.LocalUiTranslations.current
+    val metro = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current
     val results = withJapaneseState(withCaptionPluginState(searchSettings(query, english = english),
         com.kingzcheung.xime.ui.caption.CaptionPlugin.isActive(context)),
         com.kingzcheung.xime.settings.LanguagePreferences.japaneseOn(context))
     if (results.isEmpty()) {
         Text("没有找到「$query」相关的设置", style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(16.dp))
+            color = metro.onBackgroundMuted, modifier = Modifier.padding(16.dp))
         return
     }
     SettingsSection(title = "搜索结果", content = {
         results.take(30).forEachIndexed { index, entry ->
-            if (index > 0) HorizontalDivider(Modifier.padding(horizontal = 16.dp))
-            Column(Modifier.fillMaxWidth().clickable { SettingsSearchFocus.open(entry); onOpen(entry) }.testTag("settings-search-result:${entry.title}")
-                .padding(horizontal = 16.dp, vertical = 12.dp)) {
-                Text(entry.title, style = MaterialTheme.typography.bodyLarge)
-                Text(entry.path, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (index > 0) com.kingzcheung.xime.ui.metro.MetroDivider()
+            Column(Modifier.fillMaxWidth()
+                .metroTilt(4f, 0.98f)
+                .clickable { SettingsSearchFocus.open(entry); onOpen(entry) }
+                .testTag("settings-search-result:${entry.title}")
+                .padding(horizontal = 4.dp, vertical = 12.dp)) {
+                Text(entry.title, style = MaterialTheme.typography.titleLarge, color = metro.onBackground)
+                Text(entry.path, style = MaterialTheme.typography.bodySmall, color = metro.accent)
             }
         }
     })
@@ -809,9 +823,8 @@ internal fun Modifier.settingsSearchAnchor(key: String, bleed: Dp = 0.dp, bleedV
             if (a > 0f) {
                 val bx = bleed.toPx()
                 val by = bleedVertical.toPx()
-                drawRoundRect(color.copy(alpha = 0.2f * a), topLeft = Offset(-bx, -by),
-                    size = Size(this.size.width + 2 * bx, this.size.height + 2 * by),
-                    cornerRadius = CornerRadius(12.dp.toPx()))
+                drawRect(color.copy(alpha = 0.22f * a), topLeft = Offset(-bx, -by),
+                    size = Size(this.size.width + 2 * bx, this.size.height + 2 * by))
             }
         }
         .testTag("settings-search-anchor:$key")

@@ -27,7 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
@@ -471,7 +471,7 @@ private fun CandidatePageContent(
                 ) {
                     val railKeyModifier = if (compactRail) Modifier.weight(1f) else Modifier.size(46.dp)
                     CompositionLocalProvider(
-                        LocalKeyCornerRadius provides if (matchKeyboard) LocalKeyCornerRadius.current else KeyShapes.current.radius(14.dp),
+                        LocalKeyCornerRadius provides if (matchKeyboard) LocalKeyCornerRadius.current else KeyShapes.current.radius(0.dp),
                         LocalKeyVisualPadding provides if (matchKeyboard) LocalKeyVisualPadding.current else PaddingValues(0.dp),
                         LocalKeyboardKeyVisualMetrics provides if (matchKeyboard) LocalKeyboardKeyVisualMetrics.current else KeyVisualMetrics.Unspecified,
                         LocalKeyboardKeyContentScale provides if (matchKeyboard) LocalKeyboardKeyContentScale.current else 1f,
@@ -579,7 +579,7 @@ private fun CandidatePageItem(
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(6.dp))
+            .clip(RectangleShape)
             .background(if (isPressed) textColor.copy(alpha = 0.12f) else Color.Transparent)
             .tolerantClick(
                 showRipple = false,
@@ -773,13 +773,7 @@ private fun CandidateRailSymbolKey(
     /** 同一栏的全部读音，整栏一个字号（见 [FittedRailText]）。 */
     fitTo: List<String> = emptyList(),
 ) {
-    val cornerRadius = LocalKeyCornerRadius.current
-    val shape = RoundedCornerShape(
-        topStart = if (isFirst) cornerRadius else 0.dp,
-        topEnd = if (isFirst) cornerRadius else 0.dp,
-        bottomStart = if (isLast) cornerRadius else 0.dp,
-        bottomEnd = if (isLast) cornerRadius else 0.dp
-    )
+    val shape = RectangleShape
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val pillColor = if (accentColor == Color.Unspecified) textColor else accentColor
@@ -811,7 +805,7 @@ private fun CandidateRailSymbolKey(
             if (isSelected) {
                 Box(
                     modifier = meaning
-                        .clip(RoundedCornerShape(5.dp))
+                        .clip(RectangleShape)
                         .background(pillColor.copy(alpha = 0.2f))
                         .padding(horizontal = 3.dp, vertical = 1.dp)
                 ) {
@@ -836,7 +830,7 @@ private fun RailKey(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     opacityScale: Float = 1f,
-    cornerRadius: Dp = 14.dp,
+    cornerRadius: Dp = 0.dp,
     visualPadding: PaddingValues = PaddingValues(0.dp),
     content: @Composable BoxScope.() -> Unit
 ) {
@@ -854,7 +848,7 @@ private fun RailKey(
                 interactionSource = interactionSource, onClick = onClick,
             )
             .padding(visualPadding)
-            .clip(RoundedCornerShape(KeyShapes.current.radius(cornerRadius)))
+            .clip(RectangleShape)
             .background(frostedKeyColor(
                 keyBg, textColor, LocalKeyboardInputPreferences.current.frostedGlass,
                 legacyStateColor = when {
@@ -882,7 +876,7 @@ private fun CandidatePagingButton(
         BoxWithConstraints(modifier.semantics(mergeDescendants = true) { if (!enabled) disabled() }) {
             val padding = scaledKeyVisualPadding()
             val capHeight = (maxHeight - padding.calculateTopPadding() - padding.calculateBottomPadding()).coerceAtLeast(0.dp)
-            val radius = minOf(14.dp * keyContentScale(maxWidth.value, capHeight.value), minOf(maxWidth, capHeight) * .3f)
+            val radius = 0.dp
             val iconSize = keyIconSizeDp(maxWidth.value, capHeight.value, 20f).dp
             RailKey(onClick, keyBg, foreground, Modifier.fillMaxSize(), enabled,
                 cornerRadius = radius, visualPadding = padding) {
@@ -907,7 +901,7 @@ private fun SizedExpandedLeftRail(state: CandidatePageState, callbacks: Candidat
     items: List<String>, keyBg: Color, modifier: Modifier) {
     Column(modifier) {
         BoxWithConstraints(Modifier.weight(3f).fillMaxWidth().padding(scaledKeyVisualPadding())
-            .clip(RoundedCornerShape(LocalKeyCornerRadius.current))
+            .clip(RectangleShape)
             .background(frostedKeyColor(keyBg, state.textColor, LocalKeyboardInputPreferences.current.frostedGlass))) {
             val metrics = t9CandidateMetrics(maxWidth.value, maxHeight.value, LocalDensity.current.fontScale,
                 rememberCandidateTextSize().toFloat(), keyContentScale(maxWidth.value, maxHeight.value / 4f))

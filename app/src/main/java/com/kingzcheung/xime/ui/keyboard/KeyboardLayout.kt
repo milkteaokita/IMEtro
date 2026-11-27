@@ -29,7 +29,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material.icons.filled.EmojiEmotions
@@ -354,7 +354,8 @@ fun KeyboardLayout(
         else themeScheme.specialKeyLight
     val kbShadow = KeysConfigHelper.getKeyboardShadow()
     val kbKey = KeysConfigHelper.getKeyboardKeyConfig()
-    val shadowEnabled = kbShadow.enabled
+    val metroActive = com.kingzcheung.xime.ui.theme.LocalMetroThemeActive.current
+    val shadowEnabled = kbShadow.enabled && !metroActive
     val shadowElevation = kbShadow.elevation.dp
     val shadowShapeRadius = kbShadow.shapeRadius.dp
     val schemaName = uiState.schemaName
@@ -622,8 +623,13 @@ fun KeyboardLayout(
         LocalShiftSlideTargets provides shiftSlideTargets,
         LocalLongPressMenuKeyboard provides longPressMenuKeyboard,
         LocalLetterGlide provides glideEnabled,
-        LocalKeyCornerRadius provides kbKey.cornerRadius.dp,
-        LocalEnterKeyColors provides KeyboardKeyColors(KeyboardThemes.getEnterKeyColor(uiState.themeId, uiState.isDarkTheme), specialKeyTextColor),
+        LocalKeyCornerRadius provides if (metroActive) 0.dp else kbKey.cornerRadius.dp,
+        LocalEnterKeyColors provides KeyboardKeyColors(
+            KeyboardThemes.getEnterKeyColor(uiState.themeId, uiState.isDarkTheme),
+            if (metroActive) com.kingzcheung.xime.ui.theme.MetroKeyboardThemes.onAccentColor(
+                KeyboardThemes.getEnterKeyColor(uiState.themeId, uiState.isDarkTheme)
+            ) else specialKeyTextColor
+        ),
         LocalFunctionKeyColors provides KeyboardKeyColors(specialKeyBackgroundColor, specialKeyTextColor),
         LocalKeyVisualPadding provides PaddingValues(
             horizontal = kbKey.spacingFor("qwerty").first?.dp ?: 2.dp,
@@ -1660,7 +1666,7 @@ private fun DummyKeyButton(
     Box(
         modifier = modifier
             .fillMaxHeight()
-            .clip(RoundedCornerShape(LocalKeyCornerRadius.current))
+            .clip(RectangleShape)
             .background(frostedKeyColor(backgroundColor, Color.White,
                 LocalKeyboardInputPreferences.current.frostedGlass, opacityScale = 0.5f))
     )
@@ -1892,8 +1898,9 @@ internal fun ShiftCapsKeyButton(
     var bounds by remember { mutableStateOf(Rect.Zero) }
 
     val frostedGlass = LocalKeyboardInputPreferences.current.frostedGlass
-    val shadowModifier = remember(shadowEnabled, shadowElevation, shadowShapeRadius, KeyShapes.current, density, backgroundColor, frostedGlass.enabled) {
-        if (shadowEnabled && !frostedGlass.enabled) {
+    val metroActive = com.kingzcheung.xime.ui.theme.LocalMetroThemeActive.current
+    val shadowModifier = remember(shadowEnabled, shadowElevation, shadowShapeRadius, KeyShapes.current, density, backgroundColor, frostedGlass.enabled, metroActive) {
+        if (shadowEnabled && !frostedGlass.enabled && !metroActive) {
             val offsetPx = with(density) { shadowElevation.toPx() }
             val cornerPx = with(density) { KeyShapes.current.radius(shadowShapeRadius).toPx() }
             val color = crispShadowColor(backgroundColor)
@@ -1907,10 +1914,10 @@ internal fun ShiftCapsKeyButton(
             }
         } else Modifier
     }
-    val keyCornerRadius = LocalKeyCornerRadius.current
+    val keyCornerRadius = if (metroActive) 0.dp else LocalKeyCornerRadius.current
     val honeycombEdge = LocalHoneycombEdge.current
     val keyClipShape = remember(keyCornerRadius, honeycombEdge) {
-        honeycombEdge?.let(::HalfHexagonShape) ?: RoundedCornerShape(keyCornerRadius)
+        honeycombEdge?.let(::HalfHexagonShape) ?: RectangleShape
     }
     // 液态玻璃：和字母键（keyGlow）同一条件，开着时 Shift 键帽也画玻璃亮边，不再只画视觉样式（11-19 用户「Shift 键还是没有液态玻璃」）。
     // 以前 Shift 不经过 keyGlow，只改过底色，玻璃边从来没画上。蜂窝布局照旧不画。
@@ -1925,14 +1932,23 @@ internal fun ShiftCapsKeyButton(
             alpha = color.alpha)
     }
 
-    val colors = shiftKeyColors(backgroundColor, iconColor, accentColor, panelColor,
-        frostedGlass, shiftMode, isPressed,
-        legacyStateColor = if (isPressed) darkenColor(backgroundColor, 0.1f)
-        else if (shiftMode == ShiftMode.CAPS) darkenColor(backgroundColor, 0.2f)
-        else if (shiftMode == ShiftMode.SINGLE) darkenColor(backgroundColor, 0.1f)
-        else backgroundColor,
-        opacityScale = glassFunctionKeyScale(backgroundColor),
-        functionDepth = glassFunctionKeyDepth(backgroundColor))
+    val metroPressedShift = if (shiftMode == ShiftMode.OFF) {
+        com.kingzcheung.xime.ui.theme.MetroKeyboardThemes.resolvePressedKeyColors(
+            backgroundColor, iconColor, isPressed, frostedGlass.enabled
+        )
+    } else null
+    val colors = if (metroPressedShift != null) {
+        KeyboardKeyColors(metroPressedShift.first, metroPressedShift.second)
+    } else {
+        shiftKeyColors(backgroundColor, iconColor, accentColor, panelColor,
+            frostedGlass, shiftMode, isPressed,
+            legacyStateColor = if (isPressed) darkenColor(backgroundColor, 0.1f)
+            else if (shiftMode == ShiftMode.CAPS) darkenColor(backgroundColor, 0.2f)
+            else if (shiftMode == ShiftMode.SINGLE) darkenColor(backgroundColor, 0.1f)
+            else backgroundColor,
+            opacityScale = glassFunctionKeyScale(backgroundColor),
+            functionDepth = glassFunctionKeyDepth(backgroundColor))
+    }
 
     Box(
         modifier = modifier

@@ -12,12 +12,8 @@ class KeyboardPanelShapeTest {
         for (size in listOf(Size(320f, 228f), Size(1000f, 500f))) {
             for (direction in LayoutDirection.entries) {
                 for (floating in listOf(false, true)) {
-                    val outline = keyboardPanelShape(floating).createOutline(size, direction, Density(1f)) as Outline.Rounded
-                    val rect = outline.roundRect
-                    assertEquals(16f, rect.topLeftCornerRadius.x, 0f)
-                    assertEquals(16f, rect.topRightCornerRadius.x, 0f)
-                    assertEquals(if (floating) 16f else 0f, rect.bottomLeftCornerRadius.x, 0f)
-                    assertEquals(if (floating) 16f else 0f, rect.bottomRightCornerRadius.x, 0f)
+                    val outline = keyboardPanelShape(floating).createOutline(size, direction, Density(1f)) as Outline.Rectangle
+                    val rect = outline.rect
                     assertEquals(size.width, rect.width, 0f)
                     assertEquals(size.height, rect.height, 0f)
                 }
@@ -28,9 +24,7 @@ class KeyboardPanelShapeTest {
         val size = Size(360f, 228f)
         for (floating in listOf(false, true)) {
             val rect = (keyboardPanelShape(floating, true)
-                .createOutline(size, LayoutDirection.Ltr, Density(1f)) as Outline.Rounded).roundRect
-            assertEquals(16f, rect.bottomLeftCornerRadius.x, 0f)
-            assertEquals(16f, rect.bottomRightCornerRadius.x, 0f)
+                .createOutline(size, LayoutDirection.Ltr, Density(1f)) as Outline.Rectangle).rect
             assertEquals(size.width, rect.width, 0f)
             assertEquals(size.height, rect.height, 0f)
         }

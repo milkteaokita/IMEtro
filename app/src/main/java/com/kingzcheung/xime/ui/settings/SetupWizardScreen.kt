@@ -8,9 +8,14 @@ import com.kingzcheung.xime.platform.AndroidPlatform
 import com.kingzcheung.xime.platform.DeviceVendor
 import android.util.Log
 import android.view.inputmethod.InputMethodManager
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import com.kingzcheung.xime.ui.i18n.Text
+import com.kingzcheung.xime.ui.metro.LocalMetroUiState
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
+import com.kingzcheung.xime.ui.metro.metroTilt
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -297,16 +302,28 @@ internal fun SetupWizardContent(
     showSkipDetection: Boolean = false,
     onSkipDetection: () -> Unit = {},
 ) {
-    Scaffold(topBar = { TopAppBar(title = { Text("设置向导") }) }) { padding ->
+    val metro = LocalMetroUiState.current
+    Scaffold(
+        containerColor = metro.background,
+        topBar = {
+            Column(
+                Modifier.fillMaxWidth().background(metro.background).statusBarsPadding()
+                    .padding(horizontal = 20.dp, vertical = 12.dp)
+            ) {
+                Text("IMETRO", style = MaterialTheme.typography.labelMedium, color = metro.accent)
+                Text("设置向导", style = MaterialTheme.typography.displayMedium, color = metro.onBackground)
+            }
+        }
+    ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).settingsVerticalScroll()
             .padding(horizontal = 20.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("按顺序完成下面三项，即可开始输入。", style = MaterialTheme.typography.bodyLarge)
-            SetupCard(1, "启用 CyIME", status.imeEnabled,
+            verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Text("按顺序完成下面三项，即可开始输入。", style = MaterialTheme.typography.bodyLarge, color = metro.onBackgroundMuted)
+            SetupCard(1, "启用 IMEtro", status.imeEnabled,
                 if (status.imeEnabled) "已启用" else "待启用") {
                 if (!status.imeEnabled) {
-                    Text("在系统输入法列表中打开 CyIME，返回后会自动检查。")
-                    Button(onClick = onEnable) { Text("去系统设置启用") }
+                    Text("在系统输入法列表中打开 IMEtro，返回后会自动检查。", color = metro.onBackgroundMuted)
+                    MetroSolidButton("去系统设置启用", onClick = onEnable)
                 }
             }
             SetupCard(2, "准备输入方案", status.ready,
@@ -314,63 +331,63 @@ internal fun SetupWizardContent(
                 when {
                     status.preparing -> {
                         val step = progress.step?.takeIf { it != PreparationProgress.Step.DONE }
-                        if (step == null) LinearProgressIndicator(Modifier.fillMaxWidth())
-                        else LinearProgressIndicator(progress = { PreparationProgress.fraction(progress) }, modifier = Modifier.fillMaxWidth())
-                        Text("正在准备词库，首次使用可能需要几分钟…")
-                        // 现在在做哪一步、哪个文件、这一步用了多久：卡住时一眼看出停在哪（11-20 用户反馈）。
+                        if (step == null) LinearProgressIndicator(Modifier.fillMaxWidth(), color = metro.accent, trackColor = metro.divider)
+                        else LinearProgressIndicator(progress = { PreparationProgress.fraction(progress) }, modifier = Modifier.fillMaxWidth(), color = metro.accent, trackColor = metro.divider)
+                        Text("正在准备词库，首次使用可能需要几分钟…", color = metro.onBackground)
                         if (step != null) {
                             Text("第 ${step.ordinal + 1}/${PreparationProgress.Step.entries.size - 1} 步：${step.label}（${stepElapsedMs / 1000} 秒）",
-                                style = MaterialTheme.typography.bodyMedium)
+                                style = MaterialTheme.typography.bodyMedium, color = metro.onBackground)
                             if (step == PreparationProgress.Step.COMPILE && progress.total > 0)
                                 Text("已编译词典 ${progress.done}/${progress.total}", style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    color = metro.onBackgroundMuted)
                             if (progress.detail.isNotEmpty()) Text(progress.detail, style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                color = metro.onBackgroundMuted)
                         }
                         status.detail?.let {
                             Text(it, style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                color = metro.onBackgroundMuted)
                         }
                         stall?.let { PreparationStallNotice(it, onExportLog, onRestart) }
                     }
                     status.error != null -> {
-                        Text(status.error, color = MaterialTheme.colorScheme.error)
-                        OutlinedButton(onClick = onRetry) { Text("重试准备") }
+                        Text(status.error, color = metro.error)
+                        MetroOutlinedButton("重试准备", onClick = onRetry)
                     }
-                    else -> Text(status.schemas.joinToString(" · "))
+                    else -> Text(status.schemas.joinToString(" · "), color = metro.onBackgroundMuted)
                 }
-                // 老人包不出下一页（按设备推荐配置）。
                 if (!com.kingzcheung.xime.BuildConfig.ELDER) Text("用全拼、双拼还是五笔，26 键、14 键还是九键，完成后下一页会问你。",
-                    style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                TextButton(onClick = onSchemas, enabled = !status.preparing) { Text("选择其他方案(可选)") }
+                    style = MaterialTheme.typography.bodyMedium, color = metro.onBackgroundMuted)
+                MetroOutlinedButton("选择其他方案(可选)", onClick = onSchemas, enabled = !status.preparing)
             }
             SetupCard(3, "切换到 CyIME", status.imeEnabled && status.imeSelected,
                 if (status.imeEnabled && status.imeSelected) "已切换" else "待切换") {
                 if (!status.imeEnabled || !status.imeSelected) {
                     val canSwitch = status.imeEnabled && status.ready
                     if (pickerFallbackHint == null) {
-                        Text("启用并准备完成后，在输入法选择器中选中 CyIME。")
-                        Button(onClick = onSwitch, enabled = canSwitch) { Text("选择 CyIME") }
+                        Text("启用并准备完成后，在输入法选择器中选中 CyIME。", color = metro.onBackgroundMuted)
+                        MetroSolidButton("选择 CyIME", onClick = onSwitch, enabled = canSwitch)
                     } else {
-                        Text(pickerFallbackHint)
-                        Button(onClick = onOpenImeSettings, enabled = canSwitch) { Text("去系统设置选择 CyIME") }
-                        TextButton(onClick = onSwitch, enabled = canSwitch) { Text("仍用输入法选择框") }
+                        Text(pickerFallbackHint, color = metro.onBackgroundMuted)
+                        MetroSolidButton("去系统设置选择 CyIME", onClick = onOpenImeSettings, enabled = canSwitch)
+                        MetroOutlinedButton("仍用输入法选择框", onClick = onSwitch, enabled = canSwitch)
                     }
                 }
             }
             if (status.complete) {
-                Surface(color = MaterialTheme.colorScheme.primaryContainer, shape = MaterialTheme.shapes.medium) {
-                    Text("✓ 设置成功，可以开始输入了", Modifier.fillMaxWidth().padding(16.dp),
-                        color = MaterialTheme.colorScheme.onPrimaryContainer, fontWeight = FontWeight.SemiBold)
+                Box(Modifier.fillMaxWidth().background(metro.accent).padding(14.dp)) {
+                    Text("✓ 设置成功，可以开始输入了", color = metro.onAccent, fontWeight = FontWeight.SemiBold)
                 }
             }
-            Button(onClick = onFinish, enabled = status.complete, modifier = Modifier.fillMaxWidth()) {
-                Text(if (status.complete) "开始使用" else "完成三项后即可开始使用")
-            }
+            MetroSolidButton(
+                text = if (status.complete) "开始使用" else "完成三项后即可开始使用",
+                onClick = onFinish,
+                enabled = status.complete,
+                modifier = Modifier.fillMaxWidth(),
+            )
             if (showSkipDetection) {
                 Text("已经在系统设置里启用、也能用 CyIME 打字，这里还是没变？有的手机读不到启用状态。",
-                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                TextButton(onClick = onSkipDetection, modifier = Modifier.fillMaxWidth()) { Text("已经能用了，直接开始使用") }
+                    style = MaterialTheme.typography.bodySmall, color = metro.onBackgroundMuted)
+                MetroOutlinedButton("已经能用了，直接开始使用", onClick = onSkipDetection, modifier = Modifier.fillMaxWidth())
             }
         }
     }
@@ -378,29 +395,32 @@ internal fun SetupWizardContent(
 
 @Composable
 private fun PreparationStallNotice(stall: PreparationStall, onExportLog: () -> Unit, onRestart: () -> Unit) {
-    Surface(color = MaterialTheme.colorScheme.errorContainer, shape = MaterialTheme.shapes.medium) {
-        Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    val metro = LocalMetroUiState.current
+    Row(Modifier.fillMaxWidth().background(metro.chrome).padding(12.dp)) {
+        Box(Modifier.width(4.dp).height(48.dp).background(metro.error))
+        Spacer(Modifier.width(10.dp))
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             val minutes = stall.seconds / 60
             Text(if (minutes > 0) "超时了：已经 $minutes 分钟没有新进展" else "超时了：已经 ${stall.seconds} 秒没有新进展",
-                color = MaterialTheme.colorScheme.onErrorContainer, fontWeight = FontWeight.SemiBold)
-            Text("停在：${stall.where}", color = MaterialTheme.colorScheme.onErrorContainer)
+                color = metro.error, fontWeight = FontWeight.SemiBold)
+            Text("停在：${stall.where}", color = metro.onBackground)
             if (stall.logTail.isNotEmpty()) {
-                Text("最近的日志：", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onErrorContainer)
+                Text("最近的日志：", style = MaterialTheme.typography.labelMedium, color = metro.onBackgroundMuted)
                 Text(stall.logTail.joinToString("\n"), style = MaterialTheme.typography.bodySmall,
                     fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                    color = MaterialTheme.colorScheme.onErrorContainer)
+                    color = metro.onBackgroundMuted)
             }
-            Text("可以这样做：", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onErrorContainer)
+            Text("可以这样做：", style = MaterialTheme.typography.labelMedium, color = metro.onBackgroundMuted)
             stall.advice.forEach { line ->
                 Row {
                     Text("•", Modifier.padding(end = 6.dp), style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onErrorContainer)
-                    Text(line, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onErrorContainer)
+                        color = metro.onBackgroundMuted)
+                    Text(line, style = MaterialTheme.typography.bodySmall, color = metro.onBackgroundMuted)
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = onRestart) { Text("重新开始准备") }
-                OutlinedButton(onClick = onExportLog) { Text("导出日志") }
+                MetroSolidButton("重新开始准备", onClick = onRestart)
+                MetroOutlinedButton("导出日志", onClick = onExportLog)
             }
         }
     }
@@ -408,14 +428,17 @@ private fun PreparationStallNotice(stall: PreparationStall, onExportLog: () -> U
 
 @Composable
 private fun SetupCard(number: Int, title: String, complete: Boolean, state: String, content: @Composable ColumnScope.() -> Unit) {
-    Card(colors = CardDefaults.cardColors(containerColor = if (complete)
-        MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainer)) {
-        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    val metro = LocalMetroUiState.current
+    Row(Modifier.fillMaxWidth().background(metro.surface).padding(14.dp)) {
+        Box(Modifier.width(5.dp).height(36.dp).background(if (complete) metro.accent else metro.divider))
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(if (complete) "✓" else number.toString(), fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(end = 12.dp))
-                Text(title, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
-                Text(state, style = MaterialTheme.typography.labelLarge)
+                Text(if (complete) "✓" else "$number.", fontWeight = FontWeight.Bold,
+                    color = if (complete) metro.accent else metro.onBackground,
+                    modifier = Modifier.padding(end = 8.dp))
+                Text(title, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, color = metro.onBackground)
+                Text(state, style = MaterialTheme.typography.labelMedium, color = if (complete) metro.accent else metro.onBackgroundMuted)
             }
             content()
         }

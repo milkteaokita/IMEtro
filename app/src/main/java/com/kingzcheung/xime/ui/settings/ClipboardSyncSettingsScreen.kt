@@ -43,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.kingzcheung.xime.ui.metro.MetroRadioIndicator
 import com.kingzcheung.xime.plugin.ExtensionManager
 import com.kingzcheung.xime.plugin.core.model.PluginCategory
 import com.kingzcheung.xime.settings.SettingsPreferences
@@ -104,22 +105,12 @@ fun ClipboardSyncSettingsContent(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = com.kingzcheung.xime.ui.metro.LocalMetroUiState.current.background,
         topBar = {
-            TopAppBar(
-                title = { Text("剪贴板同步") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "返回"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                ),
+            com.kingzcheung.xime.ui.metro.MetroSubPageHeader(
+                parentTitle = "剪贴板",
+                pageTitle = "剪贴板同步",
+                onBack = onBack,
             )
         }
     ) { padding ->
@@ -224,7 +215,7 @@ private fun ClipboardPullIntervalSetting() {
                         SettingsPreferences.setClipboardSyncPullIntervalS(context, option)
                     }
                     .padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(selected = seconds == option, onClick = null)
+                    MetroRadioIndicator(selected = seconds == option)
                     Spacer(Modifier.width(12.dp))
                     Text("$option 秒", style = MaterialTheme.typography.titleSmall)
                 }
@@ -298,7 +289,7 @@ internal fun ClipboardExportSetting() {
                 Row(Modifier.fillMaxWidth().testTag("clipboard-export-format:${option.extension}")
                     .selectable(format == option, role = androidx.compose.ui.semantics.Role.RadioButton) { format = option }
                     .padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(selected = format == option, onClick = null)
+                    MetroRadioIndicator(selected = format == option)
                     Spacer(Modifier.width(12.dp))
                     Text("${option.label}(.${option.extension})", style = MaterialTheme.typography.titleSmall)
                 }

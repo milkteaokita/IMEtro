@@ -190,7 +190,7 @@ internal fun SwipeBubbleOverlay(data: BubbleDrawData?, live: Boolean = true,
     animate: (BubbleDrawData) -> BubbleDrawData = { it }) {
     if (data == null) return
     val density = LocalDensity.current
-    val shadow = ceil(data.shadowRadiusPx)
+    val shadow = maxOf(ceil(data.shadowRadiusPx), if (data.sharpSquare) 3f else 0f)
     val width = ceil(maxOf(data.pathBodyLeft + data.pathBodyWidth,
         data.pointerLeftInBox + data.keyWidthPx) + shadow * 2).toInt()
     val height = ceil(data.bodyHeightPx + data.pointerHeightPx + shadow * 2).toInt()

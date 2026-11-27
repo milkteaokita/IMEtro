@@ -9,7 +9,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DragHandle
@@ -140,7 +143,7 @@ internal fun PluginEntryListEditor(
                 onDelete = { save(entries.filter { it.uid != entry.uid }); editing = null },
                 onCancel = { editing = null },
             ) else Surface(
-                shape = RoundedCornerShape(12.dp),
+                shape = RectangleShape,
                 color = MaterialTheme.colorScheme.surfaceContainerHighest,
                 modifier = Modifier.fillMaxWidth()
                     .testTag("entry:$index")
@@ -148,8 +151,8 @@ internal fun PluginEntryListEditor(
                     .zIndex(if (active) 1f else 0f)
                     .graphicsLayer {
                         translationY = if (active) dragOffset else 0f
-                        shadowElevation = if (active) 8.dp.toPx() else 0f
-                        shape = RoundedCornerShape(12.dp)
+                        shadowElevation = 0f
+                        shape = RectangleShape
                         clip = true
                     }
                     .reorderOnLongPress(
@@ -206,19 +209,22 @@ internal fun PluginEntryListEditor(
         }
     }
 
-    if (confirmReset && defaultValue != null) AlertDialog(
+    if (confirmReset && defaultValue != null) MetroAlertDialog(
         onDismissRequest = { confirmReset = false },
         title = { Text("恢复默认") },
         text = { Text("现在的条目会换成默认的几条，自己加的和改过的都会去掉。") },
         confirmButton = {
-            TextButton(onClick = {
-                val defaults = PluginEntries.parse(defaultValue, nextUid)
-                nextUid += defaults.size
-                save(defaults)
-                confirmReset = false
-            }) { Text("恢复默认") }
+            MetroSolidButton(
+                text = "恢复默认",
+                onClick = {
+                    val defaults = PluginEntries.parse(defaultValue, nextUid)
+                    nextUid += defaults.size
+                    save(defaults)
+                    confirmReset = false
+                },
+            )
         },
-        dismissButton = { TextButton(onClick = { confirmReset = false }) { Text("取消") } },
+        dismissButton = { MetroOutlinedButton(text = "取消", onClick = { confirmReset = false }) },
     )
 }
 
@@ -234,7 +240,7 @@ private fun EntryEditorCard(
     var name by remember(initial.uid) { mutableStateOf(initial.name) }
     var text by remember(initial.uid) { mutableStateOf(initial.text) }
     Surface(
-        shape = RoundedCornerShape(12.dp),
+        shape = RectangleShape,
         color = MaterialTheme.colorScheme.surfaceContainerHighest,
         modifier = Modifier.fillMaxWidth().testTag("entry-editor"),
     ) {

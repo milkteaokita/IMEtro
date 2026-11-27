@@ -52,6 +52,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kingzcheung.xime.settings.*
 import com.kingzcheung.xime.ui.keyboard.customLayoutKeyColors
+import com.kingzcheung.xime.ui.metro.LocalMetroUiState
+import com.kingzcheung.xime.ui.metro.MetroAlertDialog
+import com.kingzcheung.xime.ui.metro.MetroOutlinedButton
+import com.kingzcheung.xime.ui.metro.MetroSlider
+import com.kingzcheung.xime.ui.metro.MetroSolidButton
+import com.kingzcheung.xime.ui.metro.MetroSubPageHeader
+import com.kingzcheung.xime.ui.metro.MetroToggleSwitch
 import com.kingzcheung.xime.ui.theme.XimeTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -145,26 +152,21 @@ internal fun CustomLayoutManager(themeId: String, dark: Boolean, createNew: Bool
         prefs.registerOnSharedPreferenceChangeListener(listener)
         onDispose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
     }
+    val metro = LocalMetroUiState.current
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = metro.background,
         topBar = {
-            TopAppBar(
-                title = { Text(if (id == null) "布局管理" else "编辑布局") },
-                navigationIcon = {
-                    IconButton(onClick = { back() }, enabled = !busy) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface)
+            MetroSubPageHeader(
+                parentTitle = if (id == null) "键盘布局" else "布局管理",
+                pageTitle = if (id == null) "布局管理" else "编辑布局",
+                onBack = { if (!busy) back() },
             )
         },
         floatingActionButton = {
-            if (id == null) FloatingActionButton(onClick = { if (!busy) edit(CustomKeyboardLayout.fresh()) },
-                containerColor = MaterialTheme.colorScheme.primary) {
-                Icon(Icons.Default.Add, contentDescription = "新建布局", tint = MaterialTheme.colorScheme.onPrimary)
-            }
+            if (id == null) MetroSolidButton(
+                text = "+ 新建布局",
+                onClick = { if (!busy) edit(CustomKeyboardLayout.fresh()) },
+            )
         }
     ) { paddingValues ->
     val page = Modifier.fillMaxSize().padding(paddingValues).imePadding()
@@ -209,15 +211,14 @@ internal fun CustomLayoutManager(themeId: String, dark: Boolean, createNew: Bool
             })
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text("独立分号键", modifier = Modifier.weight(1f))
-                Switch(checked = layout.hasSemicolon(), onCheckedChange = { update(layout.setSemicolonEnabled(it)); selected = null }, enabled = !busy,
-                    colors = settingsSwitchColors())
+                MetroToggleSwitch(checked = layout.hasSemicolon(), onCheckedChange = { update(layout.setSemicolonEnabled(it)); selected = null }, enabled = !busy, showStatusLabel = false)
             }
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = { selected?.let { update(layout.merge(it)) }; selected = null },
-                    enabled = !busy && selected != null && layout.merge(selected!!) != layout) { Text("合并右侧") }
-                OutlinedButton(onClick = { selected?.let { update(layout.split(it)) }; selected = null },
-                    enabled = !busy && selected?.length == 2) { Text("拆分") }
-                TextButton(onClick = { update(layout.copy(rows = listOf("qwertyuiop", "asdfghjkl_", "zxcvbnm").map { it.map(Char::toString) }, widths = emptyMap())); selected = null }, enabled = !busy) { Text("恢复原位") }
+                MetroOutlinedButton(text = "合并右侧", onClick = { selected?.let { update(layout.merge(it)) }; selected = null },
+                    enabled = !busy && selected != null && layout.merge(selected!!) != layout)
+                MetroOutlinedButton(text = "拆分", onClick = { selected?.let { update(layout.split(it)) }; selected = null },
+                    enabled = !busy && selected?.length == 2)
+                MetroOutlinedButton(text = "恢复原位", onClick = { update(layout.copy(rows = listOf("qwertyuiop", "asdfghjkl_", "zxcvbnm").map { it.map(Char::toString) }, widths = emptyMap())); selected = null }, enabled = !busy)
             }
             val adjusting = selected?.takeIf { key -> key != CustomKeyboardLayout.EMPTY_SLOT && layout.rows.any { key in it } }
             if (adjusting != null) {
@@ -227,15 +228,15 @@ internal fun CustomLayoutManager(themeId: String, dark: Boolean, createNew: Bool
                 }
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text("窄", style = MaterialTheme.typography.labelSmall)
-                    Slider(
+                    MetroSlider(
                         value = layout.widthOf(adjusting).coerceIn(CustomKeyboardLayout.MIN_WIDTH, CustomKeyboardLayout.MAX_WIDTH),
                         onValueChange = { update(layout.withWidth(adjusting, it)) },
                         valueRange = CustomKeyboardLayout.MIN_WIDTH..CustomKeyboardLayout.MAX_WIDTH,
                         steps = 24, enabled = !busy,
                         modifier = Modifier.weight(1f).padding(horizontal = 8.dp))
                     Text("宽", style = MaterialTheme.typography.labelSmall)
-                    TextButton(onClick = { update(layout.withWidth(adjusting, adjusting.length.toFloat())) },
-                        enabled = !busy && layout.widthOf(adjusting) != adjusting.length.toFloat()) { Text("默认") }
+                    MetroOutlinedButton(text = "默认", onClick = { update(layout.withWidth(adjusting, adjusting.length.toFloat())) },
+                        enabled = !busy && layout.widthOf(adjusting) != adjusting.length.toFloat())
                 }
             }
             }
@@ -244,41 +245,46 @@ internal fun CustomLayoutManager(themeId: String, dark: Boolean, createNew: Bool
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text("强调元音 A E I O U", modifier = Modifier.weight(1f))
-                Switch(checked = red, onCheckedChange = { red = it }, enabled = !busy, colors = settingsSwitchColors())
+                MetroToggleSwitch(checked = red, onCheckedChange = { red = it }, enabled = !busy, showStatusLabel = false)
             }
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text("强调改位字母", modifier = Modifier.weight(1f))
-                Switch(checked = redMoved, onCheckedChange = { redMoved = it }, enabled = !busy, colors = settingsSwitchColors())
+                MetroToggleSwitch(checked = redMoved, onCheckedChange = { redMoved = it }, enabled = !busy, showStatusLabel = false)
             }
             Text("开启后，对应字母的文字和按键底色随主题强调；两个选项均关闭时使用普通按键颜色。备用空位不显示在键盘中。只有开启“独立分号键”才增加分号按键。", style = MaterialTheme.typography.bodySmall)
             }
             }
-            Button(modifier = Modifier.fillMaxWidth(), enabled = !busy && layout.valid(), onClick = {
-                busy = true; message = "正在保存布局…"
-                scope.launch {
-                    runCatching { withContext(Dispatchers.IO) { CustomKeyboardLayouts.save(context, layout); CustomKeyboardLayouts.load(context) } }
-                        .onSuccess { layouts = it; id = null; message = SettingsPreferences.getPrefsPublic(context).getString(CustomKeyboardLayouts.STATUS, "已保存").orEmpty() }
-                        .onFailure { message = "保存失败：${it.message}" }
-                    busy = false
-                }
-            }) { Text(if (busy) "保存中…" else "保存布局") }
+            MetroSolidButton(
+                text = if (busy) "保存中…" else "保存布局",
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !busy && layout.valid(),
+                onClick = {
+                    busy = true; message = "正在保存布局…"
+                    scope.launch {
+                        runCatching { withContext(Dispatchers.IO) { CustomKeyboardLayouts.save(context, layout); CustomKeyboardLayouts.load(context) } }
+                            .onSuccess { layouts = it; id = null; message = SettingsPreferences.getPrefsPublic(context).getString(CustomKeyboardLayouts.STATUS, "已保存").orEmpty() }
+                            .onFailure { message = "保存失败：${it.message}" }
+                        busy = false
+                    }
+                },
+            )
             if (message.isNotBlank()) SettingsNote(message)
         }
     }
     }
-    if (discard) AlertDialog(onDismissRequest = { discard = false }, title = { Text("放弃未保存的修改？") },
-        confirmButton = { TextButton(onClick = { discard = false; id = null }) { Text("放弃") } },
-        dismissButton = { TextButton(onClick = { discard = false }) { Text("继续编辑") } })
-    deleteId?.let { target -> AlertDialog(onDismissRequest = { deleteId = null }, title = { Text("删除自定义布局？") },
+    if (discard) MetroAlertDialog(onDismissRequest = { discard = false }, title = { Text("放弃未保存的修改？") },
+        confirmButton = { MetroSolidButton("放弃", onClick = { discard = false; id = null }) },
+        dismissButton = { MetroOutlinedButton("继续编辑", onClick = { discard = false }) })
+    deleteId?.let { target -> MetroAlertDialog(onDismissRequest = { deleteId = null }, title = { Text("删除自定义布局？") },
         text = { Text("只删除这个布局，不删除词库和学习记录。当前正在使用它时会切回中文26键。") },
-        confirmButton = { TextButton(onClick = {
+        confirmButton = { MetroSolidButton("删除", onClick = {
             deleteId = null; busy = true
             scope.launch {
                 runCatching { withContext(Dispatchers.IO) { CustomKeyboardLayouts.delete(context, target); CustomKeyboardLayouts.load(context) } }
                     .onSuccess { layouts = it; message = "布局已删除" }.onFailure { message = "删除失败：${it.message}" }
                 busy = false
             }
-        }) { Text("删除") } }, dismissButton = { TextButton(onClick = { deleteId = null }) { Text("取消") } }) }
+        }) }, dismissButton = { MetroOutlinedButton("取消", onClick = { deleteId = null }) }) }
 }
 
 /** 布局管理里的一个布局：点整行编辑，复制和删除在「更多」里，和词库页的一行一样。 */
@@ -343,14 +349,13 @@ private fun CustomLayoutGrid(layout: CustomKeyboardLayout, selected: String?, en
                         val scale by animateFloatAsState(if (isDragging) 1.06f else 1f, tween(120), label = "layout-key-lift")
                         val emptyOutline = if (target == letter || selected == letter) accent else MaterialTheme.colorScheme.outlineVariant
                         val colors = customLayoutKeyColors(layout, letter, keyBackground, keyForeground, accent)
-                        Surface(color = if (letter == CustomKeyboardLayout.EMPTY_SLOT) androidx.compose.ui.graphics.Color.Transparent else colors.first, contentColor = colors.second, shape = RoundedCornerShape(9.dp),
-                            shadowElevation = if (isDragging) 6.dp else 0.dp,
+                        Surface(color = if (letter == CustomKeyboardLayout.EMPTY_SLOT) androidx.compose.ui.graphics.Color.Transparent else colors.first, contentColor = colors.second, shape = androidx.compose.ui.graphics.RectangleShape,
+                            shadowElevation = 0.dp,
                             border = if (letter == CustomKeyboardLayout.EMPTY_SLOT) null else BorderStroke(if (target == letter || selected == letter) 2.dp else 1.dp,
                                 if (target == letter || selected == letter) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant),
                             modifier = Modifier.offset { IntOffset(position.x.roundToInt(), position.y.roundToInt()) }
                                 .drawBehind {
-                                    if (letter == CustomKeyboardLayout.EMPTY_SLOT) drawRoundRect(emptyOutline,
-                                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(9.dp.toPx()),
+                                    if (letter == CustomKeyboardLayout.EMPTY_SLOT) drawRect(emptyOutline,
                                         style = androidx.compose.ui.graphics.drawscope.Stroke(1.dp.toPx(),
                                             pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx(), 4.dp.toPx()))))
                                 }

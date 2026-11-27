@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
@@ -47,7 +47,7 @@ fun CandidateBarOverlayPanel(
     val card: @Composable (Modifier) -> Unit = { boxModifier ->
         Box(
             modifier = boxModifier
-                .clip(RoundedCornerShape(12.dp))
+                .clip(RectangleShape)
                 .background(cardBgColor.copy(alpha = 0.5f))
                 .padding(horizontal = 14.dp, vertical = if (inline) 0.dp else 10.dp),
             contentAlignment = if (inline) Alignment.CenterStart else Alignment.TopStart,
@@ -81,7 +81,7 @@ fun CandidateBarOverlayPanel(
                 Box(
                     modifier = Modifier
                         .size(28.dp)
-                        .clip(RoundedCornerShape(14.dp))
+                        .clip(RectangleShape)
                         .background(closeButtonBg),
                     contentAlignment = Alignment.Center
                 ) {

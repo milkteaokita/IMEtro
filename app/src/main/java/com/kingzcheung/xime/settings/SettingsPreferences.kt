@@ -159,11 +159,11 @@ object SettingsPreferences {
     private const val KEY_STT_MUSIC_MUTED_BY_VOICE = "stt_music_muted_by_voice"
     private const val KEY_STT_MUSIC_VOLUME_BEFORE_VOICE = "stt_music_volume_before_voice"
     
-    /** 默认主题 ID，可从 xime.yaml 的 style.color_scheme 初始化。 */
+    /** 默认主题 ID，預設跟隨 Metro Home 強調色。 */
     @JvmStatic
-    var defaultKeyboardTheme: String = com.kingzcheung.xime.ui.theme.PureBlackTheme.ID
+    var defaultKeyboardTheme: String = com.kingzcheung.xime.ui.theme.MetroKeyboardThemes.SYNC_ID
 
-    /** 默认显示模式，可从 xime.yaml 的 style.dark_mode 初始化。 */
+    /** 默认显示模式：1 = OLED 純黑深色。 */
     @JvmStatic
     var defaultDarkMode: Int = 1
     
@@ -999,16 +999,21 @@ object SettingsPreferences {
         getPrefs(context).edit().putInt(KEY_VIBRATION_LONG_PRESS_AMPLITUDE, amplitude).apply()
     }
 
-    /** 新安装使用配置中的默认配色；保留已有主题选择及原迁移标记。 */
+    /** 新安装使用 Metro 風格預設（直角鍵帽、純黑無陰影無毛玻璃、連動 Metro 強調色）；保留已有選擇。 */
     fun applyForkThemeDefaults(context: Context) {
         val prefs = getPrefs(context)
-        if (prefs.getBoolean("cyime_soft_blue_v1", false)) return
+        if (prefs.getBoolean("cyime_metro_v1", false)) return
         val theme = prefs.getString(KEY_KEYBOARD_THEME, null)
         prefs.edit().apply {
             if (theme.isNullOrBlank()) putString(KEY_KEYBOARD_THEME, defaultKeyboardTheme)
             if (!prefs.contains(KEY_DARK_MODE)) putInt(KEY_DARK_MODE, defaultDarkMode)
-            putBoolean("cyime_soft_blue_v1", true)
+            if (!prefs.contains(KEY_KEY_SHAPE)) putString(KEY_KEY_SHAPE, com.kingzcheung.xime.ui.theme.KeyShape.SHARP.id)
+            if (!prefs.contains(KEY_ROUNDED_KEYBOARD_TOP)) putBoolean(KEY_ROUNDED_KEYBOARD_TOP, false)
+            if (!prefs.contains(FrostedGlassPreferences.KEY_ENABLED)) putBoolean(FrostedGlassPreferences.KEY_ENABLED, false)
+            if (!prefs.contains("key_glow_enabled")) putBoolean("key_glow_enabled", false)
+            putBoolean("cyime_metro_v1", true)
         }.apply()
+        com.kingzcheung.xime.ui.theme.KeyShapes.current = getKeyShape(context)
     }
 
     fun getKeyboardTheme(context: Context): String {
@@ -1053,6 +1058,25 @@ object SettingsPreferences {
         getPrefs(context).edit().putString(KEY_KEYBOARD_THEME, themeId).apply()
         // 桌面图标（开启“跟随主题色”时）和字幕快捷方式随主题换色。
         com.kingzcheung.xime.ui.theme.IconAppearance.onKeyboardThemeChanged(context, themeId)
+    }
+
+    const val KEY_METRO_ERA = "metro_era"
+    const val KEY_METRO_ANIMATION_SCALE = "metro_animation_scale"
+
+    fun getMetroEra(context: Context): com.kingzcheung.xime.ui.metro.MetroEra =
+        com.kingzcheung.xime.ui.metro.MetroEra.fromName(
+            getPrefs(context).getString(KEY_METRO_ERA, com.kingzcheung.xime.ui.metro.MetroEra.EARLY_WP7.name)
+        )
+
+    fun setMetroEra(context: Context, era: com.kingzcheung.xime.ui.metro.MetroEra) {
+        getPrefs(context).edit().putString(KEY_METRO_ERA, era.name).apply()
+    }
+
+    fun getMetroAnimationScale(context: Context): Float =
+        getPrefs(context).getFloat(KEY_METRO_ANIMATION_SCALE, 1.0f).coerceIn(0f, 2f)
+
+    fun setMetroAnimationScale(context: Context, scale: Float) {
+        getPrefs(context).edit().putFloat(KEY_METRO_ANIMATION_SCALE, scale.coerceIn(0f, 2f)).apply()
     }
 
     
